@@ -7,6 +7,7 @@ import org.mercurialftc.mercurialftc.scheduler.commands.Command;
 import org.mercurialftc.mercurialftc.scheduler.commands.LambdaCommand;
 import org.mercurialftc.mercurialftc.scheduler.subsystems.Subsystem;
 import org.mercurialftc.mercurialftc.scheduler.triggers.gamepadex.ContinuousInput;
+import org.mercurialftc.mercurialftc.silversurfer.followable.MotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.followable.Wave;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Vector2D;
@@ -17,6 +18,7 @@ public abstract class MecanumDriveBase extends Subsystem {
 	protected DcMotorEx fl, bl, br, fr;
 	protected WaveFollower waveFollower;
 	protected Tracker tracker;
+	protected MotionConstants motionConstants;
 	protected final ContinuousInput x, y, t;
 	protected SimpleMatrix transformMatrix;
 	protected final Pose2D startPose;
@@ -124,4 +126,17 @@ public abstract class MecanumDriveBase extends Subsystem {
 				.execute(() -> waveFollower.update(opModeEX.getElapsedTime().seconds()))
 				.finish(() -> waveFollower.isFinished() || x.getValue() != 0.0 || y.getValue() != 0.0 || t.getValue() != 0.0);
 	}
+
+	public Tracker getTracker() {
+		return tracker;
+	}
+
+	public MotionConstants getMotionConstants() {
+		return motionConstants;
+	}
+
+	public WaveFollower getWaveFollower() {
+		return waveFollower;
+	}
+
 }

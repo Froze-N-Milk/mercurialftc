@@ -86,7 +86,8 @@ public abstract class MecanumDriveBase extends Subsystem {
 				}
 		);
 
-		SimpleMatrix outputMatrix = transformMatrix.multiply(inputValues).scalarMultiply(1 / wheelradius);
+		SimpleMatrix outputMatrix = transformMatrix.multiply(inputValues);
+		outputMatrix = outputMatrix.scalarMultiply(1 / motionConstants.getMaxTranslationalVelocity());
 
 		fl.setPower(outputMatrix.getItem(0, 0));
 		opModeEX.telemetry.addData("fl power", outputMatrix.getItem(0, 0));

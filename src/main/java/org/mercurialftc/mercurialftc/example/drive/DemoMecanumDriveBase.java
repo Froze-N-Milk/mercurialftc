@@ -67,7 +67,7 @@ public class DemoMecanumDriveBase extends MecanumDriveBase {
 		double currentVoltage = voltageSensor.getVoltage();
 
 		// replace accelerations
-		MotionConstants motionConstants = new MotionConstants(
+		motionConstants = new MotionConstants(
 				translationalEnforcer.transformVelocity(currentVoltage),
 				angularEnforcer.transformVelocity(currentVoltage),
 				rotationalEnforcer.transformVelocity(currentVoltage),

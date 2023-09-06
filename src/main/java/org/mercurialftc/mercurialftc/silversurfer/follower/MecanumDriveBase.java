@@ -76,6 +76,7 @@ public abstract class MecanumDriveBase extends Subsystem {
 		Vector2D translationVector = new Vector2D(x.getValue(), y.getValue());
 		double scalingQuantity = Math.max(1, translationVector.getMagnitude());
 		translationVector = translationVector.scalarMultiply(1 / scalingQuantity);
+		translationVector = translationVector.rotate(tracker.getPose2D().getTheta());
 
 		SimpleMatrix inputValues = new SimpleMatrix(
 				new double[][]{
@@ -88,6 +89,7 @@ public abstract class MecanumDriveBase extends Subsystem {
 		SimpleMatrix outputMatrix = transformMatrix.multiply(inputValues);
 
 		fl.setPower(outputMatrix.getItem(0, 0));
+		opModeEX.telemetry.addData("fl power", outputMatrix.getItem(0, 0));
 		bl.setPower(outputMatrix.getItem(1, 0));
 		br.setPower(outputMatrix.getItem(2, 0));
 		fr.setPower(outputMatrix.getItem(3, 0));

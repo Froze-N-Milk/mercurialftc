@@ -10,7 +10,7 @@ then change the values in `DemoMecanumDriveBase.java` according to these instruc
     2. motors corresponding to encoders
     3. lateral distance (three wheel tracker only) + forward offset for the tracker
     4. calculate the encoder ticks converter ratios
-    5. trackwidth and wheelbase
+    5. trackwidth, wheelbase and wheelradius
 3. Use tuners to fine tune these values and find ones you couldn't determine yet
 4. First, tune the tracker
     1. lateral distance tuner if using a three wheeled tracker

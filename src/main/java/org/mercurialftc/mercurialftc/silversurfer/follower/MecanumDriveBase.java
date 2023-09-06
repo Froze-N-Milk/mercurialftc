@@ -23,7 +23,7 @@ public abstract class MecanumDriveBase extends Subsystem {
 	protected SimpleMatrix transformMatrix;
 	protected final Pose2D startPose;
 
-	protected double trackwidth, wheelbase;
+	protected double trackwidth, wheelbase, wheelradius;
 
 	/**
 	 * @param opModeEX  the opModeEX object to register against
@@ -86,7 +86,7 @@ public abstract class MecanumDriveBase extends Subsystem {
 				}
 		);
 
-		SimpleMatrix outputMatrix = transformMatrix.multiply(inputValues);
+		SimpleMatrix outputMatrix = transformMatrix.multiply(inputValues).scalarMultiply(1 / wheelradius);
 
 		fl.setPower(outputMatrix.getItem(0, 0));
 		opModeEX.telemetry.addData("fl power", outputMatrix.getItem(0, 0));

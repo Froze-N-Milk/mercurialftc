@@ -121,6 +121,7 @@ public class DemoMecanumDriveBase extends MecanumDriveBase {
 		// use the Units enum to use your desired units, and convert them to millimeters
 		trackwidth = Units.MILLIMETER.toMillimeters(415); // replace
 		wheelbase = Units.MILLIMETER.toMillimeters(330); // replace
+		wheelradius = Units.MILLIMETER.toMillimeters(50);
 
 		waveFollower = new GVFWaveFollower(
 				tracker,

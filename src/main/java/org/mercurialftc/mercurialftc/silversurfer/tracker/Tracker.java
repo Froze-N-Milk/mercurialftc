@@ -61,17 +61,15 @@ public abstract class Tracker {
 
 		double term0 = (Math.sin(dt) / dt); // approaches 1 as dt approaches 0
 		double term1 = (1 - Math.cos(dt)) / dt; // approaches 0 as dt approaches 0
-		double term2 = (Math.cos(dt) - 1) / dt; // approaches 0 as dt approaches 0
 
 		if (dt == 0) {
 			term0 = 1; // approaches 1 as dt approaches 0
 			term1 = 0; // approaches 0 as dt approaches 0
-			term2 = 0; // approaches 0 as dt approaches 0
 		}
 
 		SimpleMatrix twistMatrix = new SimpleMatrix(
 				new double[][]{
-						{term0, term2, 0},
+						{term0, -term1, 0},
 						{term1, term0, 0},
 						{0, 0, 1}
 				}

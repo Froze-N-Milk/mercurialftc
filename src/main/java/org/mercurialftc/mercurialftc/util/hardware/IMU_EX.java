@@ -20,7 +20,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
  * with a quick access to each angle also available.
  * <p>Designed to be used in {@link ScheduledIMU_EX} but also can be used separately</p>
  */
-// todo, update the javadoc in this class
 public class IMU_EX implements IMU, HeadingSupplier {
 	private IMU imu;
 	private Angle pitch;
@@ -38,15 +37,15 @@ public class IMU_EX implements IMU, HeadingSupplier {
 	public Angle getYaw() {
 		return yaw.subtract(offsetYaw);
 	}
-	private Angle offsetPitch;
-	private Angle offsetRoll;
-	private Angle offsetYaw;
+	private final Angle offsetPitch;
+	private final Angle offsetRoll;
+	private final Angle offsetYaw;
 	private final AngleUnit angleUnit;
 	private long acquisitionTime;
 	
 	/**
 	 *
-	 * @param angleUnit the angle unit that this class should return all values in
+	 * @param angleUnit the angle unit that this class should return all values in by default
 	 */
 	public IMU_EX(IMU imu, AngleUnit angleUnit) {
 		this.imu = imu;
@@ -70,21 +69,34 @@ public class IMU_EX implements IMU, HeadingSupplier {
 			offsetRoll = new AngleRadians(0);
 		}
 	}
-	
+
+	/**
+	 * resets roll, pitch and yaw
+	 */
 	public void resetIMU() {
 		resetRoll();
 		resetPitch();
 		resetYaw();
 	}
-	
+
+	/**
+	 * updates the offset value
+	 */
 	public void resetPitch() {
 		offsetPitch.setTheta(pitch.getTheta());
 	}
-	
+
+	/**
+	 * resets the yaw using {@link IMU#resetYaw()} and by updating the offset
+	 */
 	public void resetYaw() {
+		imu.resetYaw();
 		offsetYaw.setTheta(yaw.getTheta());
 	}
-	
+
+	/**
+	 * updates the offset value
+	 */
 	public void resetRoll() {
 		offsetRoll.setTheta(roll.getTheta());
 	}
@@ -142,6 +154,8 @@ public class IMU_EX implements IMU, HeadingSupplier {
 	 * <p><p>
 	 * The {@link Orientation} class provides many ways to represent the robot's orientation,
 	 * which is helpful for advanced use cases. Most teams should use {@link #getRobotYawPitchRollAngles()}.
+	 *
+	 * NOTE: this has not been modified by this IMU_EX wrapper
 	 */
 	@Override
 	public Orientation getRobotOrientation(AxesReference reference, AxesOrder order, AngleUnit angleUnit) {

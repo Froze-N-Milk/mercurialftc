@@ -2,36 +2,38 @@ package org.mercurialftc.mercurialftc.util.matrix;
 
 public class SimpleMatrix {
 	private final double[][] matrix;
-	
+
 	/* STRUCTURE:
 	 * double x = matrix[row][column];
 	 *
 	 * double[] row = matrix[row];
 	 */
-	
+
 	/**
-	 * assumes that the rows are all of the same length, if not, fills the empty spaces with 0
+	 * assumes that the rows are all the same length, if not, fills the empty spaces with 0
+	 *
 	 * @param matrix
 	 */
 	public SimpleMatrix(double[][] matrix) {
 		int columns = matrix[0].length;
 		boolean fix = false;
-		
+
 		for (double[] doubles : matrix) {
 			if (doubles.length != columns) {
 				columns = Math.max(columns, doubles.length);
 				fix = true;
 			}
 		}
-		if(fix) {
+		if (fix) {
 			formatMatrix(matrix, columns);
 		}
-		
+
 		this.matrix = matrix;
 	}
-	
+
 	/**
 	 * for internal use, saves time if the matrix is guaranteed to have a consistent number of columns
+	 *
 	 * @param matrix
 	 * @param safeOrigin
 	 */
@@ -39,7 +41,7 @@ public class SimpleMatrix {
 		if (!safeOrigin) {
 			int columns = matrix[0].length;
 			boolean fix = false;
-			
+
 			for (double[] doubles : matrix) {
 				if (doubles.length != columns) {
 					columns = Math.max(columns, doubles.length);
@@ -52,29 +54,31 @@ public class SimpleMatrix {
 		}
 		this.matrix = matrix;
 	}
-	
-	private void formatMatrix(double[][] matrix, int columns){
+
+	private void formatMatrix(double[][] matrix, int columns) {
 		for (int i = 0; i < matrix.length; i++) {
-			if(matrix[i].length != columns) {
+			if (matrix[i].length != columns) {
 				double[] temp = new double[columns];
 				System.arraycopy(matrix[i], 0, temp, 0, matrix[i].length);
 				matrix[i] = temp;
 			}
 		}
 	}
-	
+
 	/**
-	 * returns an empty matrix if the matrices are mismatched, and so cannot be multiplied
+	 * <p>non-mutating</p>
+	 * throws a runtime exception if the matrices are mismatched and the operation cannot be performed
+	 *
 	 * @param other
 	 * @return
 	 */
 	public SimpleMatrix multiply(SimpleMatrix other) {
-		if(this.columns() != other.rows()) {
-			return new SimpleMatrix(new double[][]{}, true);
+		if (this.columns() != other.rows()) {
+			throw new RuntimeException("matrix 1 does not have the same number of columns as matrix 2 has rows");
 		}
-		
+
 		double[][] result = new double[this.rows()][other.columns()];
-		
+
 		for (int i = 0; i < result.length; i++) {
 			double[] row = result[i];
 			for (int j = 0; j < row.length; j++) {
@@ -85,22 +89,41 @@ public class SimpleMatrix {
 				result[i][j] = dotproduct;
 			}
 		}
-		
+
 		return new SimpleMatrix(result, true);
 	}
-	
+
+	/**
+	 * non-mutating
+	 *
+	 * @param scalar
+	 * @return
+	 */
+	public SimpleMatrix scalarMultiply(double scalar) {
+		double[][] result = getMatrix();
+
+		for (int i = 0; i < result.length; i++) {
+			double[] row = result[i];
+			for (int j = 0; j < row.length; j++) {
+				result[i][j] *= scalar;
+			}
+		}
+
+		return new SimpleMatrix(result, true);
+	}
+
 	public double[][] getMatrix() {
 		return matrix;
 	}
-	
+
 	public double getItem(int row, int column) {
 		return matrix[row][column];
 	}
-	
+
 	public int rows() {
 		return matrix.length;
 	}
-	
+
 	public int columns() {
 		return matrix[0].length;
 	}

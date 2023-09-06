@@ -10,33 +10,34 @@ public class DemoCommand extends Command {
 	private final DemoSubsystem demoSubsystem;
 	private ElapsedTime elapsedTime;
 	private double startTime;
+
 	public DemoCommand(DemoSubsystem demoSubsystem) {
 		super(demoSubsystem);
 		this.demoSubsystem = demoSubsystem;
 	}
-	
+
 	@Override
-	public boolean isOverrideAllowed() {
+	public boolean getOverrideAllowed() {
 		return true;
 	}
-	
+
 	@Override
 	public void initialise() {
 		elapsedTime = demoSubsystem.opModeEX.getElapsedTime();
 		startTime = elapsedTime.seconds();
 	}
-	
+
 	@Override
 	public void execute() {
-	
+
 	}
-	
+
 	@Override
 	public void end() {
 	}
-	
+
 	@Override
-	public boolean isFinished() {
+	public boolean finishCondition() {
 		return elapsedTime.seconds() - startTime >= 5;
 	}
 }

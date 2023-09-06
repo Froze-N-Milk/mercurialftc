@@ -8,29 +8,29 @@ public abstract class CommandGroup extends Command {
 	public CommandGroup(Set<SubsystemInterface> requiredSubsystems) {
 		super(requiredSubsystems);
 	}
-	
+
 	@Override
-	public boolean isOverrideAllowed() {
+	public boolean getOverrideAllowed() {
 		return false;
 	}
-	
+
 	@Override
 	public void initialise() {
-	
+
 	}
-	
+
 	@Override
 	public void execute() {
-	
+
 	}
-	
+
 	@Override
 	public void end() {
-	
+
 	}
-	
+
 	@Override
-	public boolean isFinished() {
+	public boolean finishCondition() {
 		return false;
 	}
 }

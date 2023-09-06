@@ -2,7 +2,6 @@ package org.mercurialftc.mercurialftc.silversurfer.followable;
 
 import org.mercurialftc.mercurialftc.scheduler.commands.Command;
 import org.mercurialftc.mercurialftc.scheduler.commands.LambdaCommand;
-import org.mercurialftc.mercurialftc.scheduler.commands.interfaces.CommandInit;
 import org.mercurialftc.mercurialftc.silversurfer.encoderticksconverter.Units;
 import org.mercurialftc.mercurialftc.silversurfer.followable.curvebuilder.CurveBuilder;
 import org.mercurialftc.mercurialftc.silversurfer.followable.linebuilder.LineBuilder;
@@ -11,12 +10,12 @@ import org.mercurialftc.mercurialftc.silversurfer.followable.stopbuilder.StopBui
 import org.mercurialftc.mercurialftc.silversurfer.followable.turnbuilder.TurnBuilder;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Angle;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
-import org.mercurialftc.mercurialftc.silversurfer.motionprofile.MotionConstants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class WaveBuilder {
+
 	private enum BuildState {
 		CURVE,
 		LINE,
@@ -24,7 +23,7 @@ public class WaveBuilder {
 		TURN,
 		IDLE; // entered at initialisation, and then re entered when the whole process is finished. Will not cause a build on exit, will cause one on entry
 	}
-	
+
 	private Pose2D previousPose;
 	private FollowableBuilder builder;
 	private BuildState buildState;
@@ -32,7 +31,7 @@ public class WaveBuilder {
 	private final MotionConstants motionConstants;
 	private MotionConstants buildingMotionConstants;
 	private final ArrayList<Followable> followables;
-	
+
 	public WaveBuilder(Pose2D startPose, Units units, MotionConstants motionConstants) {
 		this.previousPose = startPose;
 		this.units = units;
@@ -41,7 +40,7 @@ public class WaveBuilder {
 		followables = new ArrayList<>();
 		buildState = BuildState.IDLE;
 	}
-	
+
 	/**
 	 * sets the max translational velocity for all subsequent build instructions see {@link #resetVelocity} to reset the translational velocity
 	 *
@@ -58,7 +57,7 @@ public class WaveBuilder {
 		builder.setMotionConstants(buildingMotionConstants);
 		return this;
 	}
-	
+
 	public WaveBuilder resetVelocity() {
 		buildingMotionConstants = new MotionConstants(
 				motionConstants.getMaxTranslationalVelocity(),
@@ -70,7 +69,7 @@ public class WaveBuilder {
 		builder.setMotionConstants(buildingMotionConstants);
 		return this;
 	}
-	
+
 	/**
 	 * sets the max translational acceleration for all subsequent build instructions see {@link #resetAcceleration} to reset the translational acceleration
 	 *
@@ -87,7 +86,7 @@ public class WaveBuilder {
 		builder.setMotionConstants(buildingMotionConstants);
 		return this;
 	}
-	
+
 	public WaveBuilder resetAcceleration() {
 		buildingMotionConstants = new MotionConstants(
 				buildingMotionConstants.getMaxTranslationalVelocity(),
@@ -99,15 +98,16 @@ public class WaveBuilder {
 		builder.setMotionConstants(buildingMotionConstants);
 		return this;
 	}
-	
+
 	public WaveBuilder splineTo(double x, double y, Angle theta) {
 		handleState(BuildState.CURVE);
 		addSegment(units.toMillimeters(x), units.toMillimeters(y), theta);
 		return this;
 	}
-	
+
 	/**
 	 * instructs the robot to wait in place
+	 *
 	 * @param seconds the time of the wait (in seconds)
 	 * @return
 	 */
@@ -117,9 +117,10 @@ public class WaveBuilder {
 		stopBuilder.addWait(previousPose, seconds);
 		return this;
 	}
-	
+
 	/**
 	 * turns to the provided angle
+	 *
 	 * @param theta the angle to turn to
 	 * @return
 	 */
@@ -128,9 +129,10 @@ public class WaveBuilder {
 		addSegment(previousPose.getX(), previousPose.getY(), theta);
 		return this;
 	}
-	
+
 	/**
 	 * turns the provided angle, relative to previous angle
+	 *
 	 * @param theta the angle of the turn to be done
 	 * @return
 	 */
@@ -139,41 +141,43 @@ public class WaveBuilder {
 		addSegment(previousPose.getX(), previousPose.getY(), previousPose.getTheta().add(theta));
 		return this;
 	}
-	
+
 	public WaveBuilder lineTo(double x, double y, Angle theta) {
 		handleState(BuildState.LINE);
 		addSegment(x, y, theta);
 		return this;
 	}
-	
+
 	private void addSegment(double x, double y, Angle theta) {
 		Pose2D destination = new Pose2D(x, y, theta, units);
 		builder.addFollowableSegment(previousPose, destination);
 		previousPose = destination;
 	}
-	
+
 	/**
 	 * sets a callback action to occur with a timed offset reference to end the instruction before it.
+	 *
 	 * @param offset
 	 * @param markerReached
 	 * @return
 	 */
-	public WaveBuilder addOffsetCommandMarker(double offset, Command markerReached) {
+	public WaveBuilder addOffsetActionMarker(double offset, Command markerReached) {
 		builder.addOffsetCommandMarker(offset, Marker.MarkerType.COMMAND, markerReached);
 		return this;
 	}
-	
+
 	/**
 	 * sets a callback action to occur with a timed offset reference to end the instruction before it.
+	 *
 	 * @param offset
 	 * @param markerReached
 	 * @return
 	 */
-	public WaveBuilder addOffsetActionMarker(double offset, CommandInit markerReached) {
+	public WaveBuilder addOffsetActionMarker(double offset, Runnable markerReached) {
 		builder.addOffsetCommandMarker(offset, Marker.MarkerType.LAMBDA, new LambdaCommand().init(markerReached));
 		return this;
 	}
-	
+
 	/**
 	 * handles bundling sequential moves of the same type together, ships a built curve when the state finishes..
 	 *
@@ -205,30 +209,30 @@ public class WaveBuilder {
 				break;
 		}
 	}
-	
+
 	public Wave build() {
 		handleState(BuildState.IDLE);
-		
+
 		ArrayList<Followable.Output> outputs = new ArrayList<>();
 		ArrayList<Marker> markers = new ArrayList<>();
-		
+
 		double accumulatedTime = 0;
 
-        for (Followable followable : followables) {
-            for (Followable.Output output : followable.getOutputs()) {
-                output.setAccumulatedTime(accumulatedTime);
-            }
+		for (Followable followable : followables) {
+			for (Followable.Output output : followable.getOutputs()) {
+				output.setAccumulatedTime(accumulatedTime);
+			}
 
-            for (Marker marker : followable.getMarkers()) {
-                marker.setAccumulatedTime(accumulatedTime);
-            }
+			for (Marker marker : followable.getMarkers()) {
+				marker.setAccumulatedTime(accumulatedTime);
+			}
 
-            outputs.addAll(Arrays.asList(followable.getOutputs()));
-            markers.addAll(Arrays.asList(followable.getMarkers()));
+			outputs.addAll(Arrays.asList(followable.getOutputs()));
+			markers.addAll(Arrays.asList(followable.getMarkers()));
 
-            accumulatedTime = followable.getOutputs()[followable.getOutputs().length - 1].getCallbackTime();
-        }
-		
+			accumulatedTime = followable.getOutputs()[followable.getOutputs().length - 1].getCallbackTime();
+		}
+
 		return new Wave(outputs, markers);
 	}
 }

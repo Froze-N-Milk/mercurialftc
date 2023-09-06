@@ -37,6 +37,7 @@ public class StopBuilder extends FollowableBuilder {
 						new Vector2D(0, 0),
 						0,
 						previousWait + seconds,
+						position,
 						position
 				)
 		);

@@ -1,45 +1,45 @@
 package org.mercurialftc.mercurialftc.scheduler.commands;
 
-import org.mercurialftc.mercurialftc.scheduler.commands.interfaces.CommandEnd;
-import org.mercurialftc.mercurialftc.scheduler.commands.interfaces.CommandFinish;
-import org.mercurialftc.mercurialftc.scheduler.commands.interfaces.CommandInit;
-import org.mercurialftc.mercurialftc.scheduler.commands.interfaces.CommandMethod;
 import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 
 /**
  * todo fill in
  */
 public class LambdaCommand extends Command {
-	private final CommandInit commandInit;
-	private final CommandMethod commandMethod;
-	private final CommandFinish commandFinish;
-	private final CommandEnd commandEnd;
+	private final Runnable commandInit;
+	private final Runnable commandMethod;
+	private final BooleanSupplier commandFinish;
+	private final Runnable commandEnd;
 	private final boolean isOverrideAllowed;
-	
+
 	/**
 	 * constructs a default lambda command
 	 */
 	public LambdaCommand() {
 		this(
 				new HashSet<>(),
-				() -> {},
-				() -> {},
+				() -> {
+				},
+				() -> {
+				},
 				() -> true,
-				() -> {},
+				() -> {
+				},
 				true
 		);
 	}
-	
+
 	private LambdaCommand(
 			Set<SubsystemInterface> requiredSubsystems,
-			CommandInit commandInit,
-			CommandMethod commandMethod,
-			CommandFinish commandFinish,
-			CommandEnd commandEnd,
+			Runnable commandInit,
+			Runnable commandMethod,
+			BooleanSupplier commandFinish,
+			Runnable commandEnd,
 			boolean isOverrideAllowed
 	) {
 		super(requiredSubsystems);
@@ -49,11 +49,11 @@ public class LambdaCommand extends Command {
 		this.commandEnd = commandEnd;
 		this.isOverrideAllowed = isOverrideAllowed;
 	}
-	
+
 	public LambdaCommand addRequirements(SubsystemInterface... requiredSubsystems) {
 		Set<SubsystemInterface> requirements = this.getRequiredSubsystems();
 		Collections.addAll(requirements, requiredSubsystems);
-		
+
 		return new LambdaCommand(
 				requirements,
 				this.commandInit,
@@ -63,8 +63,8 @@ public class LambdaCommand extends Command {
 				this.isOverrideAllowed
 		);
 	}
-	
-	public LambdaCommand init(CommandInit initialise) {
+
+	public LambdaCommand init(Runnable initialise) {
 		return new LambdaCommand(
 				this.getRequiredSubsystems(),
 				initialise,
@@ -74,8 +74,8 @@ public class LambdaCommand extends Command {
 				this.isOverrideAllowed
 		);
 	}
-	
-	public LambdaCommand execute(CommandMethod execute) {
+
+	public LambdaCommand execute(Runnable execute) {
 		return new LambdaCommand(
 				this.getRequiredSubsystems(),
 				this.commandInit,
@@ -85,8 +85,8 @@ public class LambdaCommand extends Command {
 				this.isOverrideAllowed
 		);
 	}
-	
-	public LambdaCommand finish(CommandFinish finish) {
+
+	public LambdaCommand finish(BooleanSupplier finish) {
 		return new LambdaCommand(
 				this.getRequiredSubsystems(),
 				this.commandInit,
@@ -96,8 +96,8 @@ public class LambdaCommand extends Command {
 				this.isOverrideAllowed
 		);
 	}
-	
-	public LambdaCommand end(CommandEnd end) {
+
+	public LambdaCommand end(Runnable end) {
 		return new LambdaCommand(
 				this.getRequiredSubsystems(),
 				this.commandInit,
@@ -107,7 +107,7 @@ public class LambdaCommand extends Command {
 				this.isOverrideAllowed
 		);
 	}
-	
+
 	public LambdaCommand isOverrideAllowed(boolean isOverrideAllowed) {
 		return new LambdaCommand(
 				this.getRequiredSubsystems(),
@@ -118,30 +118,30 @@ public class LambdaCommand extends Command {
 				isOverrideAllowed
 		);
 	}
-	
+
 	// Wrapper methods:
 	@Override
 	public final void initialise() {
-		commandInit.initialise();
+		commandInit.run();
 	}
-	
+
 	@Override
 	public final void execute() {
-		commandMethod.execute();
+		commandMethod.run();
 	}
-	
+
 	@Override
-	public final boolean isFinished() {
-		return commandFinish.isFinished();
+	public final boolean finishCondition() {
+		return commandFinish.getAsBoolean();
 	}
-	
+
 	@Override
 	public void end() {
-		commandEnd.end();
+		commandEnd.run();
 	}
-	
+
 	@Override
-	public final boolean isOverrideAllowed() {
+	public final boolean getOverrideAllowed() {
 		return isOverrideAllowed;
 	}
 }

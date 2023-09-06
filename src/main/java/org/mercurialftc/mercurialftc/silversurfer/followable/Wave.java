@@ -19,7 +19,9 @@ public class Wave {
 		this.markers = markers;
 		this.currentOutput = new Followable.Output(
 				new Vector2D(0, 0),
-				0, 0, outputs.get(0).getDestination()
+				0, 0,
+				outputs.get(0).getPosition(),
+				outputs.get(0).getDestination()
 		);
 		i = j = 0;
 	}
@@ -31,18 +33,24 @@ public class Wave {
 	/**
 	 * runs markers and updates the current {@link #getOutput()} of this wave, to be read by a follower
 	 * @param currentTime time since start of path following
+	 * @return returns true when no more outputs or actions are to be done
 	 */
-	public void update(double currentTime) {
+	public boolean update(double currentTime) {
+		boolean finished = true;
+
 		if (i < outputs.size()) {
 			while(currentTime >= outputs.get(i).getCallbackTime()) {
 				this.currentOutput = outputs.get(i);
 				i++;
 			}
+			finished = false;
 		}
 		else { //set out 0s for end of instructions
 			this.currentOutput = new Followable.Output(
 					new Vector2D(0, 0),
-					0, currentTime, outputs.get(outputs.size() - 1).getDestination()
+					0, currentTime,
+					outputs.get(outputs.size() - 1).getPosition(),
+					outputs.get(outputs.size() - 1).getDestination()
 			);
 		}
 		
@@ -57,6 +65,10 @@ public class Wave {
 				}
 				j++;
 			}
+
+			finished = false;
 		}
+
+		return finished;
 	}
 }

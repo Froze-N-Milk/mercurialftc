@@ -15,7 +15,7 @@ public class SequentialCommandGroup extends CommandGroup {
 	private int previousCommandIndex;
 	private final ArrayList<Command> commands;
 	private final boolean isOverrideAllowed;
-	
+
 	public SequentialCommandGroup() {
 		super(new HashSet<>());
 		isOverrideAllowed = true;
@@ -23,7 +23,7 @@ public class SequentialCommandGroup extends CommandGroup {
 		commandIndex = -1;
 		previousCommandIndex = -2;
 	}
-	
+
 	private SequentialCommandGroup(ArrayList<Command> commands, Set<SubsystemInterface> requirements, boolean isOverrideAllowed) {
 		super(requirements);
 		this.isOverrideAllowed = isOverrideAllowed;
@@ -31,65 +31,65 @@ public class SequentialCommandGroup extends CommandGroup {
 		commandIndex = -1;
 		previousCommandIndex = -2;
 	}
-	
+
 	public SequentialCommandGroup addCommands(Command... commands) {
-		
+
 		ArrayList<Command> newCommandList = new ArrayList<>(this.commands);
 		Collections.addAll(newCommandList, commands);
-		
+
 		Set<SubsystemInterface> newRequirementSet = new HashSet<>(this.getRequiredSubsystems());
 		boolean newIsOverrideAllowed = true;
-		
+
 		for (Command command : commands) {
 			newRequirementSet.addAll(command.getRequiredSubsystems());
-			if(!command.isOverrideAllowed()) {
+			if (!command.getOverrideAllowed()) {
 				newIsOverrideAllowed = false;
 			}
 		}
-		
+
 		return new SequentialCommandGroup(
-			newCommandList,
-			newRequirementSet,
-			newIsOverrideAllowed
+				newCommandList,
+				newRequirementSet,
+				newIsOverrideAllowed
 		);
 	}
-	
+
 	@Override
-	public boolean isOverrideAllowed() {
+	public boolean getOverrideAllowed() {
 		return isOverrideAllowed;
 	}
-	
+
 	@Override
 	public void initialise() {
 		commandIndex = 0;
 		previousCommandIndex = -1;
 	}
-	
+
 	@Override
 	public void execute() {
 		Command command = commands.get(commandIndex);
-		
-		if(previousCommandIndex != commandIndex) {
+
+		if (previousCommandIndex != commandIndex) {
 			previousCommandIndex = commandIndex;
 			command.initialise();
 		}
-		
-		if(command.isFinished()){
+
+		if (command.finishCondition()) {
 			command.end();
 			commandIndex++;
 			return;
 		}
-		
+
 		command.execute();
 	}
-	
+
 	@Override
 	public void end() {
 
 	}
-	
+
 	@Override
-	public boolean isFinished() {
+	public boolean finishCondition() {
 		return commandIndex >= commands.size() - 1;
 	}
 }

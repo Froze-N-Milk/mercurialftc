@@ -12,23 +12,24 @@ public class MarkerBuilder {
 		this.offset = offset;
 		this.referenceIndex = referenceIndex;
 	}
+
 	private final Marker.MarkerType markerType;
 	private final Command markerReached;
 	private final double offset;
 	private final int referenceIndex;
-	
+
 	public Marker build(FollowableCurve followableCurve) {
 		double callbackTime = followableCurve.getOutputFromIndex(referenceIndex).getCallbackTime() + offset;
 		return new Marker(markerReached, markerType, callbackTime);
 	}
-	
+
 	public Marker build(FollowableTurn followableTurn) {
-		double callbackTime = followableTurn.getOutputs()[followableTurn.getOutputIndexFromSegmentIndex(referenceIndex)].getCallbackTime() + offset; //todo
+		double callbackTime = followableTurn.getOutputs()[followableTurn.getOutputIndexFromSegmentIndex(referenceIndex)].getCallbackTime() + offset;
 		return new Marker(markerReached, markerType, callbackTime);
 	}
-	
+
 	public Marker build(FollowableLine followableLine) {
-		double callbackTime = followableLine.getOutputs()[followableLine.getOutputIndexFromSegmentIndex(referenceIndex)].getCallbackTime() + offset; //todo
+		double callbackTime = followableLine.getOutputs()[followableLine.getOutputIndexFromSegmentIndex(referenceIndex)].getCallbackTime() + offset;
 		return new Marker(markerReached, markerType, callbackTime);
 	}
 }

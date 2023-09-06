@@ -35,6 +35,9 @@ public abstract class Followable {
 			return angularVelocity;
 		}
 
+		public Pose2D getPosition() {
+			return position;
+		}
 
 		public Pose2D getDestination() {
 			return destination;
@@ -43,18 +46,19 @@ public abstract class Followable {
 		private final Vector2D translationVector; // controls x and y
 		private final double callbackTime;
 		private double accumulatedTime;
-		private final Pose2D destination;
+		private final Pose2D position, destination;
 		
 		public void setAccumulatedTime(double accumulatedTime) {
 			this.accumulatedTime = accumulatedTime;
 		}
 		
 		private final double angularVelocity; // controls heading
-		public Output(Vector2D translationVector, double angularVelocity, double callbackTime, Pose2D destination) {
+		public Output(Vector2D translationVector, double angularVelocity, double callbackTime, Pose2D position, Pose2D destination) {
 			this.translationVector = translationVector;
 			this.angularVelocity = angularVelocity;
 			this.callbackTime = callbackTime;
 			this.accumulatedTime = 0;
+			this.position = position;
 			this.destination = destination;
 		}
 	}

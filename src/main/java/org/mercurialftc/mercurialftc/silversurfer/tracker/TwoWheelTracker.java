@@ -9,7 +9,7 @@ public class TwoWheelTracker extends Tracker {
 	private final Encoder left, middle;
 	private final HeadingSupplier headingSupplier;
 	private Angle currentTheta;
-	
+
 	public TwoWheelTracker(Pose2D initialPose, TrackerConstants.TwoWheelTrackerConstants trackerConstants, Encoder left, Encoder middle, HeadingSupplier headingSupplier) {
 		super(initialPose, trackerConstants);
 		this.left = left;
@@ -17,10 +17,10 @@ public class TwoWheelTracker extends Tracker {
 		this.headingSupplier = headingSupplier;
 		previousTheta = headingSupplier.getHeading().getRadians();
 	}
-	
+
 	private double deltaLeft, deltaMiddle, deltaTheta, previousTheta;
-	
-	
+
+
 	/**
 	 * called once per cycle, to prevent making too many calls to an encoder, etc
 	 */
@@ -29,18 +29,18 @@ public class TwoWheelTracker extends Tracker {
 		left.updateVelocity();
 		middle.updateVelocity();
 		headingSupplier.updateHeading();
-		
+
 		TrackerConstants trackerConstants = getTrackerConstants();
-		
+
 		currentTheta = headingSupplier.getHeading();
-		
+
 		deltaLeft = trackerConstants.getLeftTicksConverter().toUnits(left.getVelocityDataPacket().getDeltaPosition(), Units.MILLIMETER);
 		deltaMiddle = trackerConstants.getMiddleTicksConverter().toUnits(middle.getVelocityDataPacket().getDeltaPosition(), Units.MILLIMETER);
 		deltaTheta = currentTheta.getRadians() - previousTheta;
-		
+
 		previousTheta = headingSupplier.getHeading().getRadians();
 	}
-	
+
 	/**
 	 * @return the change in center displacement in millimeters
 	 */
@@ -48,7 +48,7 @@ public class TwoWheelTracker extends Tracker {
 	protected double findDeltaXc() {
 		return deltaLeft;
 	}
-	
+
 	/**
 	 * @return the change in horizontal displacement with correction for forward offset in millimeters
 	 */
@@ -56,7 +56,14 @@ public class TwoWheelTracker extends Tracker {
 	protected double findDeltaXp() {
 		return deltaMiddle - (getTrackerConstants().getForwardOffset() * findDeltaTheta());
 	}
-	
+
+	@Override
+	public void reset() {
+		super.reset();
+		left.reset();
+		middle.reset();
+	}
+
 	/**
 	 * @return the change in heading in radians
 	 */
@@ -64,14 +71,14 @@ public class TwoWheelTracker extends Tracker {
 	protected double findDeltaTheta() {
 		return deltaTheta;
 	}
-	
+
 	/**
 	 * enforce certain measurements, if an external measurement can be relied upon, gets automatically run every
 	 */
 	@Override
 	protected void insist() {
 		Pose2D currentPose = getPose2D();
-		if(currentPose.getTheta().getRadians() != currentTheta.getRadians()) {
+		if (currentPose.getTheta().getRadians() != currentTheta.getRadians()) {
 			setPose2D(new Pose2D(currentPose.getX(), currentPose.getY(), currentTheta));
 		}
 	}

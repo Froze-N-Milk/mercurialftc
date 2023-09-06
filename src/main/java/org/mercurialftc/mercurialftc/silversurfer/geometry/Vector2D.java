@@ -85,10 +85,25 @@ public class Vector2D {
 	public Vector2D scalarMultiply(double factor) {
 		return new Vector2D(factor * this.getX(), factor * this.getY());
 	}
-	
-	
+
+	/**
+	 * dot product
+	 * @param other
+	 * @return
+	 */
 	public double dot(Vector2D other) {
 		return this.getX() * other.getX() + this.getY() * other.getY();
+	}
+
+	/**
+	 * rotates anti-clockwise
+	 * @param angle
+	 * @return
+	 */
+	public Vector2D rotate(Angle angle) {
+		double cos = Math.cos(angle.getRadians());
+		double sin = Math.sin(angle.getRadians());
+		return new Vector2D(cos * getX() - sin * getY(), sin * getX() + cos * getY());
 	}
 	
 	/**

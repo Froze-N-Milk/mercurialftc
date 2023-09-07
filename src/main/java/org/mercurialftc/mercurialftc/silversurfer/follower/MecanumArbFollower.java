@@ -1,8 +1,8 @@
 package org.mercurialftc.mercurialftc.silversurfer.follower;
 
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import org.mercurialftc.mercurialftc.silversurfer.geometry.Vector2D;
 import org.mercurialftc.mercurialftc.silversurfer.followable.MotionConstants;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.Vector2D;
 import org.mercurialftc.mercurialftc.util.matrix.SimpleMatrix;
 
 public class MecanumArbFollower extends ArbFollower {
@@ -47,8 +47,8 @@ public class MecanumArbFollower extends ArbFollower {
 	public void follow(Vector2D translationVector, double rotationalVelocity) {
 		SimpleMatrix inputValues = new SimpleMatrix(
 				new double[][]{
-						{translationVector.getX()},
 						{translationVector.getY()},
+						{translationVector.getX()},
 						{rotationalVelocity}
 				}
 		);

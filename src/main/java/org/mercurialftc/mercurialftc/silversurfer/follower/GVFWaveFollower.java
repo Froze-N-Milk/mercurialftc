@@ -53,7 +53,7 @@ public class GVFWaveFollower extends WaveFollower {
 		int rotationalBreakControl = (int) Math.signum(Math.abs(rotationalError) - rotationalBreakDistance);
 
 		double modifiedRotationalVelocity = rotationalVelocity + getMotionConstants().getMaxRotationalAcceleration() * Math.signum(rotationalError) * rotationalBreakControl * loopTime;
-		modifiedRotationalVelocity = Math.max(modifiedRotationalVelocity, getMotionConstants().getMaxRotationalVelocity());
+		modifiedRotationalVelocity = Math.min(modifiedRotationalVelocity, getMotionConstants().getMaxRotationalVelocity());
 
 		arbFollower.follow(modifiedTranslationalVector, modifiedRotationalVelocity);
 	}

@@ -27,8 +27,12 @@ as a dependency for your FTCRobotController:
    in
    `build.dependencies.gradle`
 4. It takes about 10-15 minutes for a new commit on the branch to become buildable
-    1. To check that you are getting the latest version, you can check the commit hash in the download info pane of the
+    1. It can help to change the "F" or "f" in "Froze-N-Milk" to the opposite case, gradle will be more willing to look
+       for something new
+    2. It can help to run `gradle --refresh-dependencies`
+    3. To check that you are getting the latest version, you can check the commit hash in the download info pane of the
        build panel that can be opened when you run a
        gradle sync
+    4. overall very fiddly and not nice to be looking for real-time updates here
 5. You will need to have offline mode enabled in gradle when installing your code to the robot
 

@@ -13,11 +13,15 @@ public class Scheduler {
 	private final LinkedHashSet<SubsystemInterface> subsystems; // currently registered Subsystems
 	private final LinkedHashSet<Trigger> triggers;
 	private final LinkedHashSet<Command> commands; // currently scheduled Commands
+	private final LinkedHashSet<Command> commandsToCancel; // currently scheduled Commands
+
 	private final LinkedHashMap<SubsystemInterface, Command> requirements; // the mapping of required Subsystems to commands
 	private final ArrayList<SubsystemInterface> storedSubsystems;
+
 	private Scheduler() {
 		this.subsystems = new LinkedHashSet<>();
 		this.commands = new LinkedHashSet<>();
+		this.commandsToCancel = new LinkedHashSet<>();
 		this.requirements = new LinkedHashMap<>();
 		this.triggers = new LinkedHashSet<>();
 		this.storedSubsystems = new ArrayList<>();
@@ -95,7 +99,7 @@ public class Scheduler {
 		for (SubsystemInterface subsystem : commandRequirements) {
 			Command requirer = requirements.get(subsystem);
 			if (requirer != null) {
-				cancelCommand(requirer);
+				commandsToCancel.add(requirer);
 			}
 		}
 
@@ -105,10 +109,10 @@ public class Scheduler {
 
 	private void cancelCommand(Command command) {
 		command.end();
-		commands.remove(command);
 		for (SubsystemInterface requirement : command.getRequiredSubsystems()) {
 			requirements.remove(requirement, command);
 		}
+		commands.remove(command);
 	}
 
 	private void initialiseCommand(Command command, Set<SubsystemInterface> commandRequirements) {
@@ -119,14 +123,18 @@ public class Scheduler {
 		command.initialise();
 	}
 
-	public void pollCommands() {
+	public void pollCommandsState() {
 		for (Command command : commands) {
 			if (command.finishCondition()) {
-				cancelCommand(command);
-			} else {
-				// runs the commands
-				command.execute();
+				commandsToCancel.add(command);
 			}
+		}
+	}
+
+	public void pollCommands() {
+		for (Command command : commandsToCancel) {
+			cancelCommand(command);
+			commandsToCancel.remove(command);
 		}
 
 		// checks if any subsystems are not being used by any commands, if so, initialises the default command for that subsystem
@@ -134,6 +142,11 @@ public class Scheduler {
 			if (!requirements.containsKey(subsystem)) {
 				registerCommand(subsystem.getDefaultCommand());
 			}
+		}
+
+		for (Command command : commands) {
+			// runs the commands
+			command.execute();
 		}
 	}
 

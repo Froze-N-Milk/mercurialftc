@@ -29,8 +29,8 @@ public class MecanumArbFollower extends ArbFollower {
 				new double[][]{
 						{1, -1, -1},
 						{1, 1, -1},
-						{1, -1, 1},
-						{1, 1, 1}
+						{1, 1, 1},
+						{1, -1, 1}
 				}
 		);
 

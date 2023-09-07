@@ -13,7 +13,8 @@ public class Scheduler {
 	private final LinkedHashSet<SubsystemInterface> subsystems; // currently registered Subsystems
 	private final LinkedHashSet<Trigger> triggers;
 	private final LinkedHashSet<Command> commands; // currently scheduled Commands
-	private final LinkedHashSet<Command> commandsToCancel; // currently scheduled Commands
+	private final ArrayList<Command> commandsToCancel; // commands to be cancelled this loop
+	private final LinkedHashSet<Command> commandsToSchedule; // commands to be scheduled this loop;
 
 	private final LinkedHashMap<SubsystemInterface, Command> requirements; // the mapping of required Subsystems to commands
 	private final ArrayList<SubsystemInterface> storedSubsystems;
@@ -21,7 +22,8 @@ public class Scheduler {
 	private Scheduler() {
 		this.subsystems = new LinkedHashSet<>();
 		this.commands = new LinkedHashSet<>();
-		this.commandsToCancel = new LinkedHashSet<>();
+		this.commandsToCancel = new ArrayList<>();
+		this.commandsToSchedule = new LinkedHashSet<>();
 		this.requirements = new LinkedHashMap<>();
 		this.triggers = new LinkedHashSet<>();
 		this.storedSubsystems = new ArrayList<>();
@@ -78,19 +80,31 @@ public class Scheduler {
 		}
 	}
 
-	public boolean registerCommand(Command command) {
+	public void scheduleCommand(Command command) {
+		commandsToSchedule.add(command);
+	}
+
+	private void cancelCommand(Command command) {
+		command.end();
+		for (SubsystemInterface requirement : command.getRequiredSubsystems()) {
+			requirements.remove(requirement, command);
+		}
+		commands.remove(command);
+	}
+
+	private void initialiseCommand(Command command) {
 		Set<SubsystemInterface> commandRequirements = command.getRequiredSubsystems();
 
 		// if the subsystems required by the command are not required, register it
 		if (Collections.disjoint(commandRequirements, requirements.keySet())) {
 			initialiseCommand(command, commandRequirements);
-			return true;
+			return;
 		} else {
 			// for each subsystem required, check the command currently requiring it, and make sure that they can all be overwritten
 			for (SubsystemInterface subsystem : commandRequirements) {
 				Command requirer = requirements.get(subsystem);
 				if (requirer != null && !requirer.getOverrideAllowed()) {
-					return false;
+					return;
 				}
 			}
 		}
@@ -104,15 +118,6 @@ public class Scheduler {
 		}
 
 		initialiseCommand(command, commandRequirements);
-		return true;
-	}
-
-	private void cancelCommand(Command command) {
-		command.end();
-		for (SubsystemInterface requirement : command.getRequiredSubsystems()) {
-			requirements.remove(requirement, command);
-		}
-		commands.remove(command);
 	}
 
 	private void initialiseCommand(Command command, Set<SubsystemInterface> commandRequirements) {
@@ -123,24 +128,29 @@ public class Scheduler {
 		command.initialise();
 	}
 
-	public void pollCommandsState() {
+	public void pollCommands() {
 		for (Command command : commands) {
 			if (command.finishCondition()) {
 				commandsToCancel.add(command);
 			}
 		}
-	}
 
-	public void pollCommands() {
 		for (Command command : commandsToCancel) {
 			cancelCommand(command);
-			commandsToCancel.remove(command);
 		}
+
+		commandsToCancel.clear();
+
+		for (Command command : commandsToSchedule) {
+			initialiseCommand(command);
+		}
+
+		commandsToSchedule.clear();
 
 		// checks if any subsystems are not being used by any commands, if so, initialises the default command for that subsystem
 		for (SubsystemInterface subsystem : subsystems) {
 			if (!requirements.containsKey(subsystem)) {
-				registerCommand(subsystem.getDefaultCommand());
+				scheduleCommand(subsystem.getDefaultCommand());
 			}
 		}
 

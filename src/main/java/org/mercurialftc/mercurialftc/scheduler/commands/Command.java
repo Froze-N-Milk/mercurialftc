@@ -31,8 +31,8 @@ public abstract class Command implements CommandSignature {
 		this.requiredSubsystems = new HashSet<>(Arrays.asList(requiredSubsystems));
 	}
 
-	public final boolean queue() {
-		return Scheduler.getSchedulerInstance().registerCommand(this);
+	public final void queue() {
+		Scheduler.getSchedulerInstance().scheduleCommand(this);
 	}
 
 	public final Set<SubsystemInterface> getRequiredSubsystems() {

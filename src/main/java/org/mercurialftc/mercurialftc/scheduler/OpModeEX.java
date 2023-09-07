@@ -124,7 +124,6 @@ public abstract class OpModeEX extends OpMode {
 		}
 		scheduler.pollSubsystemsPeriodic();
 		init_loopEX();
-		scheduler.pollCommandsState();
 		telemetry.update();
 	}
 
@@ -153,7 +152,6 @@ public abstract class OpModeEX extends OpMode {
 		scheduler.pollSubsystemsPeriodic();
 		scheduler.pollTriggers();
 		loopEX();
-		scheduler.pollCommandsState();
 		scheduler.pollCommands();
 		gamepadEX1.endLoopUpdate();
 		gamepadEX2.endLoopUpdate();

@@ -26,10 +26,9 @@ as a dependency for your FTCRobotController:
 3. add `implementation 'com.github.Froze-N-Milk:mercurialftc:testing-SNAPSHOT'` to the bottom of your dependencies block
    in
    `build.dependencies.gradle`
-4. It is hard to convince android studio that changes have been made, to update, change the letter 'F' in 'Froze-N-Milk'
-   to lowercase, or vice versa, and then run a gradle sync, this will take a while to do (~1-2 minutes)
-    1. running `gradle --refresh-dependencies` can help sometimes
-    2. you can check the commit hash in the download info pane of the build panel that can be opened when you run a
+4. It takes about 10-15 minutes for a new commit on the branch to become buildable
+    1. To check that you are getting the latest version, you can check the commit hash in the download info pane of the
+       build panel that can be opened when you run a
        gradle sync
-5. You will need to have offline mode enabled in gradle when downloading to the robot
+5. You will need to have offline mode enabled in gradle when installing your code to the robot
 

@@ -4,35 +4,17 @@ import org.mercurialftc.mercurialftc.scheduler.commands.Command;
 import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
 import org.mercurialftc.mercurialftc.scheduler.triggers.Trigger;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 public class Scheduler {
 	public static Scheduler scheduler;
 
 	public static boolean refreshScheduler = true;
-
-	public LinkedHashSet<SubsystemInterface> getSubsystems() {
-		return subsystems;
-	}
-
-	public LinkedHashSet<Trigger> getTriggers() {
-		return triggers;
-	}
-
-	public LinkedHashSet<Command> getCommands() {
-		return commands;
-	}
-
 	private final LinkedHashSet<SubsystemInterface> subsystems; // currently registered Subsystems
 	private final LinkedHashSet<Trigger> triggers;
 	private final LinkedHashSet<Command> commands; // currently scheduled Commands
 	private final LinkedHashMap<SubsystemInterface, Command> requirements; // the mapping of required Subsystems to commands
-	private ArrayList<SubsystemInterface> storedSubsystems;
-
+	private final ArrayList<SubsystemInterface> storedSubsystems;
 	private Scheduler() {
 		this.subsystems = new LinkedHashSet<>();
 		this.commands = new LinkedHashSet<>();
@@ -44,7 +26,7 @@ public class Scheduler {
 	/**
 	 * A safe method of accessing the scheduler singleton, if it has not been generated, the generation will be run.
 	 *
-	 * @return safe return of a non null scheduler instance
+	 * @return safe return of a non-null scheduler instance
 	 */
 	public static Scheduler getSchedulerInstance() {
 		if (scheduler == null) {
@@ -68,6 +50,18 @@ public class Scheduler {
 
 		scheduler = new Scheduler();
 		return scheduler;
+	}
+
+	public LinkedHashSet<SubsystemInterface> getSubsystems() {
+		return subsystems;
+	}
+
+	public LinkedHashSet<Trigger> getTriggers() {
+		return triggers;
+	}
+
+	public LinkedHashSet<Command> getCommands() {
+		return commands;
 	}
 
 	public void registerSubsystem(SubsystemInterface subsystem) {
@@ -157,7 +151,6 @@ public class Scheduler {
 		}
 	}
 
-
 	public void storeSubsystem(SubsystemInterface subsystem) {
 		storedSubsystems.add(subsystem);
 	}
@@ -165,4 +158,9 @@ public class Scheduler {
 	public SubsystemInterface getStoredSubsystem(int index) {
 		return storedSubsystems.get(index);
 	}
+
+	public boolean isBusy(SubsystemInterface subsystem) {
+		return !commands.contains(subsystem.getDefaultCommand());
+	}
+
 }

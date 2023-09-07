@@ -7,16 +7,16 @@ import org.mercurialftc.mercurialftc.silversurfer.geometry.Vector2D;
 import org.mercurialftc.mercurialftc.silversurfer.tracker.Tracker;
 
 /**
- * wrapper class for over {@link FFMecanumWaveFollower} or your own implementation, modifies the output and feeds it back in
+ * Consumes {@link org.mercurialftc.mercurialftc.silversurfer.followable.Followable.Output}s from the wave and then modifies them for use in an {@link  ArbFollower} such as {@link MecanumArbFollower}
  */
 public class GVFWaveFollower extends WaveFollower {
 	private final Tracker tracker;
-	private final WaveFollower waveFollower;
+	private final ArbFollower arbFollower;
 
-	public GVFWaveFollower(Tracker tracker, WaveFollower waveFollower) {
-		super(waveFollower.getMotionConstants());
+	public GVFWaveFollower(Tracker tracker, ArbFollower arbFollower) {
+		super(arbFollower.getMotionConstants());
 		this.tracker = tracker;
-		this.waveFollower = waveFollower;
+		this.arbFollower = arbFollower;
 	}
 
 	@Override
@@ -54,14 +54,6 @@ public class GVFWaveFollower extends WaveFollower {
 		double modifiedRotationalVelocity = rotationalVelocity + getMotionConstants().getMaxRotationalAcceleration() * Math.signum(rotationalError) * rotationalBreakControl * loopTime;
 		modifiedRotationalVelocity = Math.max(modifiedRotationalVelocity, getMotionConstants().getMaxRotationalVelocity());
 
-		Followable.Output modifiedOutput = new Followable.Output(
-				modifiedTranslationalVector,
-				modifiedRotationalVelocity,
-				output.getCallbackTime(),
-				output.getPosition(),
-				output.getDestination()
-		);
-
-		waveFollower.followOutput(modifiedOutput, loopTime);
+		arbFollower.follow(modifiedTranslationalVector, modifiedRotationalVelocity);
 	}
 }

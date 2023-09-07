@@ -7,6 +7,7 @@ import org.mercurialftc.mercurialftc.scheduler.commands.Command;
 import org.mercurialftc.mercurialftc.scheduler.commands.LambdaCommand;
 import org.mercurialftc.mercurialftc.scheduler.subsystems.Subsystem;
 import org.mercurialftc.mercurialftc.scheduler.triggers.gamepadex.ContinuousInput;
+import org.mercurialftc.mercurialftc.silversurfer.followable.Followable;
 import org.mercurialftc.mercurialftc.silversurfer.followable.MotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.followable.Wave;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
@@ -17,13 +18,12 @@ import org.mercurialftc.mercurialftc.util.matrix.SimpleMatrix;
 public abstract class MecanumDriveBase extends Subsystem {
 	protected DcMotorEx fl, bl, br, fr;
 	protected WaveFollower waveFollower;
+	protected MecanumArbFollower mecanumArbFollower;
+
 	protected Tracker tracker;
 	protected MotionConstants motionConstants;
 	protected final ContinuousInput x, y, t;
-	protected SimpleMatrix transformMatrix;
 	protected final Pose2D startPose;
-
-	protected double trackwidth, wheelbase, wheelradius;
 
 	/**
 	 * @param opModeEX  the opModeEX object to register against
@@ -52,18 +52,6 @@ public abstract class MecanumDriveBase extends Subsystem {
 		bl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 		br.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 		fr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-		double l = trackwidth / 2;
-		double b = wheelbase / 2;
-
-		transformMatrix = new SimpleMatrix( // matrix used for controlling the mecanum drive base
-				new double[][]{
-						{1, -1, -(l + b)},
-						{1, 1, -(l + b)},
-						{1, -1, (l + b)},
-						{1, 1, (l + b)}
-				}
-		).scalarMultiply(1 / wheelradius);
 	}
 
 	@Override
@@ -74,25 +62,14 @@ public abstract class MecanumDriveBase extends Subsystem {
 	@Override
 	public void defaultCommandExecute() {
 		Vector2D translationVector = new Vector2D(x.getValue(), y.getValue());
-		double scalingQuantity = Math.max(1, translationVector.getMagnitude());
-		translationVector = translationVector.scalarMultiply(1 / scalingQuantity);
+		double scalingQuantity = Math.max(1, translationVector.getMagnitude()); // todo check this stuff
+		translationVector = translationVector.scalarMultiply(1 / scalingQuantity).scalarMultiply(getMotionConstants().getMaxTranslationalVelocity());
 		translationVector = translationVector.rotate(tracker.getPose2D().getTheta());
 
-		SimpleMatrix inputValues = new SimpleMatrix(
-				new double[][]{
-						{translationVector.getX()},
-						{translationVector.getY()},
-						{t.getValue()}
-				}
+		mecanumArbFollower.follow(
+				translationVector,
+				t.getValue() * getMotionConstants().getMaxRotationalVelocity()
 		);
-
-		SimpleMatrix outputMatrix = transformMatrix.multiply(inputValues);
-
-		fl.setPower(outputMatrix.getItem(0, 0));
-		opModeEX.telemetry.addData("fl power", outputMatrix.getItem(0, 0));
-		bl.setPower(outputMatrix.getItem(1, 0));
-		br.setPower(outputMatrix.getItem(2, 0));
-		fr.setPower(outputMatrix.getItem(3, 0));
 	}
 
 	@Override

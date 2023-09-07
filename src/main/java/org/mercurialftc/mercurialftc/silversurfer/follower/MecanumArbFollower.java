@@ -27,8 +27,8 @@ public class MecanumArbFollower extends ArbFollower {
 
 		transformMatrix = new SimpleMatrix(
 				new double[][]{
-						{1, -1, -1},
 						{1, 1, -1},
+						{1, -1, -1},
 						{1, 1, 1},
 						{1, -1, 1}
 				}

@@ -93,8 +93,7 @@ public abstract class OpModeEX extends OpMode {
 		StringBuilder initialisationSequencer = new StringBuilder();
 
 		for (SubsystemInterface subsystem : scheduler.getSubsystems()) {
-			String[] subsystemStringSplit = subsystem.getClass().toString().split("\\.");
-			String subsystemString = subsystemStringSplit[subsystemStringSplit.length - 1];
+			String subsystemString = subsystem.getClass().getSimpleName();
 			initialising.setValue(subsystemString);
 			telemetry.update();
 			subsystem.init();

@@ -41,7 +41,7 @@ public class Wave {
 		boolean finished = true;
 
 		if (i < outputs.size()) {
-			while (currentTime >= outputs.get(i).getCallbackTime()) {
+			while (i < outputs.size() && currentTime >= outputs.get(i).getCallbackTime()) {
 				this.currentOutput = outputs.get(i);
 				i++;
 			}
@@ -56,7 +56,7 @@ public class Wave {
 		}
 
 		if (j < markers.size()) {
-			while (currentTime >= markers.get(j).getCallbackTime()) {
+			while (j < markers.size() && currentTime >= markers.get(j).getCallbackTime()) {
 				Marker marker = markers.get(j);
 				if (marker.getMarkerType() == Marker.MarkerType.COMMAND) {
 					marker.getMarkerReached().queue();

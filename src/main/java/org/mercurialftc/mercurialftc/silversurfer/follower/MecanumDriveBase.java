@@ -7,23 +7,21 @@ import org.mercurialftc.mercurialftc.scheduler.commands.Command;
 import org.mercurialftc.mercurialftc.scheduler.commands.LambdaCommand;
 import org.mercurialftc.mercurialftc.scheduler.subsystems.Subsystem;
 import org.mercurialftc.mercurialftc.scheduler.triggers.gamepadex.ContinuousInput;
-import org.mercurialftc.mercurialftc.silversurfer.followable.Followable;
 import org.mercurialftc.mercurialftc.silversurfer.followable.MotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.followable.Wave;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.AngleRadians;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Vector2D;
 import org.mercurialftc.mercurialftc.silversurfer.tracker.Tracker;
-import org.mercurialftc.mercurialftc.util.matrix.SimpleMatrix;
 
 public abstract class MecanumDriveBase extends Subsystem {
+	protected final ContinuousInput x, y, t;
+	protected final Pose2D startPose;
 	protected DcMotorEx fl, bl, br, fr;
 	protected WaveFollower waveFollower;
 	protected MecanumArbFollower mecanumArbFollower;
-
 	protected Tracker tracker;
 	protected MotionConstants motionConstants;
-	protected final ContinuousInput x, y, t;
-	protected final Pose2D startPose;
 
 	/**
 	 * @param opModeEX  the opModeEX object to register against
@@ -64,7 +62,7 @@ public abstract class MecanumDriveBase extends Subsystem {
 		Vector2D translationVector = new Vector2D(x.getValue(), y.getValue());
 		double scalingQuantity = Math.max(1, translationVector.getMagnitude()); // todo check this stuff
 		translationVector = translationVector.scalarMultiply(1 / scalingQuantity).scalarMultiply(getMotionConstants().getMaxTranslationalVelocity());
-		translationVector = translationVector.rotate(tracker.getPose2D().getTheta());
+		translationVector = translationVector.rotate(new AngleRadians(-tracker.getPose2D().getTheta().getRadians()));
 
 		mecanumArbFollower.follow(
 				translationVector,

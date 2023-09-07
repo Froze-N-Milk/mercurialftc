@@ -2,6 +2,7 @@ package org.mercurialftc.mercurialftc.silversurfer.follower;
 
 import org.mercurialftc.mercurialftc.silversurfer.followable.Followable;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Angle;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.AngleRadians;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Vector2D;
 import org.mercurialftc.mercurialftc.silversurfer.tracker.Tracker;
@@ -41,7 +42,7 @@ public class GVFWaveFollower extends WaveFollower {
 		modifiedTranslationVectorMagnitude = Math.max(modifiedTranslationVectorMagnitude, getMotionConstants().getMaxTranslationalVelocity());
 
 		Vector2D modifiedTranslationalVector = Vector2D.fromPolar(modifiedTranslationVectorMagnitude, modifiedTranslationVectorAngle);
-		modifiedTranslationalVector = modifiedTranslationalVector.rotate(currentPose.getTheta());
+		modifiedTranslationalVector = modifiedTranslationalVector.rotate(new AngleRadians(-currentPose.getTheta().getRadians()));
 
 		double rotationalError = currentPose.getTheta().findShortestDistance(targetPose.getTheta()); //shortest distance from estimated current position to target position
 

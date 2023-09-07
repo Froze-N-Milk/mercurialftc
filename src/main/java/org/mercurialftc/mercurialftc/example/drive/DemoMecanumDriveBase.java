@@ -1,14 +1,18 @@
 package org.mercurialftc.mercurialftc.example.drive;
 
-import com.qualcomm.robotcore.hardware.*;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.mercurialftc.mercurialftc.scheduler.OpModeEX;
 import org.mercurialftc.mercurialftc.scheduler.triggers.gamepadex.ContinuousInput;
 import org.mercurialftc.mercurialftc.silversurfer.encoderticksconverter.EncoderTicksConverter;
 import org.mercurialftc.mercurialftc.silversurfer.encoderticksconverter.Units;
 import org.mercurialftc.mercurialftc.silversurfer.followable.MotionConstants;
-import org.mercurialftc.mercurialftc.silversurfer.follower.MecanumArbFollower;
 import org.mercurialftc.mercurialftc.silversurfer.follower.GVFWaveFollower;
+import org.mercurialftc.mercurialftc.silversurfer.follower.MecanumArbFollower;
 import org.mercurialftc.mercurialftc.silversurfer.follower.MecanumDriveBase;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 import org.mercurialftc.mercurialftc.silversurfer.tracker.TrackerConstants;
@@ -40,7 +44,7 @@ public class DemoMecanumDriveBase extends MecanumDriveBase {
 		br = new CachingDcMotorEX(opModeEX.hardwareMap.get(DcMotorEx.class, "br"));
 		fr = new CachingDcMotorEX(opModeEX.hardwareMap.get(DcMotorEx.class, "fr"));
 
-		VoltageSensor voltageSensor = opModeEX.hardwareMap.getAll(VoltageSensor.class).iterator().next();
+		voltageSensor = opModeEX.hardwareMap.getAll(VoltageSensor.class).iterator().next();
 
 		// replace these values
 		VoltagePerformanceEnforcer translationalEnforcer = new VoltagePerformanceEnforcer(
@@ -124,5 +128,18 @@ public class DemoMecanumDriveBase extends MecanumDriveBase {
 				tracker,
 				mecanumArbFollower
 		);
+	}
+
+	public double getCurrent() {
+		double result = 0.0;
+		result += fl.getCurrent(CurrentUnit.AMPS);
+		result += bl.getCurrent(CurrentUnit.AMPS);
+		result += br.getCurrent(CurrentUnit.AMPS);
+		result += fr.getCurrent(CurrentUnit.AMPS);
+		return result / 4.0;
+	}
+
+	public VoltageSensor getVoltageSensor() {
+		return voltageSensor;
 	}
 }

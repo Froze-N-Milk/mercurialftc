@@ -2,6 +2,7 @@ package org.mercurialftc.mercurialftc.silversurfer.follower;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import org.mercurialftc.mercurialftc.scheduler.OpModeEX;
 import org.mercurialftc.mercurialftc.scheduler.commands.Command;
 import org.mercurialftc.mercurialftc.scheduler.commands.LambdaCommand;
@@ -18,6 +19,7 @@ public abstract class MecanumDriveBase extends Subsystem {
 	protected final ContinuousInput x, y, t;
 	protected final Pose2D startPose;
 	protected DcMotorEx fl, bl, br, fr;
+	protected VoltageSensor voltageSensor;
 	protected WaveFollower waveFollower;
 	protected MecanumArbFollower mecanumArbFollower;
 	protected Tracker tracker;

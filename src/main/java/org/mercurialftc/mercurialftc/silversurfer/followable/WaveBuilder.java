@@ -16,21 +16,13 @@ import java.util.Arrays;
 
 public class WaveBuilder {
 
-	private enum BuildState {
-		CURVE,
-		LINE,
-		STOP,
-		TURN,
-		IDLE; // entered at initialisation, and then re entered when the whole process is finished. Will not cause a build on exit, will cause one on entry
-	}
-
+	private final Units units;
+	private final MotionConstants motionConstants;
+	private final ArrayList<Followable> followables;
 	private Pose2D previousPose;
 	private FollowableBuilder builder;
 	private BuildState buildState;
-	private final Units units;
-	private final MotionConstants motionConstants;
 	private MotionConstants buildingMotionConstants;
-	private final ArrayList<Followable> followables;
 
 	public WaveBuilder(Pose2D startPose, Units units, MotionConstants motionConstants) {
 		this.previousPose = startPose;
@@ -155,7 +147,7 @@ public class WaveBuilder {
 	}
 
 	/**
-	 * sets a callback action to occur with a timed offset reference to end the instruction before it.
+	 * sets a callback action to occur with a timed offset reference to the end of the instruction before it.
 	 *
 	 * @param offset
 	 * @param markerReached
@@ -167,7 +159,7 @@ public class WaveBuilder {
 	}
 
 	/**
-	 * sets a callback action to occur with a timed offset reference to end the instruction before it.
+	 * sets a callback action to occur with a timed offset reference to the end of the instruction before it.
 	 *
 	 * @param offset
 	 * @param markerReached
@@ -234,5 +226,13 @@ public class WaveBuilder {
 		}
 
 		return new Wave(outputs, markers);
+	}
+
+	private enum BuildState {
+		CURVE,
+		LINE,
+		STOP,
+		TURN,
+		IDLE; // entered at initialisation, and then re entered when the whole process is finished. Will not cause a build on exit, will cause one on entry
 	}
 }

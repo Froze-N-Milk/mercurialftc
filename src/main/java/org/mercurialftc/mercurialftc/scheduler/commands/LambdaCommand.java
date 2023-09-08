@@ -7,15 +7,12 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 
-/**
- * todo fill in
- */
 public class LambdaCommand extends Command {
 	private final Runnable commandInit;
 	private final Runnable commandMethod;
 	private final BooleanSupplier commandFinish;
 	private final Runnable commandEnd;
-	private final boolean isOverrideAllowed;
+	private final boolean overrideAllowed;
 
 	/**
 	 * constructs a default lambda command
@@ -40,14 +37,14 @@ public class LambdaCommand extends Command {
 			Runnable commandMethod,
 			BooleanSupplier commandFinish,
 			Runnable commandEnd,
-			boolean isOverrideAllowed
+			boolean overrideAllowed
 	) {
 		super(requiredSubsystems);
 		this.commandInit = commandInit;
 		this.commandMethod = commandMethod;
 		this.commandFinish = commandFinish;
 		this.commandEnd = commandEnd;
-		this.isOverrideAllowed = isOverrideAllowed;
+		this.overrideAllowed = overrideAllowed;
 	}
 
 	public LambdaCommand addRequirements(SubsystemInterface... requiredSubsystems) {
@@ -60,7 +57,7 @@ public class LambdaCommand extends Command {
 				this.commandMethod,
 				this.commandFinish,
 				this.commandEnd,
-				this.isOverrideAllowed
+				this.overrideAllowed
 		);
 	}
 
@@ -71,7 +68,7 @@ public class LambdaCommand extends Command {
 				this.commandMethod,
 				this.commandFinish,
 				this.commandEnd,
-				this.isOverrideAllowed
+				this.overrideAllowed
 		);
 	}
 
@@ -82,7 +79,7 @@ public class LambdaCommand extends Command {
 				execute,
 				this.commandFinish,
 				this.commandEnd,
-				this.isOverrideAllowed
+				this.overrideAllowed
 		);
 	}
 
@@ -93,7 +90,7 @@ public class LambdaCommand extends Command {
 				this.commandMethod,
 				finish,
 				this.commandEnd,
-				this.isOverrideAllowed
+				this.overrideAllowed
 		);
 	}
 
@@ -104,18 +101,7 @@ public class LambdaCommand extends Command {
 				this.commandMethod,
 				this.commandFinish,
 				end,
-				this.isOverrideAllowed
-		);
-	}
-
-	public LambdaCommand isOverrideAllowed(boolean isOverrideAllowed) {
-		return new LambdaCommand(
-				this.getRequiredSubsystems(),
-				this.commandInit,
-				this.commandMethod,
-				this.commandFinish,
-				this.commandEnd,
-				isOverrideAllowed
+				this.overrideAllowed
 		);
 	}
 
@@ -131,7 +117,7 @@ public class LambdaCommand extends Command {
 	}
 
 	@Override
-	public final boolean finishCondition() {
+	public final boolean finished() {
 		return commandFinish.getAsBoolean();
 	}
 
@@ -142,6 +128,17 @@ public class LambdaCommand extends Command {
 
 	@Override
 	public final boolean getOverrideAllowed() {
-		return isOverrideAllowed;
+		return overrideAllowed;
+	}
+
+	public LambdaCommand setOverrideAllowed(boolean overrideAllowed) {
+		return new LambdaCommand(
+				this.getRequiredSubsystems(),
+				this.commandInit,
+				this.commandMethod,
+				this.commandFinish,
+				this.commandEnd,
+				overrideAllowed
+		);
 	}
 }

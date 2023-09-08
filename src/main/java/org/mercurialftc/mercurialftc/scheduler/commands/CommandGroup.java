@@ -30,7 +30,7 @@ public abstract class CommandGroup extends Command {
 	}
 
 	@Override
-	public boolean finishCondition() {
+	public boolean finished() {
 		return false;
 	}
 }

@@ -11,10 +11,10 @@ import java.util.Set;
  *
  */
 public class SequentialCommandGroup extends CommandGroup {
-	private int commandIndex;
-	private int previousCommandIndex;
 	private final ArrayList<Command> commands;
 	private final boolean isOverrideAllowed;
+	private int commandIndex;
+	private int previousCommandIndex;
 
 	public SequentialCommandGroup() {
 		super(new HashSet<>());
@@ -74,7 +74,7 @@ public class SequentialCommandGroup extends CommandGroup {
 			command.initialise();
 		}
 
-		if (command.finishCondition()) {
+		if (command.finished()) {
 			command.end();
 			commandIndex++;
 			return;
@@ -89,7 +89,7 @@ public class SequentialCommandGroup extends CommandGroup {
 	}
 
 	@Override
-	public boolean finishCondition() {
+	public boolean finished() {
 		return commandIndex >= commands.size() - 1;
 	}
 }

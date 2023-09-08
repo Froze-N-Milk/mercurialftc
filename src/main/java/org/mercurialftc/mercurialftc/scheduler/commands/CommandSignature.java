@@ -7,5 +7,5 @@ public interface CommandSignature {
 
 	void end();
 
-	boolean finishCondition();
+	boolean finished();
 }

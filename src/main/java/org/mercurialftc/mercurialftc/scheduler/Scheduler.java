@@ -129,33 +129,36 @@ public class Scheduler {
 	}
 
 	public void pollCommands() {
+		// checks to see if any commands are finished, if so, queues them to be canceled
 		for (Command command : commands) {
-			if (command.finishCondition()) {
+			if (command.finished()) {
 				commandsToCancel.add(command);
 			}
 		}
 
+		// cancels all cancel queued commands
 		for (Command command : commandsToCancel) {
 			cancelCommand(command);
 		}
-
+		// empties the queue
 		commandsToCancel.clear();
 
-		for (Command command : commandsToSchedule) {
-			initialiseCommand(command);
-		}
-
-		commandsToSchedule.clear();
-
-		// checks if any subsystems are not being used by any commands, if so, initialises the default command for that subsystem
+		// checks if any subsystems are not being used by any commands, if so, schedules the default command for that subsystem
 		for (SubsystemInterface subsystem : subsystems) {
 			if (!requirements.containsKey(subsystem)) {
 				scheduleCommand(subsystem.getDefaultCommand());
 			}
 		}
 
+		// initialises all the commands that are due to be scheduled
+		for (Command command : commandsToSchedule) {
+			initialiseCommand(command);
+		}
+		// empties the queue
+		commandsToSchedule.clear();
+
+		// runs the commands
 		for (Command command : commands) {
-			// runs the commands
 			command.execute();
 		}
 	}

@@ -9,7 +9,7 @@ public abstract class Subsystem implements SubsystemInterface {
 	private final Command defaultCommand;
 
 	public Subsystem(OpModeEX opModeEX) {
-		this.defaultCommand = new LambdaCommand().addRequirements(this).isOverrideAllowed(true).execute(this::defaultCommandExecute).finish(() -> false);
+		this.defaultCommand = new LambdaCommand().addRequirements(this).setOverrideAllowed(true).execute(this::defaultCommandExecute).finish(() -> false);
 		this.opModeEX = opModeEX;
 		opModeEX.getScheduler().registerSubsystem(this);
 		this.defaultCommand.queue();

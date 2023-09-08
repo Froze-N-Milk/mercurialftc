@@ -89,7 +89,8 @@ public abstract class MecanumDriveBase extends Subsystem {
 				.addRequirements(this)
 				.init(() -> waveFollower.setWave(wave))
 				.execute(() -> waveFollower.update(opModeEX.getElapsedTime().seconds()))
-				.finish(() -> waveFollower.isFinished());
+				.finish(waveFollower::isFinished)
+				.setOverrideAllowed(true);
 	}
 
 	/**
@@ -103,7 +104,8 @@ public abstract class MecanumDriveBase extends Subsystem {
 				.addRequirements(this)
 				.init(() -> waveFollower.setWave(wave))
 				.execute(() -> waveFollower.update(opModeEX.getElapsedTime().seconds()))
-				.finish(() -> waveFollower.isFinished() || x.getValue() != 0.0 || y.getValue() != 0.0 || t.getValue() != 0.0);
+				.finish(() -> waveFollower.isFinished() || x.getValue() != 0.0 || y.getValue() != 0.0 || t.getValue() != 0.0)
+				.setOverrideAllowed(true);
 	}
 
 	public Tracker getTracker() {

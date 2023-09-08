@@ -6,16 +6,14 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 
-/**
- * todo fill in
- */
 public class LambdaCommand extends Command {
 	private final Runnable commandInit;
 	private final Runnable commandMethod;
 	private final BooleanSupplier commandFinish;
-	private final Runnable commandEnd;
-	private final boolean isOverrideAllowed;
+	private final Consumer<Boolean> commandEnd;
+	private final boolean interruptable;
 
 	/**
 	 * constructs a default lambda command
@@ -28,7 +26,7 @@ public class LambdaCommand extends Command {
 				() -> {
 				},
 				() -> true,
-				() -> {
+				(interrupted) -> {
 				},
 				true
 		);
@@ -39,15 +37,15 @@ public class LambdaCommand extends Command {
 			Runnable commandInit,
 			Runnable commandMethod,
 			BooleanSupplier commandFinish,
-			Runnable commandEnd,
-			boolean isOverrideAllowed
+			Consumer<Boolean> commandEnd,
+			boolean interruptable
 	) {
 		super(requiredSubsystems);
 		this.commandInit = commandInit;
 		this.commandMethod = commandMethod;
 		this.commandFinish = commandFinish;
 		this.commandEnd = commandEnd;
-		this.isOverrideAllowed = isOverrideAllowed;
+		this.interruptable = interruptable;
 	}
 
 	public LambdaCommand addRequirements(SubsystemInterface... requiredSubsystems) {
@@ -60,7 +58,7 @@ public class LambdaCommand extends Command {
 				this.commandMethod,
 				this.commandFinish,
 				this.commandEnd,
-				this.isOverrideAllowed
+				this.interruptable
 		);
 	}
 
@@ -71,7 +69,7 @@ public class LambdaCommand extends Command {
 				this.commandMethod,
 				this.commandFinish,
 				this.commandEnd,
-				this.isOverrideAllowed
+				this.interruptable
 		);
 	}
 
@@ -82,7 +80,7 @@ public class LambdaCommand extends Command {
 				execute,
 				this.commandFinish,
 				this.commandEnd,
-				this.isOverrideAllowed
+				this.interruptable
 		);
 	}
 
@@ -93,29 +91,18 @@ public class LambdaCommand extends Command {
 				this.commandMethod,
 				finish,
 				this.commandEnd,
-				this.isOverrideAllowed
+				this.interruptable
 		);
 	}
 
-	public LambdaCommand end(Runnable end) {
+	public LambdaCommand end(Consumer<Boolean> end) {
 		return new LambdaCommand(
 				this.getRequiredSubsystems(),
 				this.commandInit,
 				this.commandMethod,
 				this.commandFinish,
 				end,
-				this.isOverrideAllowed
-		);
-	}
-
-	public LambdaCommand isOverrideAllowed(boolean isOverrideAllowed) {
-		return new LambdaCommand(
-				this.getRequiredSubsystems(),
-				this.commandInit,
-				this.commandMethod,
-				this.commandFinish,
-				this.commandEnd,
-				isOverrideAllowed
+				this.interruptable
 		);
 	}
 
@@ -131,17 +118,28 @@ public class LambdaCommand extends Command {
 	}
 
 	@Override
-	public final boolean finishCondition() {
+	public final boolean finished() {
 		return commandFinish.getAsBoolean();
 	}
 
 	@Override
-	public void end() {
-		commandEnd.run();
+	public void end(boolean interrupted) {
+		commandEnd.accept(interrupted);
 	}
 
 	@Override
-	public final boolean getOverrideAllowed() {
-		return isOverrideAllowed;
+	public final boolean interruptable() {
+		return interruptable;
+	}
+
+	public LambdaCommand setInterruptable(boolean interruptable) {
+		return new LambdaCommand(
+				this.getRequiredSubsystems(),
+				this.commandInit,
+				this.commandMethod,
+				this.commandFinish,
+				this.commandEnd,
+				interruptable
+		);
 	}
 }

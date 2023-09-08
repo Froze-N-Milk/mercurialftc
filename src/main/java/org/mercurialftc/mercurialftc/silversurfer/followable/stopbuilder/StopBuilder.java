@@ -13,14 +13,14 @@ public class StopBuilder extends FollowableBuilder {
 	private final ArrayList<Marker> markers;
 	private final ArrayList<Followable.Output> outputs;
 	double previousWait;
-	
+
 	public StopBuilder() {
 		super(null);
 		markers = new ArrayList<>();
 		outputs = new ArrayList<>();
 		previousWait = 0;
 	}
-	
+
 	@Override
 	public Followable build() {
 		return new FollowableStop(
@@ -28,10 +28,10 @@ public class StopBuilder extends FollowableBuilder {
 				markers.toArray(new Marker[0])
 		);
 	}
-	
+
 	public final void addWait(Pose2D position, double seconds) {
 		seconds = Math.max(seconds, 0);
-		
+
 		outputs.add(
 				new Followable.Output(
 						new Vector2D(0, 0),
@@ -43,7 +43,7 @@ public class StopBuilder extends FollowableBuilder {
 		);
 		previousWait += seconds;
 	}
-	
+
 	/**
 	 * <h1>DO NOT USE<h1/>
 	 * {@link StopBuilder} is special and so has no segments
@@ -55,7 +55,7 @@ public class StopBuilder extends FollowableBuilder {
 	protected void addSegment(Pose2D previousPose, Pose2D destinationPose) {
 		// does nothing
 	}
-	
+
 	@Override
 	protected void addOffsetCommandMarker(double offset, Marker.MarkerType markerType, Command markerReached) {
 		markers.add(new Marker(

@@ -2,6 +2,7 @@ package org.mercurialftc.mercurialftc.silversurfer.follower;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import org.mercurialftc.mercurialftc.scheduler.OpModeEX;
 import org.mercurialftc.mercurialftc.scheduler.commands.Command;
 import org.mercurialftc.mercurialftc.scheduler.commands.LambdaCommand;
@@ -9,21 +10,20 @@ import org.mercurialftc.mercurialftc.scheduler.subsystems.Subsystem;
 import org.mercurialftc.mercurialftc.scheduler.triggers.gamepadex.ContinuousInput;
 import org.mercurialftc.mercurialftc.silversurfer.followable.MotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.followable.Wave;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.AngleRadians;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Vector2D;
 import org.mercurialftc.mercurialftc.silversurfer.tracker.Tracker;
-import org.mercurialftc.mercurialftc.util.matrix.SimpleMatrix;
 
 public abstract class MecanumDriveBase extends Subsystem {
+	protected final ContinuousInput x, y, t;
+	protected final Pose2D startPose;
 	protected DcMotorEx fl, bl, br, fr;
+	protected VoltageSensor voltageSensor;
 	protected WaveFollower waveFollower;
+	protected MecanumArbFollower mecanumArbFollower;
 	protected Tracker tracker;
 	protected MotionConstants motionConstants;
-	protected final ContinuousInput x, y, t;
-	protected SimpleMatrix transformMatrix;
-	protected final Pose2D startPose;
-
-	protected double trackwidth, wheelbase, wheelradius;
 
 	/**
 	 * @param opModeEX  the opModeEX object to register against
@@ -52,18 +52,6 @@ public abstract class MecanumDriveBase extends Subsystem {
 		bl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 		br.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 		fr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-		double l = trackwidth / 2;
-		double b = wheelbase / 2;
-
-		transformMatrix = new SimpleMatrix( // matrix used for controlling the mecanum drive base
-				new double[][]{
-						{1, -1, -(l + b)},
-						{1, 1, -(l + b)},
-						{1, -1, (l + b)},
-						{1, 1, (l + b)}
-				}
-		);
 	}
 
 	@Override
@@ -74,25 +62,14 @@ public abstract class MecanumDriveBase extends Subsystem {
 	@Override
 	public void defaultCommandExecute() {
 		Vector2D translationVector = new Vector2D(x.getValue(), y.getValue());
-		double scalingQuantity = Math.max(1, translationVector.getMagnitude());
-		translationVector = translationVector.scalarMultiply(1 / scalingQuantity);
-		translationVector = translationVector.rotate(tracker.getPose2D().getTheta());
+		double scalingQuantity = Math.max(1, translationVector.getMagnitude()); // todo check this stuff
+		translationVector = translationVector.scalarMultiply(1 / scalingQuantity).scalarMultiply(getMotionConstants().getMaxTranslationalVelocity());
+		translationVector = translationVector.rotate(new AngleRadians(-tracker.getPose2D().getTheta().getRadians()));
 
-		SimpleMatrix inputValues = new SimpleMatrix(
-				new double[][]{
-						{translationVector.getX()},
-						{translationVector.getY()},
-						{t.getValue()}
-				}
+		mecanumArbFollower.follow(
+				translationVector,
+				t.getValue() * getMotionConstants().getMaxRotationalVelocity()
 		);
-
-		SimpleMatrix outputMatrix = transformMatrix.multiply(inputValues).scalarMultiply(1 / wheelradius);
-
-		fl.setPower(outputMatrix.getItem(0, 0));
-		opModeEX.telemetry.addData("fl power", outputMatrix.getItem(0, 0));
-		bl.setPower(outputMatrix.getItem(1, 0));
-		br.setPower(outputMatrix.getItem(2, 0));
-		fr.setPower(outputMatrix.getItem(3, 0));
 	}
 
 	@Override
@@ -112,7 +89,8 @@ public abstract class MecanumDriveBase extends Subsystem {
 				.addRequirements(this)
 				.init(() -> waveFollower.setWave(wave))
 				.execute(() -> waveFollower.update(opModeEX.getElapsedTime().seconds()))
-				.finish(() -> waveFollower.isFinished());
+				.finish(waveFollower::isFinished)
+				.setInterruptable(true);
 	}
 
 	/**
@@ -126,7 +104,8 @@ public abstract class MecanumDriveBase extends Subsystem {
 				.addRequirements(this)
 				.init(() -> waveFollower.setWave(wave))
 				.execute(() -> waveFollower.update(opModeEX.getElapsedTime().seconds()))
-				.finish(() -> waveFollower.isFinished() || x.getValue() != 0.0 || y.getValue() != 0.0 || t.getValue() != 0.0);
+				.finish(() -> waveFollower.isFinished() || x.getValue() != 0.0 || y.getValue() != 0.0 || t.getValue() != 0.0)
+				.setInterruptable(true);
 	}
 
 	public Tracker getTracker() {

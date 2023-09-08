@@ -14,19 +14,17 @@ import java.util.Arrays;
  * motion profile for splines
  */
 public class MotionProfile {
-	public double getArcSegmentLength() {
-		return arcSegmentLength;
-	}
-
 	private double arcSegmentLength;
-
 	private FollowableCurve spline;
+	private int plannedPoints;
 
 	public MotionProfile(FollowableCurve spline) {
 		this.spline = spline;
 	}
 
-	private int plannedPoints;
+	public double getArcSegmentLength() {
+		return arcSegmentLength;
+	}
 
 	public Followable.Output[] profile() {
 		return optimise();
@@ -121,7 +119,7 @@ public class MotionProfile {
 
 			// todo should do for now, possibly need to implement some scaling for the acceleration to dampen or smth
 			double rotationalVelocity = Math.sqrt((previousRotationalVelocity * previousRotationalVelocity) + 2 * motionConstants.getMaxRotationalAcceleration() * Math.signum(rotationalError) * rotationalBreakControl * rotationDistance); // todo should do for now, possibly need to implement some scaling for the acceleration to dampen or smth
-			rotationalVelocity = Math.max(rotationalVelocity, motionConstants.getMaxRotationalVelocity());
+			rotationalVelocity = Math.min(rotationalVelocity, motionConstants.getMaxRotationalVelocity());
 
 			double vMax = motionConstants.getMaxTranslationalVelocity();
 

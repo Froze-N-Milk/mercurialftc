@@ -1,5 +1,6 @@
 package org.mercurialftc.mercurialftc.scheduler.commands;
 
+import org.mercurialftc.mercurialftc.scheduler.Scheduler;
 import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
 
 import java.util.ArrayList;
@@ -7,89 +8,104 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- *
- */
-public class SequentialCommandGroup extends CommandGroup {
+public class SequentialCommandGroup extends Command {
+	private final ArrayList<CommandSignature> commands;
+	private final boolean interruptable;
 	private int commandIndex;
-	private int previousCommandIndex;
-	private final ArrayList<Command> commands;
-	private final boolean isOverrideAllowed;
+	private CommandSignature currentCommand;
 
 	public SequentialCommandGroup() {
 		super(new HashSet<>());
-		isOverrideAllowed = true;
+		interruptable = true;
 		this.commands = new ArrayList<>();
 		commandIndex = -1;
-		previousCommandIndex = -2;
 	}
 
-	private SequentialCommandGroup(ArrayList<Command> commands, Set<SubsystemInterface> requirements, boolean isOverrideAllowed) {
+	private SequentialCommandGroup(ArrayList<CommandSignature> commands, Set<SubsystemInterface> requirements, boolean interruptable) {
 		super(requirements);
-		this.isOverrideAllowed = isOverrideAllowed;
+		this.interruptable = interruptable;
 		this.commands = commands;
 		commandIndex = -1;
-		previousCommandIndex = -2;
 	}
 
-	public SequentialCommandGroup addCommands(Command... commands) {
+	@Override
+	public void queue() {
+		Scheduler.getSchedulerInstance().registerComposedCommands(commands);
+		super.queue();
+	}
 
-		ArrayList<Command> newCommandList = new ArrayList<>(this.commands);
+	/**
+	 * non-mutating
+	 *
+	 * @param commands new commands to add
+	 * @return a new SequentialCommandGroup, with the added commands
+	 */
+	public SequentialCommandGroup addCommands(CommandSignature... commands) {
+		if (commandIndex != -1) {
+			throw new IllegalStateException(
+					"Commands cannot be added to a composition while it's running");
+		}
+
+		ArrayList<CommandSignature> newCommandList = new ArrayList<>(this.commands);
 		Collections.addAll(newCommandList, commands);
 
 		Set<SubsystemInterface> newRequirementSet = new HashSet<>(this.getRequiredSubsystems());
-		boolean newIsOverrideAllowed = true;
+		boolean newInterruptable = this.interruptable();
 
-		for (Command command : commands) {
+		for (CommandSignature command : commands) {
 			newRequirementSet.addAll(command.getRequiredSubsystems());
-			if (!command.getOverrideAllowed()) {
-				newIsOverrideAllowed = false;
-			}
+			newInterruptable &= command.interruptable();
 		}
 
 		return new SequentialCommandGroup(
 				newCommandList,
 				newRequirementSet,
-				newIsOverrideAllowed
+				newInterruptable
 		);
 	}
 
 	@Override
-	public boolean getOverrideAllowed() {
-		return isOverrideAllowed;
+	public boolean interruptable() {
+		return interruptable;
 	}
 
 	@Override
 	public void initialise() {
+		if (commands.isEmpty()) {
+			throw new RuntimeException("Attempted to run empty SequentialCommandGroup, SequentialCommandGroupRequires a minimum of 1 Command to be run");
+		}
 		commandIndex = 0;
-		previousCommandIndex = -1;
+		currentCommand = commands.get(commandIndex);
 	}
 
 	@Override
 	public void execute() {
-		Command command = commands.get(commandIndex);
-
-		if (previousCommandIndex != commandIndex) {
-			previousCommandIndex = commandIndex;
-			command.initialise();
-		}
-
-		if (command.finishCondition()) {
-			command.end();
+		if (currentCommand.finished()) {
+			currentCommand.end(false);
 			commandIndex++;
+		}
+		if (commandIndex < commands.size()) {
+			currentCommand = commands.get(commandIndex);
+			currentCommand.initialise();
+		} else {
 			return;
 		}
-
-		command.execute();
+		currentCommand.execute();
 	}
 
 	@Override
-	public void end() {
-
+	public void end(boolean interrupted) {
+		if (interrupted
+				&& !commands.isEmpty()
+				&& commandIndex > -1
+				&& commandIndex < commands.size()) {
+			commands.get(commandIndex).end(true);
+		}
+		commandIndex = -1;
 	}
 
 	@Override
-	public boolean finishCondition() {
+	public boolean finished() {
 		return commandIndex >= commands.size() - 1;
 	}
 }

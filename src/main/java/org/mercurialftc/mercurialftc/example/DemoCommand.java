@@ -1,7 +1,7 @@
 package org.mercurialftc.mercurialftc.example;
 
-import org.mercurialftc.mercurialftc.scheduler.commands.Command;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import org.mercurialftc.mercurialftc.scheduler.commands.Command;
 
 /**
  * A demonstration of a command. Sets the demoSubsystem to run for 5 seconds or until this command is interrupted
@@ -17,7 +17,7 @@ public class DemoCommand extends Command {
 	}
 
 	@Override
-	public boolean getOverrideAllowed() {
+	public boolean interruptable() {
 		return true;
 	}
 
@@ -33,11 +33,11 @@ public class DemoCommand extends Command {
 	}
 
 	@Override
-	public void end() {
+	public void end(boolean interrupted) {
 	}
 
 	@Override
-	public boolean finishCondition() {
+	public boolean finished() {
 		return elapsedTime.seconds() - startTime >= 5;
 	}
 }

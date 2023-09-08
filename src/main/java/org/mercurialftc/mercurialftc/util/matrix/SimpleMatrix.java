@@ -100,7 +100,7 @@ public class SimpleMatrix {
 	 * @return
 	 */
 	public SimpleMatrix scalarMultiply(double scalar) {
-		double[][] result = getMatrix();
+		double[][] result = matrix.clone();
 
 		for (int i = 0; i < result.length; i++) {
 			double[] row = result[i];
@@ -118,6 +118,20 @@ public class SimpleMatrix {
 
 	public double getItem(int row, int column) {
 		return matrix[row][column];
+	}
+
+	/**
+	 * non-mutating
+	 *
+	 * @param row
+	 * @param column
+	 * @param input  new value
+	 * @return
+	 */
+	public SimpleMatrix setItem(int row, int column, double input) {
+		double[][] result = matrix.clone();
+		result[row][column] = input;
+		return new SimpleMatrix(result, true);
 	}
 
 	public int rows() {

@@ -10,7 +10,7 @@ public abstract class WaveFollower {
 	private final MotionConstants motionConstants;
 	private boolean finished;
 
-	protected WaveFollower(MotionConstants motionConstants) {
+	public WaveFollower(MotionConstants motionConstants) {
 		this.motionConstants = motionConstants;
 		currentTime = previousTime = 0;
 	}

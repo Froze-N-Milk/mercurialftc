@@ -31,13 +31,12 @@ public abstract class Command implements CommandSignature {
 		this.requiredSubsystems = new HashSet<>(Arrays.asList(requiredSubsystems));
 	}
 
-	public final boolean queue() {
-		return Scheduler.getSchedulerInstance().registerCommand(this);
+	public void queue() {
+		Scheduler.getSchedulerInstance().scheduleCommand(this);
 	}
 
+	@Override
 	public final Set<SubsystemInterface> getRequiredSubsystems() {
 		return requiredSubsystems;
 	}
-
-	public abstract boolean getOverrideAllowed();
 }

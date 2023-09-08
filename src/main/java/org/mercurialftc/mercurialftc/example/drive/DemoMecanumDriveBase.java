@@ -1,17 +1,20 @@
 package org.mercurialftc.mercurialftc.example.drive;
 
-import com.qualcomm.robotcore.hardware.*;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.mercurialftc.mercurialftc.scheduler.OpModeEX;
 import org.mercurialftc.mercurialftc.scheduler.triggers.gamepadex.ContinuousInput;
 import org.mercurialftc.mercurialftc.silversurfer.encoderticksconverter.EncoderTicksConverter;
 import org.mercurialftc.mercurialftc.silversurfer.encoderticksconverter.Units;
 import org.mercurialftc.mercurialftc.silversurfer.followable.MotionConstants;
-import org.mercurialftc.mercurialftc.silversurfer.follower.FFMecanumWaveFollower;
 import org.mercurialftc.mercurialftc.silversurfer.follower.GVFWaveFollower;
+import org.mercurialftc.mercurialftc.silversurfer.follower.MecanumArbFollower;
 import org.mercurialftc.mercurialftc.silversurfer.follower.MecanumDriveBase;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
-import org.mercurialftc.mercurialftc.silversurfer.tracker.InsistentThreeWheelTracker;
 import org.mercurialftc.mercurialftc.silversurfer.tracker.TrackerConstants;
 import org.mercurialftc.mercurialftc.silversurfer.tracker.TwoWheelTracker;
 import org.mercurialftc.mercurialftc.silversurfer.voltageperformanceenforcer.VoltagePerformanceEnforcer;
@@ -41,7 +44,7 @@ public class DemoMecanumDriveBase extends MecanumDriveBase {
 		br = new CachingDcMotorEX(opModeEX.hardwareMap.get(DcMotorEx.class, "br"));
 		fr = new CachingDcMotorEX(opModeEX.hardwareMap.get(DcMotorEx.class, "fr"));
 
-		VoltageSensor voltageSensor = opModeEX.hardwareMap.getAll(VoltageSensor.class).iterator().next();
+		voltageSensor = opModeEX.hardwareMap.getAll(VoltageSensor.class).iterator().next();
 
 		// replace these values
 		VoltagePerformanceEnforcer translationalEnforcer = new VoltagePerformanceEnforcer(
@@ -68,12 +71,12 @@ public class DemoMecanumDriveBase extends MecanumDriveBase {
 
 		// replace accelerations
 		motionConstants = new MotionConstants(
-				translationalEnforcer.transformVelocity(currentVoltage),
+				translationalEnforcer.transformVelocity(currentVoltage), //start with these all set at 1
 				angularEnforcer.transformVelocity(currentVoltage),
 				rotationalEnforcer.transformVelocity(currentVoltage),
-				10,
-				10,
-				10
+				1,
+				1,
+				1
 		);
 
 		// replace all, select the tracker which works best for you
@@ -116,22 +119,27 @@ public class DemoMecanumDriveBase extends MecanumDriveBase {
 				new IMU_EX(opModeEX.hardwareMap.get(IMU.class, "imu"), AngleUnit.RADIANS)
 		);
 
-		// these need to be used in other places, so need to be like this set, unlike most other constants
-		// look at FFMecanumWaveFollower to see what these values represent
-		// use the Units enum to use your desired units, and convert them to millimeters
-		trackwidth = Units.MILLIMETER.toMillimeters(415); // replace
-		wheelbase = Units.MILLIMETER.toMillimeters(330); // replace
-		wheelradius = Units.MILLIMETER.toMillimeters(50);
+		mecanumArbFollower = new MecanumArbFollower(
+				motionConstants,
+				fl, bl, br, fr
+		);
 
 		waveFollower = new GVFWaveFollower(
 				tracker,
-				new FFMecanumWaveFollower(
-						motionConstants,
-						true, // the GVFWaveFollower will pre rotate for us
-						trackwidth,
-						wheelbase,
-						fl, bl, br, fr
-				)
+				mecanumArbFollower
 		);
+	}
+
+	public double getCurrent() {
+		double result = 0.0;
+		result += fl.getCurrent(CurrentUnit.AMPS);
+		result += bl.getCurrent(CurrentUnit.AMPS);
+		result += br.getCurrent(CurrentUnit.AMPS);
+		result += fr.getCurrent(CurrentUnit.AMPS);
+		return result / 4.0;
+	}
+
+	public VoltageSensor getVoltageSensor() {
+		return voltageSensor;
 	}
 }

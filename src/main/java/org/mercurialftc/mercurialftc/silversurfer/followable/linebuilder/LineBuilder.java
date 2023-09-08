@@ -3,12 +3,12 @@ package org.mercurialftc.mercurialftc.silversurfer.followable.linebuilder;
 import org.mercurialftc.mercurialftc.scheduler.commands.Command;
 import org.mercurialftc.mercurialftc.silversurfer.followable.Followable;
 import org.mercurialftc.mercurialftc.silversurfer.followable.FollowableBuilder;
+import org.mercurialftc.mercurialftc.silversurfer.followable.MotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.followable.markers.Marker;
 import org.mercurialftc.mercurialftc.silversurfer.followable.markers.MarkerBuilder;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.AngleRadians;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Vector2D;
-import org.mercurialftc.mercurialftc.silversurfer.followable.MotionConstants;
 
 import java.util.ArrayList;
 
@@ -103,7 +103,7 @@ public class LineBuilder extends FollowableBuilder {
 
 			// todo should do for now, possibly need to implement some scaling for the acceleration to dampen or smth
 			double rotationalVelocity = Math.sqrt((previousRotationalVelocity * previousRotationalVelocity) + 2 * motionConstants.getMaxRotationalAcceleration() * Math.signum(rotationalError) * rotationalBreakControl * rotationDistance); // todo should do for now, possibly need to implement some scaling for the acceleration to dampen or smth
-			rotationalVelocity = Math.max(rotationalVelocity, motionConstants.getMaxRotationalVelocity());
+			rotationalVelocity = Math.min(rotationalVelocity, motionConstants.getMaxRotationalVelocity());
 
 			double vMax = motionConstants.getMaxTranslationalVelocity();
 

@@ -17,7 +17,7 @@ public class DemoCommand extends Command {
 	}
 
 	@Override
-	public boolean getOverrideAllowed() {
+	public boolean interruptable() {
 		return true;
 	}
 
@@ -33,7 +33,7 @@ public class DemoCommand extends Command {
 	}
 
 	@Override
-	public void end() {
+	public void end(boolean interrupted) {
 	}
 
 	@Override

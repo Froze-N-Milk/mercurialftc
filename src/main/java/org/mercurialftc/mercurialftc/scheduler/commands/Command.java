@@ -35,9 +35,8 @@ public abstract class Command implements CommandSignature {
 		Scheduler.getSchedulerInstance().scheduleCommand(this);
 	}
 
+	@Override
 	public final Set<SubsystemInterface> getRequiredSubsystems() {
 		return requiredSubsystems;
 	}
-
-	public abstract boolean getOverrideAllowed();
 }

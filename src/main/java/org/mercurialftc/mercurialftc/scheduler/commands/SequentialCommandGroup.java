@@ -7,26 +7,23 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- *
- */
-public class SequentialCommandGroup extends CommandGroup {
+public class SequentialCommandGroup extends Command {
 	private final ArrayList<Command> commands;
-	private final boolean isOverrideAllowed;
+	private final boolean interruptable;
 	private int commandIndex;
 	private int previousCommandIndex;
 
 	public SequentialCommandGroup() {
 		super(new HashSet<>());
-		isOverrideAllowed = true;
+		interruptable = true;
 		this.commands = new ArrayList<>();
 		commandIndex = -1;
 		previousCommandIndex = -2;
 	}
 
-	private SequentialCommandGroup(ArrayList<Command> commands, Set<SubsystemInterface> requirements, boolean isOverrideAllowed) {
+	private SequentialCommandGroup(ArrayList<Command> commands, Set<SubsystemInterface> requirements, boolean interruptable) {
 		super(requirements);
-		this.isOverrideAllowed = isOverrideAllowed;
+		this.interruptable = interruptable;
 		this.commands = commands;
 		commandIndex = -1;
 		previousCommandIndex = -2;
@@ -42,7 +39,7 @@ public class SequentialCommandGroup extends CommandGroup {
 
 		for (Command command : commands) {
 			newRequirementSet.addAll(command.getRequiredSubsystems());
-			if (!command.getOverrideAllowed()) {
+			if (!command.interruptable()) {
 				newIsOverrideAllowed = false;
 			}
 		}
@@ -55,8 +52,8 @@ public class SequentialCommandGroup extends CommandGroup {
 	}
 
 	@Override
-	public boolean getOverrideAllowed() {
-		return isOverrideAllowed;
+	public boolean interruptable() {
+		return interruptable;
 	}
 
 	@Override
@@ -75,7 +72,7 @@ public class SequentialCommandGroup extends CommandGroup {
 		}
 
 		if (command.finished()) {
-			command.end();
+			command.end(false);
 			commandIndex++;
 			return;
 		}
@@ -84,7 +81,7 @@ public class SequentialCommandGroup extends CommandGroup {
 	}
 
 	@Override
-	public void end() {
+	public void end(boolean interrupted) {
 
 	}
 

@@ -1,6 +1,6 @@
 package org.mercurialftc.mercurialftc.scheduler;
 
-import org.mercurialftc.mercurialftc.scheduler.commands.Command;
+import org.mercurialftc.mercurialftc.scheduler.commands.CommandSignature;
 import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
 import org.mercurialftc.mercurialftc.scheduler.triggers.Trigger;
 
@@ -12,11 +12,11 @@ public class Scheduler {
 	public static boolean refreshScheduler = true;
 	private final LinkedHashSet<SubsystemInterface> subsystems; // currently registered Subsystems
 	private final LinkedHashSet<Trigger> triggers;
-	private final LinkedHashSet<Command> commands; // currently scheduled Commands
-	private final ArrayList<Command> commandsToCancel; // commands to be cancelled this loop
-	private final LinkedHashSet<Command> commandsToSchedule; // commands to be scheduled this loop;
+	private final LinkedHashSet<CommandSignature> commands; // currently scheduled Commands
+	private final ArrayList<CommandSignature> commandsToCancel; // commands to be cancelled this loop
+	private final LinkedHashSet<CommandSignature> commandsToSchedule; // commands to be scheduled this loop;
 
-	private final LinkedHashMap<SubsystemInterface, Command> requirements; // the mapping of required Subsystems to commands
+	private final LinkedHashMap<SubsystemInterface, CommandSignature> requirements; // the mapping of required Subsystems to commands
 	private final ArrayList<SubsystemInterface> storedSubsystems;
 
 	private Scheduler() {
@@ -43,7 +43,7 @@ public class Scheduler {
 
 	public static Scheduler freshInstance() {
 		if (scheduler != null) {
-			for (Command command : scheduler.commands) {
+			for (CommandSignature command : scheduler.commands) {
 				scheduler.cancelCommand(command);
 			}
 			for (SubsystemInterface subsystem : scheduler.subsystems) {
@@ -66,7 +66,7 @@ public class Scheduler {
 		return triggers;
 	}
 
-	public LinkedHashSet<Command> getCommands() {
+	public LinkedHashSet<CommandSignature> getCommands() {
 		return commands;
 	}
 
@@ -80,19 +80,19 @@ public class Scheduler {
 		}
 	}
 
-	public void scheduleCommand(Command command) {
+	public void scheduleCommand(CommandSignature command) {
 		commandsToSchedule.add(command);
 	}
 
-	private void cancelCommand(Command command) {
-		command.end();
+	private void cancelCommand(CommandSignature command) {
+		command.end(false);
 		for (SubsystemInterface requirement : command.getRequiredSubsystems()) {
 			requirements.remove(requirement, command);
 		}
 		commands.remove(command);
 	}
 
-	private void initialiseCommand(Command command) {
+	private void initialiseCommand(CommandSignature command) {
 		Set<SubsystemInterface> commandRequirements = command.getRequiredSubsystems();
 
 		// if the subsystems required by the command are not required, register it
@@ -102,8 +102,8 @@ public class Scheduler {
 		} else {
 			// for each subsystem required, check the command currently requiring it, and make sure that they can all be overwritten
 			for (SubsystemInterface subsystem : commandRequirements) {
-				Command requirer = requirements.get(subsystem);
-				if (requirer != null && !requirer.getOverrideAllowed()) {
+				CommandSignature requirer = requirements.get(subsystem);
+				if (requirer != null && !requirer.interruptable()) {
 					return;
 				}
 			}
@@ -111,7 +111,7 @@ public class Scheduler {
 
 		// cancel all required commands
 		for (SubsystemInterface subsystem : commandRequirements) {
-			Command requirer = requirements.get(subsystem);
+			CommandSignature requirer = requirements.get(subsystem);
 			if (requirer != null) {
 				commandsToCancel.add(requirer);
 			}
@@ -120,7 +120,7 @@ public class Scheduler {
 		initialiseCommand(command, commandRequirements);
 	}
 
-	private void initialiseCommand(Command command, Set<SubsystemInterface> commandRequirements) {
+	private void initialiseCommand(CommandSignature command, Set<SubsystemInterface> commandRequirements) {
 		commands.add(command);
 		for (SubsystemInterface requirement : commandRequirements) {
 			requirements.put(requirement, command);
@@ -130,14 +130,14 @@ public class Scheduler {
 
 	public void pollCommands() {
 		// checks to see if any commands are finished, if so, queues them to be canceled
-		for (Command command : commands) {
+		for (CommandSignature command : commands) {
 			if (command.finished()) {
 				commandsToCancel.add(command);
 			}
 		}
 
 		// cancels all cancel queued commands
-		for (Command command : commandsToCancel) {
+		for (CommandSignature command : commandsToCancel) {
 			cancelCommand(command);
 		}
 		// empties the queue
@@ -151,14 +151,14 @@ public class Scheduler {
 		}
 
 		// initialises all the commands that are due to be scheduled
-		for (Command command : commandsToSchedule) {
+		for (CommandSignature command : commandsToSchedule) {
 			initialiseCommand(command);
 		}
 		// empties the queue
 		commandsToSchedule.clear();
 
 		// runs the commands
-		for (Command command : commands) {
+		for (CommandSignature command : commands) {
 			command.execute();
 		}
 	}

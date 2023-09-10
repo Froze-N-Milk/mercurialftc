@@ -1,13 +1,13 @@
 package org.mercurialftc.mercurialftc.silversurfer.follower;
 
 import org.mercurialftc.mercurialftc.silversurfer.followable.Followable;
-import org.mercurialftc.mercurialftc.silversurfer.followable.Wave;
 import org.mercurialftc.mercurialftc.silversurfer.followable.MotionConstants;
+import org.mercurialftc.mercurialftc.silversurfer.followable.Wave;
 
 public abstract class WaveFollower {
+	private final MotionConstants motionConstants;
 	private Wave wave;
 	private double currentTime, previousTime;
-	private final MotionConstants motionConstants;
 	private boolean finished;
 
 	public WaveFollower(MotionConstants motionConstants) {
@@ -17,6 +17,10 @@ public abstract class WaveFollower {
 
 	public final void setWave(Wave wave) {
 		this.wave = wave;
+	}
+
+	public final Wave getWave(Wave wave) {
+		return wave;
 	}
 
 	public final void update(double currentTime) {

@@ -143,13 +143,6 @@ public class Scheduler {
 			}
 		}
 
-		// cancels all cancel queued commands
-		for (CommandSignature command : commandsToCancel) {
-			cancelCommand(command, true);
-		}
-		// empties the queue
-		commandsToCancel.clear();
-
 		// checks if any subsystems are not being used by any commands, if so, schedules the default command for that subsystem
 		for (SubsystemInterface subsystem : subsystems) {
 			if (!requirements.containsKey(subsystem)) {
@@ -163,6 +156,13 @@ public class Scheduler {
 		}
 		// empties the queue
 		commandsToSchedule.clear();
+
+		// cancels all cancel queued commands
+		for (CommandSignature command : commandsToCancel) {
+			cancelCommand(command, true);
+		}
+		// empties the queue
+		commandsToCancel.clear();
 
 		// runs the commands
 		for (CommandSignature command : commands) {

@@ -20,6 +20,10 @@ public class GVFWaveFollower extends WaveFollower {
 		this.arbFollower = arbFollower;
 	}
 
+	public ArbFollower getArbFollower() {
+		return arbFollower;
+	}
+
 	@Override
 	protected void followOutput(Followable.Output output, double loopTime) {
 		Pose2D currentPose = tracker.getPose2D();

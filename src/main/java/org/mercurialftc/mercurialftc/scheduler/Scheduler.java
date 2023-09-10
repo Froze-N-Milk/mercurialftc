@@ -45,20 +45,7 @@ public class Scheduler {
 	}
 
 	public static Scheduler freshInstance() {
-		if (scheduler != null) {
-			for (CommandSignature command : scheduler.commands) {
-				scheduler.cancelCommand(command, true);
-			}
-			for (SubsystemInterface subsystem : scheduler.subsystems) {
-				scheduler.subsystems.remove(subsystem);
-			}
-			for (Trigger trigger : scheduler.triggers) {
-				scheduler.deregisterTrigger(trigger);
-			}
-		}
-
-		scheduler = new Scheduler();
-		return scheduler;
+		return scheduler = new Scheduler();
 	}
 
 	public LinkedHashSet<SubsystemInterface> getSubsystems() {
@@ -127,7 +114,7 @@ public class Scheduler {
 
 	private void initialiseCommand(CommandSignature command, @NotNull Set<SubsystemInterface> commandRequirements) {
 		if (command == null) return;
-		if (!isScheduled(command)) return;
+		if (isScheduled(command)) return;
 		commands.add(command);
 		for (SubsystemInterface requirement : commandRequirements) {
 			requirements.put(requirement, command);
@@ -143,13 +130,6 @@ public class Scheduler {
 			}
 		}
 
-		// cancels all cancel queued commands
-		for (CommandSignature command : commandsToCancel) {
-			cancelCommand(command, true);
-		}
-		// empties the queue
-		commandsToCancel.clear();
-
 		// checks if any subsystems are not being used by any commands, if so, schedules the default command for that subsystem
 		for (SubsystemInterface subsystem : subsystems) {
 			if (!requirements.containsKey(subsystem)) {
@@ -163,6 +143,13 @@ public class Scheduler {
 		}
 		// empties the queue
 		commandsToSchedule.clear();
+
+		// cancels all cancel queued commands
+		for (CommandSignature command : commandsToCancel) {
+			cancelCommand(command, true);
+		}
+		// empties the queue
+		commandsToCancel.clear();
 
 		// runs the commands
 		for (CommandSignature command : commands) {
@@ -199,7 +186,7 @@ public class Scheduler {
 	 * @return true if it isn't running its default command
 	 */
 	public boolean isBusy(SubsystemInterface subsystem) {
-		return !commands.contains(subsystem.getDefaultCommand());
+		return requirements.containsKey(subsystem) && !requirements.containsValue(subsystem.getDefaultCommand());
 	}
 
 	/**

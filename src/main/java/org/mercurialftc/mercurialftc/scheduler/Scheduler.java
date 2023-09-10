@@ -45,20 +45,7 @@ public class Scheduler {
 	}
 
 	public static Scheduler freshInstance() {
-		if (scheduler != null) {
-			for (CommandSignature command : scheduler.commands) {
-				scheduler.cancelCommand(command, true);
-			}
-			for (SubsystemInterface subsystem : scheduler.subsystems) {
-				scheduler.subsystems.remove(subsystem);
-			}
-			for (Trigger trigger : scheduler.triggers) {
-				scheduler.deregisterTrigger(trigger);
-			}
-		}
-
-		scheduler = new Scheduler();
-		return scheduler;
+		return scheduler = new Scheduler();
 	}
 
 	public LinkedHashSet<SubsystemInterface> getSubsystems() {

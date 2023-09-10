@@ -199,7 +199,7 @@ public class Scheduler {
 	 * @return true if it isn't running its default command
 	 */
 	public boolean isBusy(SubsystemInterface subsystem) {
-		return !commands.contains(subsystem.getDefaultCommand());
+		return requirements.containsKey(subsystem) && !requirements.containsValue(subsystem.getDefaultCommand());
 	}
 
 	/**

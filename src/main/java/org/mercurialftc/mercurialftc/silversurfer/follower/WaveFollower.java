@@ -15,12 +15,12 @@ public abstract class WaveFollower {
 		currentTime = previousTime = 0;
 	}
 
-	public final void setWave(Wave wave) {
-		this.wave = wave;
+	public final Wave getWave() {
+		return wave;
 	}
 
-	public final Wave getWave(Wave wave) {
-		return wave;
+	public final void setWave(Wave wave) {
+		this.wave = wave;
 	}
 
 	public final void update(double currentTime) {

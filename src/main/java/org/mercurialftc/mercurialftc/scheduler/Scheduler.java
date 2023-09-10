@@ -127,7 +127,7 @@ public class Scheduler {
 
 	private void initialiseCommand(CommandSignature command, @NotNull Set<SubsystemInterface> commandRequirements) {
 		if (command == null) return;
-		if (!isScheduled(command)) return;
+		if (isScheduled(command)) return;
 		commands.add(command);
 		for (SubsystemInterface requirement : commandRequirements) {
 			requirements.put(requirement, command);

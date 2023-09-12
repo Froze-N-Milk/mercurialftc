@@ -1,5 +1,6 @@
 package org.mercurialftc.mercurialftc.example.drive;
 
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -79,6 +80,14 @@ public class DemoMecanumDriveBase extends MecanumDriveBase {
 				1
 		);
 
+		IMU_EX imu_ex = new IMU_EX(opModeEX.hardwareMap.get(IMU.class, "imu"), AngleUnit.RADIANS);
+		imu_ex.initialize(new IMU.Parameters(
+				new RevHubOrientationOnRobot(
+						RevHubOrientationOnRobot.LogoFacingDirection.UP,
+						RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD
+				)
+		));
+
 		// replace all, select the tracker which works best for you
 
 
@@ -99,7 +108,7 @@ public class DemoMecanumDriveBase extends MecanumDriveBase {
 //				new Encoder(br).setDirection(Encoder.Direction.FORWARD), // check that each encoder increases in the positive direction, if not change their directions!
 //				new Encoder(fr).setDirection(Encoder.Direction.REVERSE),
 //				new Encoder(fl).setDirection(Encoder.Direction.FORWARD),
-//				new IMU_EX(opModeEX.hardwareMap.get(IMU.class, "imu"), AngleUnit.RADIANS)
+//				imu_ex
 //		);
 
 		// two wheeled tracker
@@ -116,7 +125,7 @@ public class DemoMecanumDriveBase extends MecanumDriveBase {
 				),
 				new Encoder(br).setDirection(Encoder.Direction.FORWARD), // check that each encoder increases in the positive direction, if not change their directions!
 				new Encoder(fr).setDirection(Encoder.Direction.REVERSE),
-				new IMU_EX(opModeEX.hardwareMap.get(IMU.class, "imu"), AngleUnit.RADIANS)
+				imu_ex
 		);
 
 		mecanumArbFollower = new MecanumArbFollower(

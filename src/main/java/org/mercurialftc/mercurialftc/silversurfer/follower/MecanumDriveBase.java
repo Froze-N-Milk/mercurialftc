@@ -62,9 +62,14 @@ public abstract class MecanumDriveBase extends Subsystem {
 	@Override
 	public void defaultCommandExecute() {
 		Vector2D translationVector = new Vector2D(x.getValue(), y.getValue());
+		opModeEX.telemetry.addLine(translationVector.getMagnitude() + " " + translationVector.getHeading().getDegrees());
+
+		translationVector = translationVector.rotate(new AngleRadians(-tracker.getPose2D().getTheta().getRadians()));
+		opModeEX.telemetry.addLine(translationVector.getMagnitude() + " " + translationVector.getHeading().getDegrees());
+
 		double scalingQuantity = Math.max(1, translationVector.getMagnitude()); // todo check this stuff
 		translationVector = translationVector.scalarMultiply(1 / scalingQuantity).scalarMultiply(getMotionConstants().getMaxTranslationalVelocity());
-		translationVector = translationVector.rotate(new AngleRadians(-tracker.getPose2D().getTheta().getRadians()));
+		opModeEX.telemetry.addLine(translationVector.getMagnitude() + " " + translationVector.getHeading().getDegrees());
 
 		mecanumArbFollower.follow(
 				translationVector,

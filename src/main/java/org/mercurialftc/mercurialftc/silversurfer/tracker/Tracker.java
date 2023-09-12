@@ -1,5 +1,6 @@
 package org.mercurialftc.mercurialftc.silversurfer.tracker;
 
+import org.mercurialftc.mercurialftc.silversurfer.geometry.Angle;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.AngleRadians;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 import org.mercurialftc.mercurialftc.util.matrix.SimpleMatrix;
@@ -8,24 +9,10 @@ import org.mercurialftc.mercurialftc.util.matrix.SimpleMatrix;
  * tracks robot position in millimeters and radians
  */
 public abstract class Tracker {
-	/**
-	 * {@link #updatePose()} must be called frequently for this value to be accurate
-	 *
-	 * @return the current pose of the robot as estimated by the tracker
-	 */
-	public Pose2D getPose2D() {
-		return pose2D;
-	}
-
-	public Pose2D getPreviousPose2D() {
-		return previousPose2D;
-	}
-
-	private Pose2D pose2D, previousPose2D;
 	private final Pose2D initialPose2D;
-
 	private final TrackerConstants trackerConstants;
 	private final SimpleMatrix initialRotationMatrix;
+	private Pose2D pose2D, previousPose2D;
 	private int insistIndex, insistFrequency;
 
 	public Tracker(Pose2D initialPose, TrackerConstants trackerConstants) {
@@ -46,6 +33,23 @@ public abstract class Tracker {
 		insistIndex = 0;
 
 		this.previousPose2D = pose2D;
+	}
+
+	/**
+	 * {@link #updatePose()} must be called frequently for this value to be accurate
+	 *
+	 * @return the current pose of the robot as estimated by the tracker
+	 */
+	public Pose2D getPose2D() {
+		return pose2D;
+	}
+
+	protected final void setPose2D(Pose2D pose2D) {
+		this.pose2D = pose2D;
+	}
+
+	public Pose2D getPreviousPose2D() {
+		return previousPose2D;
 	}
 
 	/**
@@ -82,13 +86,13 @@ public abstract class Tracker {
 						{dt}
 				}
 		);
-		
+
 		/*
 		{
 			{(cosInitial * term0 + (- sinInitial) * term1), (cosInitial * term2 + (- sinInitial) * term0)},
 			{(sinInitial * term0 + cosInitial * term1), (sinInitial * term2 + cosInitial * term0)}
 		}
-		
+
 		{
 			dc * (cosInitial * term0 + (- sinInitial) * term1) + dp * (cosInitial * term2 + (- sinInitial) * term0),
 			dc * (sinInitial * term0 + cosInitial * term1) + dp * (sinInitial * term2 + cosInitial * term0)}
@@ -134,16 +138,30 @@ public abstract class Tracker {
 		return trackerConstants;
 	}
 
+	/**
+	 * may set motors associated with encoders to {@link com.qualcomm.robotcore.hardware.DcMotor.RunMode#STOP_AND_RESET_ENCODER}, which may cause issues if not addressed
+	 * <p>ensure that this cannot happen by setting the run mode of said motors after calling this method</p>
+	 */
 	public void reset() {
 		pose2D = initialPose2D;
 	}
 
-	protected final void setPose2D(Pose2D pose2D) {
-		this.pose2D = pose2D;
+	/**
+	 * resets the heading to 0 at this point
+	 */
+	public void resetHeading() {
+		pose2D = new Pose2D(pose2D.getX(), pose2D.getY(), 0);
 	}
 
 	/**
-	 * enforce certain measurements, if an external measurement can be relied upon, gets automatically run every
+	 * resets the heading to the supplied Angle at this point
+	 */
+	public void resetHeading(Angle heading) {
+		pose2D = new Pose2D(pose2D.getX(), pose2D.getY(), heading);
+	}
+
+	/**
+	 * enforce certain measurements, if an external measurement can be relied upon, gets automatically run every {@link #insistFrequency} cycles
 	 */
 	protected abstract void insist();
 

@@ -4,11 +4,11 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 public class Encoder {
+	public final VelocityDataPacket[] medians;
 	private final DcMotor motor;
 	private Direction direction;
 	private double previousTime;
 	private int previousPosition;
-	public final VelocityDataPacket[] medians;
 	private VelocityDataPacket output;
 
 	/**
@@ -31,6 +31,9 @@ public class Encoder {
 		}
 	}
 
+	/**
+	 * sets the motor associated with this encoder to {@link DcMotor.RunMode#STOP_AND_RESET_ENCODER}, which may cause issues if not handled
+	 */
 	public void reset() {
 		output = new VelocityDataPacket(0, 1);
 		motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -50,21 +53,6 @@ public class Encoder {
 	public Encoder setDirection(Direction direction) {
 		this.direction = direction;
 		return this;
-	}
-
-	public enum Direction {
-		FORWARD((byte) 1),
-		REVERSE((byte) -1);
-
-		private final byte multiplier;
-
-		Direction(byte multiplier) {
-			this.multiplier = multiplier;
-		}
-
-		private byte getMultiplier() {
-			return multiplier;
-		}
 	}
 
 	private int getMultiplier() {
@@ -130,9 +118,29 @@ public class Encoder {
 		output = velocity;
 	}
 
+	public enum Direction {
+		FORWARD((byte) 1),
+		REVERSE((byte) -1);
+
+		private final byte multiplier;
+
+		Direction(byte multiplier) {
+			this.multiplier = multiplier;
+		}
+
+		private byte getMultiplier() {
+			return multiplier;
+		}
+	}
+
 	public static class VelocityDataPacket {
 		private final double deltaTime;
 		private final int deltaPosition;
+
+		private VelocityDataPacket(int deltaPosition, double deltaTime) {
+			this.deltaPosition = deltaPosition;
+			this.deltaTime = deltaTime;
+		}
 
 		public double getDeltaTime() {
 			return deltaTime;
@@ -140,11 +148,6 @@ public class Encoder {
 
 		public int getDeltaPosition() {
 			return deltaPosition;
-		}
-
-		private VelocityDataPacket(int deltaPosition, double deltaTime) {
-			this.deltaPosition = deltaPosition;
-			this.deltaTime = deltaTime;
 		}
 
 		public double getVelocity() {

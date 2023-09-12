@@ -6,16 +6,15 @@ import org.mercurialftc.mercurialftc.util.hardware.Encoder;
 
 public class ThreeWheelTracker extends Tracker {
 	private final Encoder left, right, middle;
-	
+	private double deltaLeft, deltaRight, deltaMiddle;
+
 	public ThreeWheelTracker(Pose2D initialPose, TrackerConstants.ThreeWheelTrackerConstants trackerConstants, Encoder left, Encoder right, Encoder middle) {
 		super(initialPose, trackerConstants);
 		this.left = left;
 		this.right = right;
 		this.middle = middle;
 	}
-	
-	private double deltaLeft, deltaRight, deltaMiddle;
-	
+
 	/**
 	 * called once per cycle, to prevent making too many calls to an encoder, etc
 	 */
@@ -24,14 +23,14 @@ public class ThreeWheelTracker extends Tracker {
 		left.updateVelocity();
 		right.updateVelocity();
 		middle.updateVelocity();
-		
+
 		TrackerConstants trackerConstants = getTrackerConstants();
-		
+
 		deltaLeft = trackerConstants.getLeftTicksConverter().toUnits(left.getVelocityDataPacket().getDeltaPosition(), Units.MILLIMETER);
 		deltaRight = trackerConstants.getRightTicksConverter().toUnits(right.getVelocityDataPacket().getDeltaPosition(), Units.MILLIMETER);
 		deltaMiddle = trackerConstants.getMiddleTicksConverter().toUnits(middle.getVelocityDataPacket().getDeltaPosition(), Units.MILLIMETER);
 	}
-	
+
 	/**
 	 * @return the change in center displacement in millimeters
 	 */
@@ -39,7 +38,7 @@ public class ThreeWheelTracker extends Tracker {
 	protected double findDeltaXc() {
 		return (deltaLeft + deltaRight) / 2;
 	}
-	
+
 	/**
 	 * @return the change in horizontal displacement with correction for forward offset in millimeters
 	 */
@@ -47,7 +46,7 @@ public class ThreeWheelTracker extends Tracker {
 	protected double findDeltaXp() {
 		return deltaMiddle - (getTrackerConstants().getForwardOffset() * findDeltaTheta());
 	}
-	
+
 	/**
 	 * @return the change in heading in radians
 	 */
@@ -55,7 +54,7 @@ public class ThreeWheelTracker extends Tracker {
 	protected double findDeltaTheta() {
 		return (deltaRight - deltaLeft) / getTrackerConstants().getLateralDistance();
 	}
-	
+
 	@Override
 	public void reset() {
 		super.reset();
@@ -63,12 +62,12 @@ public class ThreeWheelTracker extends Tracker {
 		right.reset();
 		middle.reset();
 	}
-	
+
 	/**
-	 * enforce certain measurements, if an external measurement can be relied upon, gets automatically run every
+	 * enforce certain measurements, if an external measurement can be relied upon, gets automatically run every insist frequency cycles
 	 */
 	@Override
 	protected void insist() {
-	
+
 	}
 }

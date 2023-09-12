@@ -21,30 +21,16 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
  * <p>Designed to be used in {@link ScheduledIMU_EX} but also can be used separately</p>
  */
 public class IMU_EX implements IMU, HeadingSupplier {
-	private IMU imu;
-	private Angle pitch;
-	private Angle roll;
-	private Angle yaw;
-	
-	public Angle getPitch() {
-		return pitch.subtract(offsetPitch);
-	}
-	
-	public Angle getRoll() {
-		return roll.subtract(offsetRoll);
-	}
-	
-	public Angle getYaw() {
-		return yaw.subtract(offsetYaw);
-	}
 	private final Angle offsetPitch;
 	private final Angle offsetRoll;
 	private final Angle offsetYaw;
 	private final AngleUnit angleUnit;
+	private IMU imu;
+	private Angle pitch;
+	private Angle roll;
+	private Angle yaw;
 	private long acquisitionTime;
-	
 	/**
-	 *
 	 * @param angleUnit the angle unit that this class should return all values in by default
 	 */
 	public IMU_EX(IMU imu, AngleUnit angleUnit) {
@@ -54,20 +40,31 @@ public class IMU_EX implements IMU, HeadingSupplier {
 			yaw = new AngleDegrees(0);
 			pitch = new AngleDegrees(0);
 			roll = new AngleDegrees(0);
-			
+
 			offsetYaw = new AngleDegrees(0);
 			offsetPitch = new AngleDegrees(0);
 			offsetRoll = new AngleDegrees(0);
-		}
-		else {
+		} else {
 			yaw = new AngleRadians(0);
 			pitch = new AngleRadians(0);
 			roll = new AngleRadians(0);
-			
+
 			offsetYaw = new AngleRadians(0);
 			offsetPitch = new AngleRadians(0);
 			offsetRoll = new AngleRadians(0);
 		}
+	}
+
+	public Angle getPitch() {
+		return pitch.subtract(offsetPitch);
+	}
+
+	public Angle getRoll() {
+		return roll.subtract(offsetRoll);
+	}
+
+	public Angle getYaw() {
+		return yaw.subtract(offsetYaw);
 	}
 
 	/**
@@ -100,7 +97,7 @@ public class IMU_EX implements IMU, HeadingSupplier {
 	public void resetRoll() {
 		offsetRoll.setTheta(roll.getTheta());
 	}
-	
+
 	/**
 	 * Initializes the IMU with non-default settings.
 	 *
@@ -111,7 +108,7 @@ public class IMU_EX implements IMU, HeadingSupplier {
 	public boolean initialize(Parameters parameters) {
 		return imu.initialize(parameters);
 	}
-	
+
 	/**
 	 * for bulk reads, called automatically in the {@link ScheduledIMU_EX#periodic()}
 	 */
@@ -122,7 +119,7 @@ public class IMU_EX implements IMU, HeadingSupplier {
 		roll.setTheta(angles.getRoll(angleUnit));
 		acquisitionTime = angles.getAcquisitionTime();
 	}
-	
+
 	/**
 	 * for the imu use cases that this doesn't cover
 	 *
@@ -131,19 +128,19 @@ public class IMU_EX implements IMU, HeadingSupplier {
 	public IMU getImu() {
 		return imu;
 	}
-	
+
 	/**
 	 * @return A {@link YawPitchRollAngles} object representing the current orientation of the robot
 	 * last updated when {@link #readIMU()} was last called.
 	 */
 	@Override
 	public YawPitchRollAngles getRobotYawPitchRollAngles() {
-		if(angleUnit == AngleUnit.DEGREES) {
+		if (angleUnit == AngleUnit.DEGREES) {
 			return new YawPitchRollAngles(angleUnit, getYaw().getDegrees(), getPitch().getDegrees(), getRoll().getDegrees(), acquisitionTime);
 		}
 		return new YawPitchRollAngles(angleUnit, getYaw().getRadians(), getPitch().getRadians(), getRoll().getRadians(), acquisitionTime);
 	}
-	
+
 	/**
 	 * @param reference
 	 * @param order
@@ -154,14 +151,14 @@ public class IMU_EX implements IMU, HeadingSupplier {
 	 * <p><p>
 	 * The {@link Orientation} class provides many ways to represent the robot's orientation,
 	 * which is helpful for advanced use cases. Most teams should use {@link #getRobotYawPitchRollAngles()}.
-	 *
+	 * <p>
 	 * NOTE: this has not been modified by this IMU_EX wrapper
 	 */
 	@Override
 	public Orientation getRobotOrientation(AxesReference reference, AxesOrder order, AngleUnit angleUnit) {
 		return imu.getRobotOrientation(reference, order, angleUnit);
 	}
-	
+
 	/**
 	 * @return A {@link Quaternion} object representing the current orientation of the robot
 	 * relative to the robot's position the last time that {@link #resetYaw()} was called,
@@ -175,7 +172,7 @@ public class IMU_EX implements IMU, HeadingSupplier {
 	public Quaternion getRobotOrientationAsQuaternion() {
 		return imu.getRobotOrientationAsQuaternion();
 	}
-	
+
 	/**
 	 * @param angleUnit
 	 * @return The angular velocity of the robot (how fast it's turning around the three axes).
@@ -184,7 +181,7 @@ public class IMU_EX implements IMU, HeadingSupplier {
 	public AngularVelocity getRobotAngularVelocity(AngleUnit angleUnit) {
 		return imu.getRobotAngularVelocity(angleUnit);
 	}
-	
+
 	/**
 	 * Returns an indication of the manufacturer of this device.
 	 *
@@ -194,7 +191,7 @@ public class IMU_EX implements IMU, HeadingSupplier {
 	public Manufacturer getManufacturer() {
 		return imu.getManufacturer();
 	}
-	
+
 	/**
 	 * Returns a string suitable for display to the user as to the type of device.
 	 * Note that this is a device-type-specific name; it has nothing to do with the
@@ -206,7 +203,7 @@ public class IMU_EX implements IMU, HeadingSupplier {
 	public String getDeviceName() {
 		return imu.getDeviceName();
 	}
-	
+
 	/**
 	 * Get connection information about this device in a human readable format
 	 *
@@ -216,7 +213,7 @@ public class IMU_EX implements IMU, HeadingSupplier {
 	public String getConnectionInfo() {
 		return imu.getConnectionInfo();
 	}
-	
+
 	/**
 	 * Version
 	 *
@@ -226,7 +223,7 @@ public class IMU_EX implements IMU, HeadingSupplier {
 	public int getVersion() {
 		return imu.getVersion();
 	}
-	
+
 	/**
 	 * Resets the device's configuration to that which is expected at the beginning of an OpMode.
 	 * For example, motors will reset the their direction to 'forward'.
@@ -235,7 +232,7 @@ public class IMU_EX implements IMU, HeadingSupplier {
 	public void resetDeviceConfigurationForOpMode() {
 		imu.resetDeviceConfigurationForOpMode();
 	}
-	
+
 	/**
 	 * Closes this device
 	 */
@@ -243,7 +240,7 @@ public class IMU_EX implements IMU, HeadingSupplier {
 	public void close() {
 		imu.close();
 	}
-	
+
 	/**
 	 * implementations are recommended to supply a {@link AngleRadians} if possible
 	 *
@@ -253,7 +250,7 @@ public class IMU_EX implements IMU, HeadingSupplier {
 	public Angle getHeading() {
 		return getYaw();
 	}
-	
+
 	/**
 	 * <p>can be called by consumers that need to ensure that an update is run regardless of if the implementation is self updating or not</p>
 	 * may be left blank by implementation if updates are not required, or are handled differently.
@@ -261,5 +258,16 @@ public class IMU_EX implements IMU, HeadingSupplier {
 	@Override
 	public void updateHeading() {
 		readIMU();
+	}
+
+	@Override
+	public void resetHeading() {
+		resetYaw();
+	}
+
+	@Override
+	public void resetHeading(Angle heading) {
+		resetHeading();
+		offsetYaw.setTheta(offsetYaw.getTheta() + heading.getRadians());
 	}
 }

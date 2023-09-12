@@ -15,4 +15,14 @@ public interface HeadingSupplier {
 	 * may be left blank by implementation if updates are not required, or are handled differently.
 	 */
 	void updateHeading();
+
+	/**
+	 * resets the heading to 0 at this point
+	 */
+	void resetHeading();
+
+	/**
+	 * resets the heading to the supplied Angle at this point
+	 */
+	void resetHeading(Angle heading);
 }

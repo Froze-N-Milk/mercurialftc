@@ -3,6 +3,7 @@ package org.mercurialftc.mercurialftc.silversurfer.follower;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.mercurialftc.mercurialftc.scheduler.OpModeEX;
 import org.mercurialftc.mercurialftc.scheduler.commands.Command;
 import org.mercurialftc.mercurialftc.scheduler.commands.LambdaCommand;
@@ -10,12 +11,13 @@ import org.mercurialftc.mercurialftc.scheduler.subsystems.Subsystem;
 import org.mercurialftc.mercurialftc.scheduler.triggers.gamepadex.ContinuousInput;
 import org.mercurialftc.mercurialftc.silversurfer.followable.MotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.followable.Wave;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.Angle;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.AngleRadians;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Vector2D;
 import org.mercurialftc.mercurialftc.silversurfer.tracker.Tracker;
 
-public abstract class MecanumDriveBase extends Subsystem {
+public abstract class TuningMecanumDriveBase extends Subsystem {
 	protected final ContinuousInput x, y, t;
 	protected final Pose2D startPose;
 	protected DcMotorEx fl, bl, br, fr;
@@ -32,7 +34,7 @@ public abstract class MecanumDriveBase extends Subsystem {
 	 * @param y         the y controller
 	 * @param t         the theta controller, positive turns clockwise
 	 */
-	public MecanumDriveBase(OpModeEX opModeEX, Pose2D startPose, ContinuousInput x, ContinuousInput y, ContinuousInput t) {
+	public TuningMecanumDriveBase(OpModeEX opModeEX, Pose2D startPose, ContinuousInput x, ContinuousInput y, ContinuousInput t) {
 		super(opModeEX);
 		this.startPose = startPose;
 		this.x = x;
@@ -47,6 +49,7 @@ public abstract class MecanumDriveBase extends Subsystem {
 		initialiseConstants();
 
 		tracker.reset(); // resets the encoders
+
 		// sets the run modes
 		fl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 		bl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -62,14 +65,9 @@ public abstract class MecanumDriveBase extends Subsystem {
 	@Override
 	public void defaultCommandExecute() {
 		Vector2D translationVector = new Vector2D(x.getValue(), y.getValue());
-		opModeEX.telemetry.addLine(translationVector.getMagnitude() + " " + translationVector.getHeading().getDegrees());
-
 		translationVector = translationVector.rotate(new AngleRadians(-tracker.getPose2D().getTheta().getRadians()));
-		opModeEX.telemetry.addLine(translationVector.getMagnitude() + " " + translationVector.getHeading().getDegrees());
-
-		double scalingQuantity = Math.max(1, translationVector.getMagnitude()); // todo check this stuff
+		double scalingQuantity = Math.max(1, translationVector.getMagnitude());
 		translationVector = translationVector.scalarMultiply(1 / scalingQuantity).scalarMultiply(getMotionConstants().getMaxTranslationalVelocity());
-		opModeEX.telemetry.addLine(translationVector.getMagnitude() + " " + translationVector.getHeading().getDegrees());
 
 		mecanumArbFollower.follow(
 				translationVector,
@@ -113,8 +111,35 @@ public abstract class MecanumDriveBase extends Subsystem {
 				.setInterruptable(true);
 	}
 
+	/**
+	 * DO NOT CALL {@link Tracker#reset()} FROM THIS OBJECT
+	 * <p>instead see {@link #resetTracker} which prevents an issue from arising</p>
+	 *
+	 * @return the drive base's position tracker
+	 */
 	public Tracker getTracker() {
 		return tracker;
+	}
+
+	/**
+	 * resets the tracker without causing motor behaviour issues
+	 */
+	public void resetTracker() {
+		tracker.reset(); // resets the encoders
+
+		// sets the run modes
+		fl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+		bl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+		br.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+		fr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+	}
+
+	public void resetHeading() {
+		tracker.resetHeading();
+	}
+
+	public void resetHeading(Angle heading) {
+		tracker.resetHeading(heading);
 	}
 
 	public MotionConstants getMotionConstants() {
@@ -123,6 +148,19 @@ public abstract class MecanumDriveBase extends Subsystem {
 
 	public WaveFollower getWaveFollower() {
 		return waveFollower;
+	}
+	
+	public double getCurrent() {
+		double result = 0.0;
+		result += fl.getCurrent(CurrentUnit.AMPS);
+		result += bl.getCurrent(CurrentUnit.AMPS);
+		result += br.getCurrent(CurrentUnit.AMPS);
+		result += fr.getCurrent(CurrentUnit.AMPS);
+		return result / 4.0;
+	}
+
+	public VoltageSensor getVoltageSensor() {
+		return voltageSensor;
 	}
 
 }

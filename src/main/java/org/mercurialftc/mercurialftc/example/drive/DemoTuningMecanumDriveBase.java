@@ -14,7 +14,7 @@ import org.mercurialftc.mercurialftc.silversurfer.encoderticksconverter.Units;
 import org.mercurialftc.mercurialftc.silversurfer.followable.MotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.follower.GVFWaveFollower;
 import org.mercurialftc.mercurialftc.silversurfer.follower.MecanumArbFollower;
-import org.mercurialftc.mercurialftc.silversurfer.follower.MecanumDriveBase;
+import org.mercurialftc.mercurialftc.silversurfer.follower.TuningMecanumDriveBase;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 import org.mercurialftc.mercurialftc.silversurfer.tracker.TrackerConstants;
 import org.mercurialftc.mercurialftc.silversurfer.tracker.TwoWheelTracker;
@@ -30,8 +30,8 @@ import org.mercurialftc.mercurialftc.util.hardware.cachinghardwaredevice.Caching
  * with an x input, y input and an angular velocity input</p>
  * <p>For auto this shows a guided vector field implementation</p>
  */
-public class DemoMecanumDriveBase extends MecanumDriveBase {
-	public DemoMecanumDriveBase(OpModeEX opModeEX, Pose2D startPose, ContinuousInput x, ContinuousInput y, ContinuousInput t) {
+public class DemoTuningMecanumDriveBase extends TuningMecanumDriveBase {
+	public DemoTuningMecanumDriveBase(OpModeEX opModeEX, Pose2D startPose, ContinuousInput x, ContinuousInput y, ContinuousInput t) {
 		super(opModeEX, startPose, x, y, t);
 	}
 
@@ -137,18 +137,5 @@ public class DemoMecanumDriveBase extends MecanumDriveBase {
 				tracker,
 				mecanumArbFollower
 		);
-	}
-
-	public double getCurrent() {
-		double result = 0.0;
-		result += fl.getCurrent(CurrentUnit.AMPS);
-		result += bl.getCurrent(CurrentUnit.AMPS);
-		result += br.getCurrent(CurrentUnit.AMPS);
-		result += fr.getCurrent(CurrentUnit.AMPS);
-		return result / 4.0;
-	}
-
-	public VoltageSensor getVoltageSensor() {
-		return voltageSensor;
 	}
 }

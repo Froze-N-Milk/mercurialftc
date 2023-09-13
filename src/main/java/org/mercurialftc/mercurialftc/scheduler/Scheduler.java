@@ -86,10 +86,7 @@ public class Scheduler {
 							"loggingEnabled = false\n"
 			));
 
-			ConfigOptionsManager.guaranteeFile(configOptionsFile);
-			configOptionsManager = new ConfigOptionsManager(configOptionsFile);
-			ConfigOptionsManager.write(bReader, configOptionsFile, new HashMap<>());
-			configOptionsManager.update();
+			configOptionsManager = new ConfigOptionsManager(configOptionsFile, bReader);
 		} catch (IOException e) {
 			throw new RuntimeException("Error creating/reading scheduler config:\n" + e);
 		}

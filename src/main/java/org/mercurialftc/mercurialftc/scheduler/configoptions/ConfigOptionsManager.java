@@ -28,7 +28,7 @@ public class ConfigOptionsManager {
 			throw new RuntimeException(String.format("supplied tomlFile with path %s is not a file, and is probably a directory", tomlFile.getPath()));
 		}
 		this.tomlFile = tomlFile;
-		tomlParseResult = read(tomlFile);
+		tomlParseResult = read(new BufferedReader(new FileReader(tomlFile)));
 		changes = new HashMap<>();
 	}
 
@@ -39,12 +39,22 @@ public class ConfigOptionsManager {
 	 * @param defaultFile a default file to populate from
 	 */
 	public ConfigOptionsManager(@NotNull File tomlFile, @NotNull File defaultFile) throws IOException {
+		this(tomlFile, new BufferedReader(new FileReader(defaultFile)));
+	}
+
+	/**
+	 * much safer than the no default file constructor
+	 *
+	 * @param tomlFile    the file to read
+	 * @param defaultFile a default file to populate from
+	 */
+	public ConfigOptionsManager(@NotNull File tomlFile, @NotNull BufferedReader defaultFile) throws IOException {
 		this.tomlFile = tomlFile;
 		defaultFile(defaultFile);
 		if (!tomlFile.isFile()) {
 			throw new RuntimeException(String.format("could not create and defaultly format tomlFile at: %s", tomlFile.getPath()));
 		}
-		tomlParseResult = read(tomlFile);
+		tomlParseResult = read(new BufferedReader(new FileReader(tomlFile)));
 		changes = new HashMap<>();
 	}
 
@@ -55,8 +65,8 @@ public class ConfigOptionsManager {
 	 * @throws IOException
 	 */
 	@NotNull
-	public static TomlParseResult read(File tomlFile) throws IOException {
-		return Toml.parse(new BufferedReader(new FileReader(tomlFile)));
+	public static TomlParseResult read(BufferedReader tomlFile) throws IOException {
+		return Toml.parse(tomlFile);
 	}
 
 	public static void write(BufferedReader bReader, @NotNull File writeTomlFile, @NotNull Map<String, Object> changes) throws IOException {
@@ -135,7 +145,7 @@ public class ConfigOptionsManager {
 
 	public void update() throws IOException {
 		write(new BufferedReader(new FileReader(tomlFile)), tomlFile, changes); //write the current changes
-		tomlParseResult = read(tomlFile); //update the parse
+		tomlParseResult = read(new BufferedReader(new FileReader(tomlFile))); //update the parse
 	}
 
 	/**
@@ -162,13 +172,13 @@ public class ConfigOptionsManager {
 	 * @return true if the file must be reset
 	 * @throws IOException
 	 */
-	public boolean defaultFile(File defaultTomlFile) throws IOException {
+	public boolean defaultFile(BufferedReader defaultTomlFile) throws IOException {
 		guaranteeFile(tomlFile);
 		boolean write = false;
 
 		Set<Map.Entry<String, Object>> defaultMapSet = read(defaultTomlFile).entrySet();
 
-		tomlParseResult = read(tomlFile);
+		tomlParseResult = read(new BufferedReader(new FileReader(tomlFile)));
 
 		for (Map.Entry<String, Object> defaultEntry : defaultMapSet) {
 			write |= !tomlParseResult.contains(defaultEntry.getKey());
@@ -177,9 +187,23 @@ public class ConfigOptionsManager {
 		}
 
 		if (write) {
-			write(new BufferedReader(new FileReader(defaultTomlFile)), tomlFile, new HashMap<>());
+			write(defaultTomlFile, tomlFile, new HashMap<>());
 		}
 
 		return write;
+	}
+
+	/**
+	 * <p>ensures that tomlFile exists, and has all the fields specified in defaultFile and of the correct type</p>
+	 * <p>will use {@link #guaranteeFile(File)} to ensure that tomlFile exists.</p>
+	 * <p>will copy defaultFile into the newly made tomlFile if it didn't exist</p>
+	 * <p>will reset tomlFile to be the default file if it exists but does not have all the fields of the correct type</p>
+	 *
+	 * @param defaultTomlFile the file that tomlFile should have the features of, this file will not be modified
+	 * @return true if the file must be reset
+	 * @throws IOException
+	 */
+	public boolean defaultFile(File defaultTomlFile) throws IOException {
+		return defaultFile(new BufferedReader(new FileReader(defaultTomlFile)));
 	}
 }

@@ -58,6 +58,9 @@ public class ChangeSchedulerConfig extends OpModeEX {
 	@Override
 	public void startEX() {
 		instructions = telemetry.addLine();
+		TomlParseResult config = Scheduler.getConfig();
+		configTable = config.getTableOrEmpty("configOptions");
+
 		currentSettings = telemetry.addData("", "");
 		instructions.addData("use up and down on gamepad1's dpad to select the setting you want to change, then press a to change it", null);
 	}
@@ -65,8 +68,6 @@ public class ChangeSchedulerConfig extends OpModeEX {
 	@Override
 	public void loopEX() {
 		StringBuilder builder = new StringBuilder();
-		TomlParseResult config = Scheduler.getConfig();
-		configTable = config.getTableOrEmpty("configOptions");
 		Set<Map.Entry<String, Object>> configSettings = configTable.dottedEntrySet(true);
 		Iterator<Map.Entry<String, Object>> settingsIterator = configSettings.iterator();
 		selectionSize = configSettings.size() - 1;

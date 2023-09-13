@@ -158,10 +158,20 @@ public class Scheduler {
 	}
 
 	public static boolean isSchedulerRefreshed() {
+		try {
+			interpretConfigFiles();
+		} catch (IOException e) {
+			throw new RuntimeException("Error creating/reading scheduler config:\n" + e);
+		}
 		return schedulerRefreshed;
 	}
 
 	public static boolean isLoggingEnabled() {
+		try {
+			interpretConfigFiles();
+		} catch (IOException e) {
+			throw new RuntimeException("Error creating/reading scheduler config:\n" + e);
+		}
 		return loggingEnabled;
 	}
 

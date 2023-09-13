@@ -10,9 +10,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-@Autonomous(name = "Edit Scheduler Config")
+@Autonomous(name = "Edit Scheduler Config Options")
 public class ChangeSchedulerConfig extends OpModeEX {
-	private Telemetry.Line instructions, currentSettings;
+	private Telemetry.Line instructions;
+	private Telemetry.Item currentSettings;
 	private int selection, selectionSize;
 	private String selectionString;
 	private TomlTable configTable;
@@ -24,7 +25,6 @@ public class ChangeSchedulerConfig extends OpModeEX {
 
 	@Override
 	public void initEX() {
-		instructions = telemetry.addLine();
 	}
 
 	@Override
@@ -57,6 +57,8 @@ public class ChangeSchedulerConfig extends OpModeEX {
 
 	@Override
 	public void startEX() {
+		instructions = telemetry.addLine();
+		currentSettings = telemetry.addData("", "");
 		instructions.addData("use up and down on gamepad1's dpad to select the setting you want to change, then press a to change it", null);
 	}
 
@@ -77,7 +79,7 @@ public class ChangeSchedulerConfig extends OpModeEX {
 			}
 			builder.append("\n");
 		}
-		currentSettings.addData(builder.toString(), null);
+		currentSettings.setCaption(builder.toString());
 	}
 
 	@Override

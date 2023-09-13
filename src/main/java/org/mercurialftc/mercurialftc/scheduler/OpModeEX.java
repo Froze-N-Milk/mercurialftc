@@ -65,7 +65,7 @@ public abstract class OpModeEX extends OpMode {
 	 */
 	@Override
 	public final void init() {
-		if (Scheduler.refreshScheduler) {
+		if (Scheduler.isSchedulerRefreshed()) {
 			scheduler = Scheduler.freshInstance();
 		} else {
 			scheduler = Scheduler.getSchedulerInstance();

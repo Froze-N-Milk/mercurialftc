@@ -79,7 +79,7 @@ dependencies {
     compileOnly 'org.firstinspires.ftc:Vision:9.0.0'
     compileOnly 'androidx.appcompat:appcompat:1.6.1'
 
-    compileOnly 'org.tomlj:tomlj:1.1.0'
+    implementation 'org.tomlj:tomlj:1.1.0'
 }
 
 afterEvaluate {

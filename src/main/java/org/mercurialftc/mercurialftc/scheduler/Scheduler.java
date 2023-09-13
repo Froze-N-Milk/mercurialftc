@@ -1,16 +1,20 @@
 package org.mercurialftc.mercurialftc.scheduler;
 
+import android.os.Environment;
 import org.jetbrains.annotations.NotNull;
 import org.mercurialftc.mercurialftc.scheduler.commands.CommandSignature;
 import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
 import org.mercurialftc.mercurialftc.scheduler.triggers.Trigger;
+import org.tomlj.Toml;
+import org.tomlj.TomlParseResult;
 
+import java.io.*;
 import java.util.*;
 
 public class Scheduler {
 	public static Scheduler scheduler;
 
-	public static boolean refreshScheduler = true;
+	private static boolean refreshScheduler, enableLogging;
 	private final LinkedHashSet<SubsystemInterface> subsystems; // currently registered Subsystems
 	private final LinkedHashSet<Trigger> triggers;
 
@@ -30,6 +34,12 @@ public class Scheduler {
 		this.requirements = new LinkedHashMap<>();
 		this.triggers = new LinkedHashSet<>();
 		this.storedSubsystems = new ArrayList<>();
+
+		try {
+			configFiles();
+		} catch (IOException e) {
+			throw new RuntimeException("Error creating scheduler config");
+		}
 	}
 
 	/**
@@ -46,6 +56,29 @@ public class Scheduler {
 
 	public static Scheduler freshInstance() {
 		return scheduler = new Scheduler();
+	}
+
+	public static void configFiles() throws IOException {
+		String directoryPath = Environment.getExternalStorageDirectory().getPath() + "/FIRST/mercurialftc/";
+		File configFile = new File(directoryPath, "config.toml");
+		if (configFile.mkdirs()) {
+			if (!(configFile.isFile())) {
+				if (configFile.createNewFile()) {
+					FileWriter writer = new FileWriter(configFile);
+					writer.write("refreshScheduler = true\n");
+					writer.write("enableLogging = false");
+					writer.close();
+				} else {
+					throw new IOException();
+				}
+			}
+			TomlParseResult config = Toml.parse(new FileReader(configFile));
+			refreshScheduler = Boolean.TRUE.equals(config.getBoolean("refreshScheduler"));
+			enableLogging = Boolean.TRUE.equals(config.getBoolean("enableLogging"));
+		} else {
+			refreshScheduler = true;
+			enableLogging = false;
+		}
 	}
 
 	public LinkedHashSet<SubsystemInterface> getSubsystems() {

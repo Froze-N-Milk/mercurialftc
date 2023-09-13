@@ -76,8 +76,8 @@ public class Scheduler {
 				}
 			}
 			TomlParseResult config = Toml.parse(new FileReader(configFile));
-			schedulerRefreshEnabled = Boolean.TRUE.equals(config.getBoolean(ConfigOptions.SCHEDULER_REFRESH_ENABLED.getOption()));
-			loggingEnabled = Boolean.TRUE.equals(config.getBoolean(ConfigOptions.ENABLE_LOGGING.getOption()));
+			schedulerRefreshEnabled = Boolean.TRUE.equals(config.getBoolean(ConfigOptions.SCHEDULER_REFRESH_ENABLED.getDottedOption()));
+			loggingEnabled = Boolean.TRUE.equals(config.getBoolean(ConfigOptions.ENABLE_LOGGING.getDottedOption()));
 		} else {
 			schedulerRefreshEnabled = true;
 			loggingEnabled = false;
@@ -159,7 +159,7 @@ public class Scheduler {
 	}
 
 	public static void setBooleanConfigOption(ConfigOptions selection, boolean newValue) throws RuntimeException {
-		setBooleanConfigOption(selection.getOption(), newValue);
+		setBooleanConfigOption(selection.getDottedOption(), newValue);
 	}
 
 	public static boolean isSchedulerRefreshEnabled() {
@@ -404,16 +404,19 @@ public class Scheduler {
 		ENABLE_LOGGING("enableLogging");
 
 		private final String option;
-		private final String dot = "configOptions.";
 
 		ConfigOptions(String option) {
 			this.option = option;
 		}
 
-		public String getOption() {
-			return dot + option;
+		private String getOption() {
+			return option;
 		}
 
+		public String getDottedOption() {
+			String dot = "configOptions.";
+			return dot + option;
+		}
 	}
 
 }

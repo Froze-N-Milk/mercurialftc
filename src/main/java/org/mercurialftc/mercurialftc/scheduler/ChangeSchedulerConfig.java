@@ -1,17 +1,11 @@
 package org.mercurialftc.mercurialftc.scheduler;
 
-import android.os.Environment;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.mercurialftc.mercurialftc.scheduler.commands.LambdaCommand;
-import org.tomlj.Toml;
 import org.tomlj.TomlParseResult;
 import org.tomlj.TomlTable;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -20,6 +14,8 @@ import java.util.Set;
 public class ChangeSchedulerConfig extends OpModeEX {
 	private Telemetry.Line instructions, currentSettings;
 	private int selection, selectionSize;
+	private String selectionString;
+	private TomlTable configTable;
 
 	@Override
 	public void registerSubsystems() {
@@ -36,7 +32,20 @@ public class ChangeSchedulerConfig extends OpModeEX {
 		gamepadEX1().dpad_up().onPress(
 				new LambdaCommand().init(() -> {
 					selection++;
+					if (selection < 0) selection += selectionSize;
 					selection %= selectionSize;
+				})
+		);
+		gamepadEX1().dpad_down().onPress(
+				new LambdaCommand().init(() -> {
+					selection--;
+					if (selection < 0) selection += selectionSize;
+					selection %= selectionSize;
+				})
+		);
+		gamepadEX1().a().onPress(
+				new LambdaCommand().init(() -> {
+					Scheduler.setBooleanConfigOption(selectionString, Boolean.FALSE.equals(configTable.getBoolean(selectionString)));
 				})
 		);
 	}
@@ -54,8 +63,8 @@ public class ChangeSchedulerConfig extends OpModeEX {
 	@Override
 	public void loopEX() {
 		StringBuilder builder = new StringBuilder();
-		TomlParseResult config = getConfig();
-		TomlTable configTable = config.getTableOrEmpty("");
+		TomlParseResult config = Scheduler.getConfig();
+		configTable = config.getTableOrEmpty("");
 		Set<Map.Entry<String, Object>> configSettings = configTable.dottedEntrySet(true);
 		Iterator<Map.Entry<String, Object>> settingsIterator = configSettings.iterator();
 		selectionSize = configSettings.size() - 1;
@@ -63,6 +72,7 @@ public class ChangeSchedulerConfig extends OpModeEX {
 			Map.Entry<String, Object> entry = settingsIterator.next();
 			builder.append(entry.getKey()).append(": ").append(entry.getValue().toString());
 			if (selection == i) {
+				selectionString = entry.getKey();
 				builder.append(" <--");
 			}
 			builder.append("\n");
@@ -73,45 +83,5 @@ public class ChangeSchedulerConfig extends OpModeEX {
 	@Override
 	public void stopEX() {
 
-	}
-
-	private TomlParseResult getConfig() {
-		// all the required checks to ensure this exists have already been done by the scheduler
-		String directoryPath = Environment.getExternalStorageDirectory().getPath() + "/FIRST/mercurialftc/";
-		File configFile = new File(directoryPath, "config.toml");
-		try {
-			return Toml.parse(new FileReader(configFile));
-		} catch (IOException e) {
-			throw new RuntimeException("Error reading scheduler config");
-		}
-	}
-
-	/**
-	 * inverts the boolean found at selection
-	 */
-	private void changeValueAt(Set<Map.Entry<String, Object>> configSettings) {
-		// all the required checks to ensure this exists have already been done by the scheduler
-		String directoryPath = Environment.getExternalStorageDirectory().getPath() + "/FIRST/mercurialftc/";
-		File configFile = new File(directoryPath, "config.toml");
-		try {
-			FileWriter writer = new FileWriter(configFile);
-			StringBuilder builder = new StringBuilder();
-			Iterator<Map.Entry<String, Object>> settingsIterator = configSettings.iterator();
-			for (int i = 0; i < configSettings.size(); i++) {
-				Map.Entry<String, Object> entry = settingsIterator.next();
-				builder.append(entry.getKey()).append(" = ");
-				if (selection == i) {
-					builder.append(!((boolean) entry.getValue()));
-				} else {
-					builder.append("\"").append(entry.getValue()).append("\"");
-				}
-				builder.append("\n");
-			}
-			writer.write(builder.toString());
-			writer.close();
-			Scheduler.configFiles();
-		} catch (IOException e) {
-			throw new RuntimeException("Error writing to the scheduler config");
-		}
 	}
 }

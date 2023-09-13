@@ -112,26 +112,10 @@ public abstract class TuningMecanumDriveBase extends Subsystem {
 	}
 
 	/**
-	 * DO NOT CALL {@link Tracker#reset()} FROM THIS OBJECT
-	 * <p>instead see {@link #resetTracker} which prevents an issue from arising</p>
-	 *
 	 * @return the drive base's position tracker
 	 */
 	public Tracker getTracker() {
 		return tracker;
-	}
-
-	/**
-	 * resets the tracker without causing motor behaviour issues
-	 */
-	public void resetTracker() {
-		tracker.reset(); // resets the encoders
-
-		// sets the run modes
-		fl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-		bl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-		br.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-		fr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 	}
 
 	public void resetHeading() {
@@ -149,7 +133,7 @@ public abstract class TuningMecanumDriveBase extends Subsystem {
 	public WaveFollower getWaveFollower() {
 		return waveFollower;
 	}
-	
+
 	public double getCurrent() {
 		double result = 0.0;
 		result += fl.getCurrent(CurrentUnit.AMPS);

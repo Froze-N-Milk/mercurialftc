@@ -32,13 +32,15 @@ public class Encoder {
 	}
 
 	/**
-	 * sets the motor associated with this encoder to {@link DcMotor.RunMode#STOP_AND_RESET_ENCODER}, which may cause issues if not handled
+	 * sets the motor associated with this encoder to {@link DcMotor.RunMode#STOP_AND_RESET_ENCODER} and then back its previous {@link DcMotor.RunMode}
 	 */
 	public void reset() {
 		output = new VelocityDataPacket(0, 1);
+		DcMotor.RunMode previousRunMode = motor.getMode();
 		motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 		previousPosition = motor.getCurrentPosition();
 		previousTime = System.nanoTime() / 1e9;
+		motor.setMode(previousRunMode);
 	}
 
 	public Direction getDirection() {

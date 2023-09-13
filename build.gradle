@@ -72,6 +72,8 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 
+    testImplementation 'org.tomlj:tomlj:1.1.0'
+
     compileOnly 'org.firstinspires.ftc:RobotCore:9.0.0'
     compileOnly 'org.firstinspires.ftc:RobotServer:9.0.0'
     compileOnly 'org.firstinspires.ftc:Hardware:9.0.0'

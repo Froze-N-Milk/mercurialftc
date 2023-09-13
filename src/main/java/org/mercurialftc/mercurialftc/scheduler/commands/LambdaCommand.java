@@ -62,6 +62,17 @@ public class LambdaCommand extends Command {
 		);
 	}
 
+	public LambdaCommand addRequirements(Set<SubsystemInterface> requiredSubsystems) {
+		return new LambdaCommand(
+				requiredSubsystems,
+				this.commandInit,
+				this.commandMethod,
+				this.commandFinish,
+				this.commandEnd,
+				this.interruptable
+		);
+	}
+
 	public LambdaCommand init(Runnable initialise) {
 		return new LambdaCommand(
 				this.getRequiredSubsystems(),

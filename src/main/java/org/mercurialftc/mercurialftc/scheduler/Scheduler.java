@@ -66,7 +66,7 @@ public class Scheduler {
 		File configOptionsFile = new File(directoryPath, "configOptions.toml");
 
 		try {
-			configOptionsManager = new ConfigOptionsManager(configOptionsFile, new File("org/mercurialftc/mercurialftc/scheduler/configoptions/schedulerConfigDefaults.toml"));
+			configOptionsManager = new ConfigOptionsManager(configOptionsFile, new File("schedulerConfigDefaults.toml"));
 		} catch (IOException e) {
 			throw new RuntimeException("Error creating/reading scheduler config:\n" + e);
 		}

@@ -38,7 +38,7 @@ public class Scheduler {
 		try {
 			interpretConfigFiles();
 		} catch (IOException e) {
-			throw new RuntimeException("Error creating scheduler config");
+			throw new RuntimeException("Error creating/reading scheduler config:\n" + e);
 		}
 	}
 
@@ -88,7 +88,7 @@ public class Scheduler {
 		try {
 			return Toml.parse(new FileReader(configFile));
 		} catch (IOException e) {
-			throw new RuntimeException("Error reading scheduler config");
+			throw new RuntimeException("Error reading scheduler config:\n" + e);
 		}
 	}
 
@@ -119,7 +119,7 @@ public class Scheduler {
 			writer.close();
 			Scheduler.interpretConfigFiles();
 		} catch (IOException e) {
-			throw new RuntimeException("Error writing to the scheduler config");
+			throw new RuntimeException("Error writing to the scheduler config:\n" + e);
 		}
 	}
 
@@ -147,7 +147,7 @@ public class Scheduler {
 			writer.close();
 			Scheduler.interpretConfigFiles();
 		} catch (IOException e) {
-			throw new RuntimeException("Error writing to the scheduler config");
+			throw new RuntimeException("Error writing to the scheduler config:\n" + e);
 		}
 	}
 

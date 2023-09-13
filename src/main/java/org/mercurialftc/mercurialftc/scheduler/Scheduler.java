@@ -14,7 +14,7 @@ import java.util.*;
 public class Scheduler {
 	public static Scheduler scheduler;
 
-	private static boolean schedulerRefreshed, loggingEnabled;
+	private static boolean schedulerRefreshEnabled, loggingEnabled;
 	private final LinkedHashSet<SubsystemInterface> subsystems; // currently registered Subsystems
 	private final LinkedHashSet<Trigger> triggers;
 
@@ -66,8 +66,9 @@ public class Scheduler {
 			if (!(configFile.isFile())) {
 				if (configFile.createNewFile()) {
 					FileWriter writer = new FileWriter(configFile);
+					writer.write("# This file is automatically created and edited by mercurialftc, do not edit it or change its name\n\n");
 					writer.write("[configOptions]\n");
-					writer.write(ConfigOptions.SCHEDULER_REFRESHED.getOption() + " = true\n");
+					writer.write(ConfigOptions.SCHEDULER_REFRESH_ENABLED.getOption() + " = true\n");
 					writer.write(ConfigOptions.ENABLE_LOGGING.getOption() + " = false\n");
 					writer.close();
 				} else {
@@ -75,10 +76,10 @@ public class Scheduler {
 				}
 			}
 			TomlParseResult config = Toml.parse(new FileReader(configFile));
-			schedulerRefreshed = Boolean.TRUE.equals(config.getBoolean(ConfigOptions.SCHEDULER_REFRESHED.getOption()));
+			schedulerRefreshEnabled = Boolean.TRUE.equals(config.getBoolean(ConfigOptions.SCHEDULER_REFRESH_ENABLED.getOption()));
 			loggingEnabled = Boolean.TRUE.equals(config.getBoolean(ConfigOptions.ENABLE_LOGGING.getOption()));
 		} else {
-			schedulerRefreshed = true;
+			schedulerRefreshEnabled = true;
 			loggingEnabled = false;
 		}
 	}
@@ -106,6 +107,8 @@ public class Scheduler {
 		try {
 			FileWriter writer = new FileWriter(configFile);
 			StringBuilder builder = new StringBuilder();
+			builder.append("# This file is automatically created and edited by mercurialftc, do not edit it or change its name\n\n");
+			builder.append("[configOptions]\n");
 			Iterator<Map.Entry<String, Object>> settingsIterator = configSettings.iterator();
 			for (int i = 0; i < configSettings.size(); i++) {
 				Map.Entry<String, Object> entry = settingsIterator.next();
@@ -134,6 +137,8 @@ public class Scheduler {
 		try {
 			FileWriter writer = new FileWriter(configFile);
 			StringBuilder builder = new StringBuilder();
+			builder.append("# This file is automatically created and edited by mercurialftc, do not edit it or change its name\n\n");
+			builder.append("[configOptions]\n");
 			Iterator<Map.Entry<String, Object>> settingsIterator = configSettings.iterator();
 			for (int i = 0; i < configSettings.size(); i++) {
 				Map.Entry<String, Object> entry = settingsIterator.next();
@@ -157,13 +162,13 @@ public class Scheduler {
 		setBooleanConfigOption(selection.getOption(), newValue);
 	}
 
-	public static boolean isSchedulerRefreshed() {
+	public static boolean isSchedulerRefreshEnabled() {
 		try {
 			interpretConfigFiles();
 		} catch (IOException e) {
 			throw new RuntimeException("Error creating/reading scheduler config:\n" + e);
 		}
-		return schedulerRefreshed;
+		return schedulerRefreshEnabled;
 	}
 
 	public static boolean isLoggingEnabled() {
@@ -395,17 +400,18 @@ public class Scheduler {
 	}
 
 	public enum ConfigOptions {
-		SCHEDULER_REFRESHED("schedulerRefreshed"),
+		SCHEDULER_REFRESH_ENABLED("schedulerRefreshEnabled"),
 		ENABLE_LOGGING("enableLogging");
 
 		private final String option;
+		private final String dot = "configOptions.";
 
-		private ConfigOptions(String option) {
+		ConfigOptions(String option) {
 			this.option = option;
 		}
 
 		public String getOption() {
-			return option;
+			return dot + option;
 		}
 
 	}

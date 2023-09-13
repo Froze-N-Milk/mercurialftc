@@ -59,10 +59,9 @@ public class ConfigOptionsManager {
 		return Toml.parse(new BufferedReader(new FileReader(tomlFile)));
 	}
 
-	public static void write(File readTomlFile, @NotNull File writeTomlFile, @NotNull Map<String, Object> changes) throws IOException {
-		BufferedReader bReader = new BufferedReader(new FileReader(readTomlFile));
+	public static void write(BufferedReader bReader, @NotNull File writeTomlFile, @NotNull Map<String, Object> changes) throws IOException {
 
-		TomlParseResult tomlParseResult = Toml.parse(new BufferedReader(new FileReader(readTomlFile)));
+		TomlParseResult tomlParseResult = Toml.parse(bReader);
 
 		File tempFile = File.createTempFile("tmp" + writeTomlFile.getName().split("\\.")[0], ".toml", writeTomlFile.getParentFile());
 
@@ -135,7 +134,7 @@ public class ConfigOptionsManager {
 	}
 
 	public void update() throws IOException {
-		write(tomlFile, tomlFile, changes); //write the current changes
+		write(new BufferedReader(new FileReader(tomlFile)), tomlFile, changes); //write the current changes
 		tomlParseResult = read(tomlFile); //update the parse
 	}
 
@@ -178,7 +177,7 @@ public class ConfigOptionsManager {
 		}
 
 		if (write) {
-			write(defaultTomlFile, tomlFile, new HashMap<>());
+			write(new BufferedReader(new FileReader(defaultTomlFile)), tomlFile, new HashMap<>());
 		}
 
 		return write;

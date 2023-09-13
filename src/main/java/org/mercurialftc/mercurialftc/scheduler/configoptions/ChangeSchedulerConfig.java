@@ -1,7 +1,9 @@
-package org.mercurialftc.mercurialftc.scheduler;
+package org.mercurialftc.mercurialftc.scheduler.configoptions;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.mercurialftc.mercurialftc.scheduler.OpModeEX;
+import org.mercurialftc.mercurialftc.scheduler.Scheduler;
 import org.mercurialftc.mercurialftc.scheduler.commands.LambdaCommand;
 
 import java.io.IOException;

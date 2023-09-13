@@ -60,11 +60,13 @@ public class Scheduler {
 
 	public static void interpretConfigFiles() throws IOException {
 		String directoryPath = Environment.getExternalStorageDirectory().getPath() + "/FIRST/mercurialftc/";
+		File directory = new File(directoryPath);
 		File configFile = new File(directoryPath, "config.toml");
-		if (configFile.mkdirs()) {
+		if (directory.mkdirs() || directory.isDirectory()) {
 			if (!(configFile.isFile())) {
 				if (configFile.createNewFile()) {
 					FileWriter writer = new FileWriter(configFile);
+					writer.write("[configOptions]");
 					writer.write(ConfigOptions.SCHEDULER_REFRESHED.getOption() + " = true\n");
 					writer.write(ConfigOptions.ENABLE_LOGGING.getOption() + " = false");
 					writer.close();

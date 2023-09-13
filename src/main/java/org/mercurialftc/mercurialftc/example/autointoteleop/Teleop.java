@@ -24,7 +24,7 @@ public class Teleop extends OpModeEX {
 	 */
 	@Override
 	public void initEX() {
-		Scheduler.setBooleanConfigOption(Scheduler.ConfigOptions.SCHEDULER_REFRESHED, true); // after this OpModeEX runs we might want to go back to resetting the scheduler
+		Scheduler.setBooleanConfigOption(Scheduler.ConfigOptions.SCHEDULER_REFRESH_ENABLED, true); // after this OpModeEX runs we might want to go back to resetting the scheduler
 	}
 
 	/**

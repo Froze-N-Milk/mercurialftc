@@ -23,7 +23,7 @@ public class Auto extends OpModeEX {
 	 */
 	@Override
 	public void initEX() {
-		Scheduler.setBooleanConfigOption(Scheduler.ConfigOptions.SCHEDULER_REFRESHED, false);// we do NOT want to refresh the scheduler when we swap to teleop
+		Scheduler.setBooleanConfigOption(Scheduler.ConfigOptions.SCHEDULER_REFRESH_ENABLED, false);// we do NOT want to refresh the scheduler when we swap to teleop
 	}
 
 	/**

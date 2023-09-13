@@ -66,7 +66,7 @@ public class ChangeSchedulerConfig extends OpModeEX {
 	public void loopEX() {
 		StringBuilder builder = new StringBuilder();
 		TomlParseResult config = Scheduler.getConfig();
-		configTable = config.getTableOrEmpty("");
+		configTable = config.getTableOrEmpty("configOptions");
 		Set<Map.Entry<String, Object>> configSettings = configTable.dottedEntrySet(true);
 		Iterator<Map.Entry<String, Object>> settingsIterator = configSettings.iterator();
 		selectionSize = configSettings.size() - 1;

@@ -66,9 +66,9 @@ public class Scheduler {
 			if (!(configFile.isFile())) {
 				if (configFile.createNewFile()) {
 					FileWriter writer = new FileWriter(configFile);
-					writer.write("[configOptions]");
+					writer.write("[configOptions]\n");
 					writer.write(ConfigOptions.SCHEDULER_REFRESHED.getOption() + " = true\n");
-					writer.write(ConfigOptions.ENABLE_LOGGING.getOption() + " = false");
+					writer.write(ConfigOptions.ENABLE_LOGGING.getOption() + " = false\n");
 					writer.close();
 				} else {
 					throw new IOException();
@@ -100,7 +100,7 @@ public class Scheduler {
 	public static void setBooleanConfigOption(int selection, boolean newValue) throws RuntimeException {
 		// all the required checks to ensure this exists have already been done by interpretConfigFiles()
 
-		Set<Map.Entry<String, Object>> configSettings = getConfig().getTableOrEmpty("").dottedEntrySet(true);
+		Set<Map.Entry<String, Object>> configSettings = getConfig().getTableOrEmpty("configOptions").dottedEntrySet(true);
 		String directoryPath = Environment.getExternalStorageDirectory().getPath() + "/FIRST/mercurialftc/";
 		File configFile = new File(directoryPath, "config.toml");
 		try {
@@ -128,7 +128,7 @@ public class Scheduler {
 	public static void setBooleanConfigOption(String selection, boolean newValue) throws RuntimeException {
 		// all the required checks to ensure this exists have already been done by interpretConfigFiles()
 
-		Set<Map.Entry<String, Object>> configSettings = getConfig().getTableOrEmpty("").dottedEntrySet(true);
+		Set<Map.Entry<String, Object>> configSettings = getConfig().getTableOrEmpty("configOptions").dottedEntrySet(true);
 		String directoryPath = Environment.getExternalStorageDirectory().getPath() + "/FIRST/mercurialftc/";
 		File configFile = new File(directoryPath, "config.toml");
 		try {

@@ -3,10 +3,9 @@ package org.mercurialftc.mercurialftc.scheduler;
 import android.os.Environment;
 import org.jetbrains.annotations.NotNull;
 import org.mercurialftc.mercurialftc.scheduler.commands.CommandSignature;
+import org.mercurialftc.mercurialftc.scheduler.configoptions.ConfigOptionsManager;
 import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
 import org.mercurialftc.mercurialftc.scheduler.triggers.Trigger;
-import org.tomlj.Toml;
-import org.tomlj.TomlParseResult;
 
 import java.io.*;
 import java.util.*;
@@ -15,14 +14,13 @@ public class Scheduler {
 	public static Scheduler scheduler;
 
 	private static boolean schedulerRefreshEnabled, loggingEnabled;
+	private static ConfigOptionsManager configOptionsManager;
 	private final LinkedHashSet<SubsystemInterface> subsystems; // currently registered Subsystems
 	private final LinkedHashSet<Trigger> triggers;
-
 	private final Set<CommandSignature> composedCommands = Collections.newSetFromMap(new WeakHashMap<>());
 	private final LinkedHashSet<CommandSignature> commands; // currently scheduled Commands
 	private final ArrayList<CommandSignature> commandsToCancel; // commands to be cancelled this loop
 	private final LinkedHashSet<CommandSignature> commandsToSchedule; // commands to be scheduled this loop;
-
 	private final LinkedHashMap<SubsystemInterface, CommandSignature> requirements; // the mapping of required Subsystems to commands
 	private final HashMap<String, SubsystemInterface> storedSubsystems;
 
@@ -34,12 +32,11 @@ public class Scheduler {
 		this.requirements = new LinkedHashMap<>();
 		this.triggers = new LinkedHashSet<>();
 		this.storedSubsystems = new HashMap<>();
+	}
 
-		try {
-			interpretConfigFiles();
-		} catch (IOException e) {
-			throw new RuntimeException("Error creating/reading scheduler config:\n" + e);
-		}
+	public static ConfigOptionsManager getConfigOptionsManager() {
+		interpretConfigFiles();
+		return configOptionsManager;
 	}
 
 	/**
@@ -58,125 +55,30 @@ public class Scheduler {
 		return scheduler = new Scheduler();
 	}
 
-	public static void interpretConfigFiles() throws IOException {
-		String directoryPath = Environment.getExternalStorageDirectory().getPath() + "/FIRST/mercurialftc/";
-		File directory = new File(directoryPath);
-		File configFile = new File(directoryPath, "config.toml");
-		if (directory.mkdirs() || directory.isDirectory()) {
-			if (!(configFile.isFile())) {
-				if (configFile.createNewFile()) {
-					FileWriter writer = new FileWriter(configFile);
-					writer.write("# This file is automatically created and edited by mercurialftc, do not edit it or change its name\n\n");
-					writer.write("[configOptions]\n");
-					writer.write(ConfigOptions.SCHEDULER_REFRESH_ENABLED.getOption() + " = true\n");
-					writer.write(ConfigOptions.ENABLE_LOGGING.getOption() + " = false\n");
-					writer.close();
-				} else {
-					throw new IOException();
-				}
-			}
-			TomlParseResult config = Toml.parse(new FileReader(configFile));
-			schedulerRefreshEnabled = Boolean.TRUE.equals(config.getBoolean(ConfigOptions.SCHEDULER_REFRESH_ENABLED.getDottedOption()));
-			loggingEnabled = Boolean.TRUE.equals(config.getBoolean(ConfigOptions.ENABLE_LOGGING.getDottedOption()));
-		} else {
-			schedulerRefreshEnabled = true;
-			loggingEnabled = false;
+	public static void interpretConfigFiles() {
+		if (configOptionsManager != null) {
+			schedulerRefreshEnabled = Boolean.TRUE.equals(configOptionsManager.getTomlParseResult().getBoolean(ConfigOptions.SCHEDULER_REFRESH_ENABLED.getOption()));
+			schedulerRefreshEnabled = Boolean.TRUE.equals(configOptionsManager.getTomlParseResult().getBoolean(ConfigOptions.LOGGING_ENABLED.getOption()));
+			return;
 		}
-	}
 
-	public static TomlParseResult getConfig() {
-		// all the required checks to ensure this exists have already been done by the scheduler
 		String directoryPath = Environment.getExternalStorageDirectory().getPath() + "/FIRST/mercurialftc/";
-		File configFile = new File(directoryPath, "config.toml");
+		File configOptionsFile = new File(directoryPath, "configOptions.toml");
+
 		try {
-			return Toml.parse(new FileReader(configFile));
-		} catch (IOException e) {
-			throw new RuntimeException("Error reading scheduler config:\n" + e);
-		}
-	}
-
-	/**
-	 * inverts the boolean found at selection
-	 */
-	public static void setBooleanConfigOption(int selection, boolean newValue) throws RuntimeException {
-		// all the required checks to ensure this exists have already been done by interpretConfigFiles()
-
-		Set<Map.Entry<String, Object>> configSettings = getConfig().getTableOrEmpty("configOptions").dottedEntrySet(true);
-		String directoryPath = Environment.getExternalStorageDirectory().getPath() + "/FIRST/mercurialftc/";
-		File configFile = new File(directoryPath, "config.toml");
-		try {
-			FileWriter writer = new FileWriter(configFile);
-			StringBuilder builder = new StringBuilder();
-			builder.append("# This file is automatically created and edited by mercurialftc, do not edit it or change its name\n\n");
-			builder.append("[configOptions]\n");
-			Iterator<Map.Entry<String, Object>> settingsIterator = configSettings.iterator();
-			for (int i = 0; i < configSettings.size(); i++) {
-				Map.Entry<String, Object> entry = settingsIterator.next();
-				builder.append(entry.getKey()).append(" = ");
-				if (selection == i) {
-					builder.append(newValue);
-				} else {
-					builder.append("\"").append(entry.getValue()).append("\"");
-				}
-				builder.append("\n");
-			}
-			writer.write(builder.toString());
-			writer.close();
-			Scheduler.interpretConfigFiles();
-		} catch (IOException e) {
-			throw new RuntimeException("Error writing to the scheduler config:\n" + e);
-		}
-	}
-
-	public static void setBooleanConfigOption(String selection, boolean newValue) throws RuntimeException {
-		// all the required checks to ensure this exists have already been done by interpretConfigFiles()
-
-		Set<Map.Entry<String, Object>> configSettings = getConfig().getTableOrEmpty("configOptions").dottedEntrySet(true);
-		String directoryPath = Environment.getExternalStorageDirectory().getPath() + "/FIRST/mercurialftc/";
-		File configFile = new File(directoryPath, "config.toml");
-		try {
-			FileWriter writer = new FileWriter(configFile);
-			StringBuilder builder = new StringBuilder();
-			builder.append("# This file is automatically created and edited by mercurialftc, do not edit it or change its name\n\n");
-			builder.append("[configOptions]\n");
-			Iterator<Map.Entry<String, Object>> settingsIterator = configSettings.iterator();
-			for (int i = 0; i < configSettings.size(); i++) {
-				Map.Entry<String, Object> entry = settingsIterator.next();
-				builder.append(entry.getKey()).append(" = ");
-				if (Objects.equals(entry.getKey(), selection)) {
-					builder.append(newValue);
-				} else {
-					builder.append("\"").append(entry.getValue()).append("\"");
-				}
-				builder.append("\n");
-			}
-			writer.write(builder.toString());
-			writer.close();
-			Scheduler.interpretConfigFiles();
-		} catch (IOException e) {
-			throw new RuntimeException("Error writing to the scheduler config:\n" + e);
-		}
-	}
-
-	public static void setBooleanConfigOption(ConfigOptions selection, boolean newValue) throws RuntimeException {
-		setBooleanConfigOption(selection.getDottedOption(), newValue);
-	}
-
-	public static boolean isSchedulerRefreshEnabled() {
-		try {
-			interpretConfigFiles();
+			configOptionsManager = new ConfigOptionsManager(configOptionsFile, new File("org/mercurialftc/mercurialftc/scheduler/configoptions/schedulerConfigDefaults.toml"));
 		} catch (IOException e) {
 			throw new RuntimeException("Error creating/reading scheduler config:\n" + e);
 		}
+	}
+
+	public static boolean isSchedulerRefreshEnabled() {
+		interpretConfigFiles();
 		return schedulerRefreshEnabled;
 	}
 
 	public static boolean isLoggingEnabled() {
-		try {
-			interpretConfigFiles();
-		} catch (IOException e) {
-			throw new RuntimeException("Error creating/reading scheduler config:\n" + e);
-		}
+		interpretConfigFiles();
 		return loggingEnabled;
 	}
 
@@ -308,7 +210,9 @@ public class Scheduler {
 	}
 
 	public SubsystemInterface getStoredSubsystem(String name) {
-		return storedSubsystems.get(name);
+		SubsystemInterface result = storedSubsystems.get(name);
+		storedSubsystems.remove(name, result);
+		return result;
 	}
 
 	/**
@@ -401,7 +305,7 @@ public class Scheduler {
 
 	public enum ConfigOptions {
 		SCHEDULER_REFRESH_ENABLED("schedulerRefreshEnabled"),
-		ENABLE_LOGGING("enableLogging");
+		LOGGING_ENABLED("loggingEnabled");
 
 		private final String option;
 
@@ -409,13 +313,8 @@ public class Scheduler {
 			this.option = option;
 		}
 
-		private String getOption() {
+		public String getOption() {
 			return option;
-		}
-
-		public String getDottedOption() {
-			String dot = "configOptions.";
-			return dot + option;
 		}
 	}
 

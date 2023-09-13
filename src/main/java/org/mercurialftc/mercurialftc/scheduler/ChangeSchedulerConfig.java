@@ -1,22 +1,19 @@
 package org.mercurialftc.mercurialftc.scheduler;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.mercurialftc.mercurialftc.scheduler.commands.LambdaCommand;
-import org.tomlj.TomlParseResult;
-import org.tomlj.TomlTable;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-@Autonomous(name = "Edit Scheduler Config Options")
+@TeleOp(name = "Edit Scheduler Config Options", group = "?") // we use '?' to move it to the bottom of the list
 public class ChangeSchedulerConfig extends OpModeEX {
-	private Telemetry.Line instructions;
 	private Telemetry.Item currentSettings;
 	private int selection, selectionSize;
 	private String selectionString;
-	private TomlTable configTable;
 
 	@Override
 	public void registerSubsystems() {
@@ -45,7 +42,12 @@ public class ChangeSchedulerConfig extends OpModeEX {
 		);
 		gamepadEX1().a().onPress(
 				new LambdaCommand().init(() -> {
-					Scheduler.setBooleanConfigOption(selectionString, Boolean.FALSE.equals(configTable.getBoolean(selectionString)));
+					Scheduler.getConfigOptionsManager().updateValue(selectionString, Boolean.FALSE.equals(Scheduler.getConfigOptionsManager().getTomlParseResult().getBoolean(selectionString)));
+					try {
+						Scheduler.getConfigOptionsManager().update();
+					} catch (IOException e) {
+						throw new RuntimeException("failed to update settings: \n" + e);
+					}
 				})
 		);
 	}
@@ -57,30 +59,30 @@ public class ChangeSchedulerConfig extends OpModeEX {
 
 	@Override
 	public void startEX() {
-		instructions = telemetry.addLine();
-		TomlParseResult config = Scheduler.getConfig();
-		configTable = config.getTableOrEmpty("configOptions");
-
+		Telemetry.Line instructions = telemetry.addLine();
 		currentSettings = telemetry.addData("", "");
+
 		instructions.addData("use up and down on gamepad1's dpad to select the setting you want to change, then press a to change it", null);
 	}
 
 	@Override
 	public void loopEX() {
-		StringBuilder builder = new StringBuilder();
-		Set<Map.Entry<String, Object>> configSettings = configTable.dottedEntrySet(true);
-		Iterator<Map.Entry<String, Object>> settingsIterator = configSettings.iterator();
-		selectionSize = configSettings.size() - 1;
-		for (int i = 0; i < configSettings.size(); i++) {
-			Map.Entry<String, Object> entry = settingsIterator.next();
-			builder.append(entry.getKey()).append(": ").append(entry.getValue().toString());
+		Set<Map.Entry<String, Object>> config = Scheduler.getConfigOptionsManager().getTomlParseResult().dottedEntrySet();
+		selectionSize = config.size();
+
+		StringBuilder configBuilder = new StringBuilder();
+		Iterator<Map.Entry<String, Object>> configIterator = config.iterator();
+		for (int i = 0; configIterator.hasNext(); i++) {
+			Map.Entry<String, Object> configEntry = configIterator.next();
+			configBuilder.append(configEntry.getKey()).append(": ").append(configEntry.getValue());
 			if (selection == i) {
-				selectionString = entry.getKey();
-				builder.append(" <--");
+				configBuilder.append(" <--");
+				selectionString = configEntry.getKey();
 			}
-			builder.append("\n");
+			configBuilder.append("\n");
 		}
-		currentSettings.setCaption(builder.toString());
+
+		currentSettings.setCaption(configBuilder.toString());
 	}
 
 	@Override

@@ -4,6 +4,8 @@ import org.mercurialftc.mercurialftc.example.DemoSubsystem;
 import org.mercurialftc.mercurialftc.scheduler.OpModeEX;
 import org.mercurialftc.mercurialftc.scheduler.Scheduler;
 
+import java.io.IOException;
+
 /**
  * see readme.md in this directory
  */
@@ -15,7 +17,7 @@ public class Teleop extends OpModeEX {
 	 */
 	@Override
 	public void registerSubsystems() {
-		demoSubsystem = (DemoSubsystem) getScheduler().getStoredSubsystem("my very own Demosubsystem"); // we get back the first stored subsystem, and cast it back to our known type
+		demoSubsystem = (DemoSubsystem) getScheduler().getStoredSubsystem("my very own Demosubsystem"); // we get back the first stored subsystem, and cast it back to our known type, this also removes it from the stored subsystems
 //		demoSubsystem2 = (DemoSubsystem2) getScheduler().getStoredSubsystem("demosubsystem2"); // we could get back the second stored subsystem, and cast it back to our known type (but we don't have any more subsystems in this case)
 	}
 
@@ -24,7 +26,7 @@ public class Teleop extends OpModeEX {
 	 */
 	@Override
 	public void initEX() {
-		Scheduler.setBooleanConfigOption(Scheduler.ConfigOptions.SCHEDULER_REFRESH_ENABLED, true); // after this OpModeEX runs we might want to go back to resetting the scheduler
+		Scheduler.getConfigOptionsManager().updateValue(Scheduler.ConfigOptions.SCHEDULER_REFRESH_ENABLED.getOption(), true); // after this OpModeEX runs we might want to go back to resetting the scheduler
 	}
 
 	/**
@@ -34,6 +36,7 @@ public class Teleop extends OpModeEX {
 	@Override
 	public void registerTriggers() {
 		// register all your driver and operator control triggers here
+		gamepadEX1().a().whilePressed(demoSubsystem.getDefaultCommand()); // this doesn't actually do anything as this command is guaranteed to be running, and we aren't running anything else but, for demonstration's sake
 	}
 
 	@Override
@@ -54,6 +57,12 @@ public class Teleop extends OpModeEX {
 
 	@Override
 	public void stopEX() {
+		try {
+			Scheduler.getConfigOptionsManager().update(); // actually updates the setting we changed
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
 		// no need to do anything specific here
 	}
 }

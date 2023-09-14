@@ -59,7 +59,7 @@ public class Scheduler {
 	public static void interpretConfigFiles() {
 		if (configOptionsManager != null) {
 			schedulerRefreshEnabled = Boolean.TRUE.equals(configOptionsManager.getTomlParseResult().getBoolean(ConfigOptions.SCHEDULER_REFRESH_ENABLED.getOption()));
-			schedulerRefreshEnabled = Boolean.TRUE.equals(configOptionsManager.getTomlParseResult().getBoolean(ConfigOptions.LOGGING_ENABLED.getOption()));
+			loggingEnabled = Boolean.TRUE.equals(configOptionsManager.getTomlParseResult().getBoolean(ConfigOptions.LOGGING_ENABLED.getOption()));
 			return;
 		}
 

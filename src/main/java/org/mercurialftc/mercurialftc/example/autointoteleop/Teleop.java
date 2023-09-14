@@ -1,5 +1,7 @@
 package org.mercurialftc.mercurialftc.example.autointoteleop;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.mercurialftc.mercurialftc.example.DemoSubsystem;
 import org.mercurialftc.mercurialftc.scheduler.OpModeEX;
 import org.mercurialftc.mercurialftc.scheduler.Scheduler;
@@ -9,6 +11,8 @@ import java.io.IOException;
 /**
  * see readme.md in this directory
  */
+@Disabled
+@TeleOp
 public class Teleop extends OpModeEX {
 	private DemoSubsystem demoSubsystem;
 

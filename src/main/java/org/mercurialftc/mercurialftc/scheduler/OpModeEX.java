@@ -104,12 +104,14 @@ public abstract class OpModeEX extends OpMode {
 		}
 
 		initEX();
+		registerTriggers();
+
 		initialisationSequencer.append("\nRobot");
 		initialisedSubsystems.setValue(initialisationSequencer);
 		telemetry.update();
 
 		initialising.setValue("");
-		registerTriggers();
+
 	}
 
 	public abstract void init_loopEX();

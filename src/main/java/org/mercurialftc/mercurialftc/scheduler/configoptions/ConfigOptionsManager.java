@@ -109,10 +109,8 @@ public class ConfigOptionsManager {
 		for (String dottedKey : changes.keySet()) {
 			changedLines.put(Objects.requireNonNull(tomlParseResult.inputPositionOf(dottedKey)).line() - 1, dottedKey);
 		}
-
-		for (int i = 0; bReader2.ready(); i++) {
-			String line = bReader2.readLine();
-
+		String line;
+		for (int i = 0; bReader2.ready() && ((line = bReader2.readLine()) != null); i++) {
 			if (changedLines.containsKey(i)) {
 				String dottedKey = changedLines.get(i);
 				bWriter.write(dottedKey);

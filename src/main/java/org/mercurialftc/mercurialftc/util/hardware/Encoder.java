@@ -4,7 +4,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 public class Encoder {
-	public final VelocityDataPacket[] medians;
 	private final DcMotor motor;
 	private Direction direction;
 	private double previousTime;
@@ -23,12 +22,6 @@ public class Encoder {
 
 		previousTime = System.nanoTime() / 1e9;
 		previousPosition = motor.getCurrentPosition();
-		;
-
-		medians = new VelocityDataPacket[5];
-		for (int i = 0; i < medians.length; i++) {
-			medians[i] = new VelocityDataPacket(0, 1);
-		}
 	}
 
 	/**
@@ -68,28 +61,6 @@ public class Encoder {
 	 */
 	public int getCurrentPosition() {
 		return motor.getCurrentPosition() * getMultiplier();
-	}
-
-	/**
-	 * <p>uses insertion sort</p>
-	 * sorts medians into a new array (to preserve the new data coming in) and then finds the median
-	 *
-	 * @return the median of medians
-	 */
-	private VelocityDataPacket internalGetVelocityFromMedians() {
-		VelocityDataPacket[] sortedMedians = medians;
-		int n = 5; //length of medians
-		for (int i = 1; i < n; i++) {
-			VelocityDataPacket key = sortedMedians[i];
-			int j = i - 1;
-			while (j >= 0 && sortedMedians[j].getVelocity() > key.getVelocity()) {
-				sortedMedians[j + 1] = sortedMedians[j];
-				j--;
-			}
-			sortedMedians[j + 1] = key;
-		}
-
-		return sortedMedians[2];
 	}
 
 	/**

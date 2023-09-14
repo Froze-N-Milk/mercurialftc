@@ -83,7 +83,7 @@ public class Scheduler {
 							"# removing either of these two properties will cause the scheduler to remake this file with the default settings\n" +
 							"\n" +
 							"schedulerRefreshEnabled = true\n" +
-							"loggingEnabled = false\n";
+							"loggingEnabled = true\n";
 
 			configOptionsManager = new ConfigOptionsManager(configOptionsFile, defaultTomlString);
 		} catch (IOException e) {

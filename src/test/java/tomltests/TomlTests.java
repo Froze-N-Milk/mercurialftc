@@ -6,10 +6,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mercurialftc.mercurialftc.scheduler.configoptions.ConfigOptionsManager;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class TomlTests {
 	private ConfigOptionsManager configOptionsManager;
@@ -94,21 +94,14 @@ public class TomlTests {
 				"schedulerRefreshEnabled = true\n" +
 				"loggingEnabled = false\n";
 
-		BufferedReader breader = new BufferedReader(new StringReader(defaultToml));
 
-		String line;
-		
-		while (breader.ready() && ((line = breader.readLine()) != null)) {
-			System.out.println(line);
+		configOptionsManager = new ConfigOptionsManager(tomlFile, defaultToml);
+
+
+		for (Map.Entry<String, Object> entry : configOptionsManager.getTomlParseResult().dottedEntrySet()) {
+			System.out.println(entry.getKey() + ": " + entry.getValue());
 		}
 
-//		configOptionsManager = new ConfigOptionsManager(tomlFile, defaultToml);
-//
-//
-//		for (Map.Entry<String, Object> entry : configOptionsManager.getTomlParseResult().dottedEntrySet()) {
-//			System.out.println(entry.getKey() + ": " + entry.getValue());
-//		}
-//
-//		Assertions.assertFalse(configOptionsManager.defaultFile(new File("/Users/oscarchevalier/IdeaProjects/mercurialftc/src/test/java/tomltests/defaultConfig.toml")), "tomlFile was updated despite defaults being set");
+		Assertions.assertFalse(configOptionsManager.defaultFile(new File("/Users/oscarchevalier/IdeaProjects/mercurialftc/src/test/java/tomltests/defaultConfig.toml")), "tomlFile was updated despite defaults being set");
 	}
 }

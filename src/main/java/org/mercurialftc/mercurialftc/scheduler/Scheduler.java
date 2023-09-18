@@ -2,7 +2,6 @@ package org.mercurialftc.mercurialftc.scheduler;
 
 import android.os.Environment;
 import org.jetbrains.annotations.NotNull;
-import org.mercurialftc.mercurialftc.R;
 import org.mercurialftc.mercurialftc.scheduler.commands.CommandSignature;
 import org.mercurialftc.mercurialftc.scheduler.configoptions.ConfigOptionsManager;
 import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
@@ -24,6 +23,7 @@ public class Scheduler {
 	private final LinkedHashSet<CommandSignature> commandsToSchedule; // commands to be scheduled this loop;
 	private final LinkedHashMap<SubsystemInterface, CommandSignature> requirements; // the mapping of required Subsystems to commands
 	private final HashMap<String, SubsystemInterface> storedSubsystems;
+	private OpModeEX.OpModeEXRunStates runState;
 
 	private Scheduler() {
 		this.subsystems = new LinkedHashSet<>();
@@ -168,6 +168,7 @@ public class Scheduler {
 	private void initialiseCommand(CommandSignature command, @NotNull Set<SubsystemInterface> commandRequirements) {
 		if (command == null) return;
 		if (isScheduled(command)) return;
+		if (!command.getRunStates().contains(runState)) return;
 		commands.add(command);
 		for (SubsystemInterface requirement : commandRequirements) {
 			requirements.put(requirement, command);
@@ -175,11 +176,16 @@ public class Scheduler {
 		command.initialise();
 	}
 
-	public void pollCommands() {
+	public void pollCommands(OpModeEX.OpModeEXRunStates runState) {
+		this.runState = runState;
 		// checks to see if any commands are finished, if so, queues them to be canceled
 		for (CommandSignature command : commands) {
 			if (command.finished()) {
 				cancelCommand(command, false);
+			}
+			// checks to see if we have exited the valid run states for this command, if so, cancels and interrupts the command.
+			if (!command.getRunStates().contains(runState)) {
+				cancelCommand(command, true);
 			}
 		}
 

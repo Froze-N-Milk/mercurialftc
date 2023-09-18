@@ -125,7 +125,11 @@ public abstract class OpModeEX extends OpMode {
 			module.clearBulkCache();
 		}
 		scheduler.pollSubsystemsPeriodic();
+		scheduler.pollTriggers();
 		init_loopEX();
+		scheduler.pollCommands(OpModeEXRunStates.INIT_LOOP);
+		gamepadEX1.endLoopUpdate();
+		gamepadEX2.endLoopUpdate();
 		telemetry.update();
 	}
 
@@ -154,7 +158,7 @@ public abstract class OpModeEX extends OpMode {
 		scheduler.pollSubsystemsPeriodic();
 		scheduler.pollTriggers();
 		loopEX();
-		scheduler.pollCommands();
+		scheduler.pollCommands(OpModeEXRunStates.LOOP);
 		gamepadEX1.endLoopUpdate();
 		gamepadEX2.endLoopUpdate();
 		telemetry.update();
@@ -171,5 +175,10 @@ public abstract class OpModeEX extends OpMode {
 		for (SubsystemInterface subsystem : scheduler.getSubsystems()) {
 			subsystem.close();
 		}
+	}
+
+	public enum OpModeEXRunStates {
+		INIT_LOOP,
+		LOOP;
 	}
 }

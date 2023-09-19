@@ -15,7 +15,7 @@ plugins {
 apply plugin: 'com.android.library'
 
 group 'org.mercurialftc.mercurialftc'
-version 'v0.03-SNAPSHOT'
+version 'v0.04-SNAPSHOT'
 
 android {
     namespace 'org.mercurialftc.mercurialftc'
@@ -32,7 +32,7 @@ android {
         //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 28
         versionCode 1
-        versionName 'v0.03'
+        versionName 'v0.04'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.debug

@@ -17,7 +17,7 @@ as a dependency for your FTCRobotController:
 
 1. add `maven { url "https://jitpack.io" } // Needed for mercurialftc` to your repositories block in
    `build.dependencies.gradle`
-2. add `implementation 'com.github.Froze-N-Milk:mercurialftc:v0.01'` to the bottom of your
+2. add `implementation 'com.github.Froze-N-Milk:mercurialftc:v0.04'` to the bottom of your
    dependencies block
    in
    `build.dependencies.gradle`

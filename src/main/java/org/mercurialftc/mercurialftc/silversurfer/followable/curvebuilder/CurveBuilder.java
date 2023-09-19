@@ -7,10 +7,10 @@ import org.mercurialftc.mercurialftc.silversurfer.followable.curvebuilder.curve.
 import org.mercurialftc.mercurialftc.silversurfer.followable.curvebuilder.curve.QuinticBezierCurve;
 import org.mercurialftc.mercurialftc.silversurfer.followable.markers.Marker;
 import org.mercurialftc.mercurialftc.silversurfer.followable.markers.MarkerBuilder;
+import org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants.MecanumMotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.AngleRadians;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Vector2D;
-import org.mercurialftc.mercurialftc.silversurfer.followable.MotionConstants;
 
 import java.util.ArrayList;
 
@@ -22,7 +22,7 @@ public class CurveBuilder extends FollowableBuilder {
 	private Vector2D[] outputTangents;
 	private Vector2D[] secondDerivatives;
 
-	public CurveBuilder(MotionConstants motionConstants) {
+	public CurveBuilder(MecanumMotionConstants motionConstants) {
 		super(motionConstants);
 		this.segments = new ArrayList<>();
 		this.unfinishedMarkers = new ArrayList<>();

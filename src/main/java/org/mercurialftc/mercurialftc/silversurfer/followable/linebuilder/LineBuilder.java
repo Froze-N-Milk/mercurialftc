@@ -3,7 +3,7 @@ package org.mercurialftc.mercurialftc.silversurfer.followable.linebuilder;
 import org.mercurialftc.mercurialftc.scheduler.commands.Command;
 import org.mercurialftc.mercurialftc.silversurfer.followable.Followable;
 import org.mercurialftc.mercurialftc.silversurfer.followable.FollowableBuilder;
-import org.mercurialftc.mercurialftc.silversurfer.followable.MotionConstants;
+import org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants.MecanumMotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.followable.markers.Marker;
 import org.mercurialftc.mercurialftc.silversurfer.followable.markers.MarkerBuilder;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.AngleRadians;
@@ -18,7 +18,7 @@ public class LineBuilder extends FollowableBuilder {
 	private int[] segmentBreakpoints;
 	private double[] segmentOutputSizes;
 
-	public LineBuilder(MotionConstants motionConstants) {
+	public LineBuilder(MecanumMotionConstants motionConstants) {
 		super(motionConstants);
 		unfinishedMarkers = new ArrayList<>();
 		segments = new ArrayList<>();
@@ -85,7 +85,7 @@ public class LineBuilder extends FollowableBuilder {
 			int segmentIndex = getSegmentIndexFromOutputIndex(i);
 			LineSegment segment = segments.get(segmentIndex);
 
-			MotionConstants motionConstants = getMotionConstantsArray().get(segmentIndex);
+			MecanumMotionConstants motionConstants = getMotionConstantsArray().get(segmentIndex);
 
 			Pose2D targetPose = segment.getDestinationPose();
 			Pose2D estimatedPose = previousEstimatedPose2D.add(previousVectorOutput.getX() * previousDeltaT, previousVectorOutput.getY() * previousDeltaT, new AngleRadians(previousRotationalVelocity * previousDeltaT));

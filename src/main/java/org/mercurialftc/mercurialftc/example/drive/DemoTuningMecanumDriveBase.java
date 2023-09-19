@@ -10,7 +10,7 @@ import org.mercurialftc.mercurialftc.scheduler.OpModeEX;
 import org.mercurialftc.mercurialftc.scheduler.triggers.gamepadex.ContinuousInput;
 import org.mercurialftc.mercurialftc.silversurfer.encoderticksconverter.EncoderTicksConverter;
 import org.mercurialftc.mercurialftc.silversurfer.encoderticksconverter.Units;
-import org.mercurialftc.mercurialftc.silversurfer.followable.MotionConstants;
+import org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants.MecanumMotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.follower.GVFWaveFollower;
 import org.mercurialftc.mercurialftc.silversurfer.follower.MecanumArbFollower;
 import org.mercurialftc.mercurialftc.silversurfer.follower.TuningMecanumDriveBase;
@@ -70,11 +70,9 @@ public class DemoTuningMecanumDriveBase extends TuningMecanumDriveBase {
 		double currentVoltage = voltageSensor.getVoltage();
 
 		// replace accelerations
-		motionConstants = new MotionConstants(
+		motionConstants = new MecanumMotionConstants(
 				translationalEnforcer.transformVelocity(currentVoltage), //start with these all set at 1
-				angularEnforcer.transformVelocity(currentVoltage),
 				rotationalEnforcer.transformVelocity(currentVoltage),
-				1,
 				1,
 				1
 		);

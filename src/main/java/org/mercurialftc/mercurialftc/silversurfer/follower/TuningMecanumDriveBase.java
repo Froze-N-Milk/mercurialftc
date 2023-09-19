@@ -9,7 +9,7 @@ import org.mercurialftc.mercurialftc.scheduler.commands.Command;
 import org.mercurialftc.mercurialftc.scheduler.commands.LambdaCommand;
 import org.mercurialftc.mercurialftc.scheduler.subsystems.Subsystem;
 import org.mercurialftc.mercurialftc.scheduler.triggers.gamepadex.ContinuousInput;
-import org.mercurialftc.mercurialftc.silversurfer.followable.MotionConstants;
+import org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants.MecanumMotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.followable.Wave;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Angle;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.AngleRadians;
@@ -25,7 +25,7 @@ public abstract class TuningMecanumDriveBase extends Subsystem {
 	protected WaveFollower waveFollower;
 	protected MecanumArbFollower mecanumArbFollower;
 	protected Tracker tracker;
-	protected MotionConstants motionConstants;
+	protected MecanumMotionConstants motionConstants;
 
 	/**
 	 * @param opModeEX  the opModeEX object to register against
@@ -126,7 +126,7 @@ public abstract class TuningMecanumDriveBase extends Subsystem {
 		tracker.resetHeading(heading);
 	}
 
-	public MotionConstants getMotionConstants() {
+	public MecanumMotionConstants getMotionConstants() {
 		return motionConstants;
 	}
 

@@ -2,28 +2,29 @@ package org.mercurialftc.mercurialftc.silversurfer.followable;
 
 import org.mercurialftc.mercurialftc.scheduler.commands.Command;
 import org.mercurialftc.mercurialftc.silversurfer.followable.markers.Marker;
+import org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants.MecanumMotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 
 import java.util.ArrayList;
 
 public abstract class FollowableBuilder {
-	private final ArrayList<MotionConstants> motionConstantsArray;
-	private MotionConstants motionConstants; // the motion constants used to build all current segments
+	private final ArrayList<MecanumMotionConstants> motionConstantsArray;
+	private MecanumMotionConstants motionConstants; // the motion constants used to build all current segments
 
-	protected ArrayList<MotionConstants> getMotionConstantsArray() {
-		return motionConstantsArray;
-	}
-
-	public void setMotionConstants(MotionConstants motionConstants) {
+	protected FollowableBuilder(MecanumMotionConstants motionConstants) {
+		this.motionConstantsArray = new ArrayList<>();
 		this.motionConstants = motionConstants;
 	}
 
-	protected MotionConstants getMotionConstants() {
+	protected ArrayList<MecanumMotionConstants> getMotionConstantsArray() {
+		return motionConstantsArray;
+	}
+
+	protected MecanumMotionConstants getMotionConstants() {
 		return motionConstants;
 	}
 
-	protected FollowableBuilder(MotionConstants motionConstants) {
-		this.motionConstantsArray = new ArrayList<>();
+	public void setMotionConstants(MecanumMotionConstants motionConstants) {
 		this.motionConstants = motionConstants;
 	}
 

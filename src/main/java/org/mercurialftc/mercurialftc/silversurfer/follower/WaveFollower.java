@@ -1,16 +1,16 @@
 package org.mercurialftc.mercurialftc.silversurfer.follower;
 
 import org.mercurialftc.mercurialftc.silversurfer.followable.Followable;
-import org.mercurialftc.mercurialftc.silversurfer.followable.MotionConstants;
+import org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants.MecanumMotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.followable.Wave;
 
 public abstract class WaveFollower {
-	private final MotionConstants motionConstants;
+	private final MecanumMotionConstants motionConstants;
 	private Wave wave;
 	private double currentTime, previousTime;
 	private boolean finished;
 
-	public WaveFollower(MotionConstants motionConstants) {
+	public WaveFollower(MecanumMotionConstants motionConstants) {
 		this.motionConstants = motionConstants;
 		currentTime = previousTime = 0;
 	}
@@ -32,7 +32,7 @@ public abstract class WaveFollower {
 
 	protected abstract void followOutput(Followable.Output output, double loopTime);
 
-	protected MotionConstants getMotionConstants() {
+	protected MecanumMotionConstants getMotionConstants() {
 		return motionConstants;
 	}
 

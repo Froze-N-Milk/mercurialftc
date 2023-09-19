@@ -1,11 +1,11 @@
 package org.mercurialftc.mercurialftc.silversurfer.follower;
 
 import org.mercurialftc.mercurialftc.silversurfer.followable.Followable;
-import org.mercurialftc.mercurialftc.silversurfer.followable.MotionConstants;
+import org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants.MecanumMotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Vector2D;
 
 public abstract class ArbFollower extends WaveFollower {
-	public ArbFollower(MotionConstants motionConstants) {
+	public ArbFollower(MecanumMotionConstants motionConstants) {
 		super(motionConstants);
 	}
 

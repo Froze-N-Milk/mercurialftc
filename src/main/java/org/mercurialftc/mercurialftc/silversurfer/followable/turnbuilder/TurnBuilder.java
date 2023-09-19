@@ -3,7 +3,7 @@ package org.mercurialftc.mercurialftc.silversurfer.followable.turnbuilder;
 import org.mercurialftc.mercurialftc.scheduler.commands.Command;
 import org.mercurialftc.mercurialftc.silversurfer.followable.Followable;
 import org.mercurialftc.mercurialftc.silversurfer.followable.FollowableBuilder;
-import org.mercurialftc.mercurialftc.silversurfer.followable.MotionConstants;
+import org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants.MecanumMotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.followable.markers.Marker;
 import org.mercurialftc.mercurialftc.silversurfer.followable.markers.MarkerBuilder;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.AngleRadians;
@@ -18,7 +18,7 @@ public class TurnBuilder extends FollowableBuilder {
 	private int[] segmentBreakpoints;
 	private double[] segmentOutputSizes;
 
-	public TurnBuilder(MotionConstants motionConstants) {
+	public TurnBuilder(MecanumMotionConstants motionConstants) {
 		super(motionConstants);
 		unfinishedMarkers = new ArrayList<>();
 		segments = new ArrayList<>();
@@ -83,7 +83,7 @@ public class TurnBuilder extends FollowableBuilder {
 			int segmentIndex = getSegmentIndexFromOutputIndex(i);
 			TurnSegment segment = segments.get(segmentIndex);
 
-			MotionConstants motionConstants = getMotionConstantsArray().get(segmentIndex);
+			MecanumMotionConstants motionConstants = getMotionConstantsArray().get(segmentIndex);
 
 			AngleRadians targetRotationalPosition = segment.getDestinationPose().getTheta();
 			AngleRadians estimatedRotationalPosition = previousEstimatedRotationalPosition.add(previousRotationalVelocity * previousDeltaT).toAngleRadians();

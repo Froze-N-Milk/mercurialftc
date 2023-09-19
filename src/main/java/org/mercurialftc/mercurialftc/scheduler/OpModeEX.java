@@ -65,7 +65,7 @@ public abstract class OpModeEX extends OpMode {
 	 */
 	@Override
 	public final void init() {
-		if (Scheduler.refreshScheduler) {
+		if (Scheduler.isSchedulerRefreshEnabled()) {
 			scheduler = Scheduler.freshInstance();
 		} else {
 			scheduler = Scheduler.getSchedulerInstance();
@@ -104,12 +104,14 @@ public abstract class OpModeEX extends OpMode {
 		}
 
 		initEX();
+		registerTriggers();
+
 		initialisationSequencer.append("\nRobot");
 		initialisedSubsystems.setValue(initialisationSequencer);
 		telemetry.update();
 
 		initialising.setValue("");
-		registerTriggers();
+
 	}
 
 	public abstract void init_loopEX();
@@ -123,7 +125,11 @@ public abstract class OpModeEX extends OpMode {
 			module.clearBulkCache();
 		}
 		scheduler.pollSubsystemsPeriodic();
+		scheduler.pollTriggers();
 		init_loopEX();
+		scheduler.pollCommands(OpModeEXRunStates.INIT_LOOP);
+		gamepadEX1.endLoopUpdate();
+		gamepadEX2.endLoopUpdate();
 		telemetry.update();
 	}
 
@@ -152,7 +158,7 @@ public abstract class OpModeEX extends OpMode {
 		scheduler.pollSubsystemsPeriodic();
 		scheduler.pollTriggers();
 		loopEX();
-		scheduler.pollCommands();
+		scheduler.pollCommands(OpModeEXRunStates.LOOP);
 		gamepadEX1.endLoopUpdate();
 		gamepadEX2.endLoopUpdate();
 		telemetry.update();
@@ -169,5 +175,10 @@ public abstract class OpModeEX extends OpMode {
 		for (SubsystemInterface subsystem : scheduler.getSubsystems()) {
 			subsystem.close();
 		}
+	}
+
+	public enum OpModeEXRunStates {
+		INIT_LOOP,
+		LOOP;
 	}
 }

@@ -9,6 +9,7 @@ public class TwoWheelTracker extends Tracker {
 	private final Encoder left, middle;
 	private final HeadingSupplier headingSupplier;
 	private Angle currentTheta;
+	private double deltaLeft, deltaMiddle, deltaTheta, previousTheta;
 
 	public TwoWheelTracker(Pose2D initialPose, TrackerConstants.TwoWheelTrackerConstants trackerConstants, Encoder left, Encoder middle, HeadingSupplier headingSupplier) {
 		super(initialPose, trackerConstants);
@@ -17,9 +18,6 @@ public class TwoWheelTracker extends Tracker {
 		this.headingSupplier = headingSupplier;
 		previousTheta = headingSupplier.getHeading().getRadians();
 	}
-
-	private double deltaLeft, deltaMiddle, deltaTheta, previousTheta;
-
 
 	/**
 	 * called once per cycle, to prevent making too many calls to an encoder, etc
@@ -72,8 +70,18 @@ public class TwoWheelTracker extends Tracker {
 		return deltaTheta;
 	}
 
+	@Override
+	public void resetHeading() {
+		headingSupplier.resetHeading();
+	}
+
+	@Override
+	public void resetHeading(Angle heading) {
+		headingSupplier.resetHeading(heading);
+	}
+
 	/**
-	 * enforce certain measurements, if an external measurement can be relied upon, gets automatically run every
+	 * enforce certain measurements, if an external measurement can be relied upon, gets automatically run every insist frequency cycles
 	 */
 	@Override
 	protected void insist() {

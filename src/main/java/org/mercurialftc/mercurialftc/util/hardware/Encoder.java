@@ -8,7 +8,6 @@ public class Encoder {
 	private Direction direction;
 	private double previousTime;
 	private int previousPosition;
-	public final VelocityDataPacket[] medians;
 	private VelocityDataPacket output;
 
 	/**
@@ -23,19 +22,18 @@ public class Encoder {
 
 		previousTime = System.nanoTime() / 1e9;
 		previousPosition = motor.getCurrentPosition();
-		;
-
-		medians = new VelocityDataPacket[5];
-		for (int i = 0; i < medians.length; i++) {
-			medians[i] = new VelocityDataPacket(0, 1);
-		}
 	}
 
+	/**
+	 * sets the motor associated with this encoder to {@link DcMotor.RunMode#STOP_AND_RESET_ENCODER} and then back its previous {@link DcMotor.RunMode}
+	 */
 	public void reset() {
 		output = new VelocityDataPacket(0, 1);
+		DcMotor.RunMode previousRunMode = motor.getMode();
 		motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 		previousPosition = motor.getCurrentPosition();
 		previousTime = System.nanoTime() / 1e9;
+		motor.setMode(previousRunMode);
 	}
 
 	public Direction getDirection() {
@@ -52,21 +50,6 @@ public class Encoder {
 		return this;
 	}
 
-	public enum Direction {
-		FORWARD((byte) 1),
-		REVERSE((byte) -1);
-
-		private final byte multiplier;
-
-		Direction(byte multiplier) {
-			this.multiplier = multiplier;
-		}
-
-		private byte getMultiplier() {
-			return multiplier;
-		}
-	}
-
 	private int getMultiplier() {
 		return getDirection().getMultiplier() * (motor.getDirection() == DcMotorSimple.Direction.FORWARD ? 1 : -1);
 	}
@@ -78,28 +61,6 @@ public class Encoder {
 	 */
 	public int getCurrentPosition() {
 		return motor.getCurrentPosition() * getMultiplier();
-	}
-
-	/**
-	 * <p>uses insertion sort</p>
-	 * sorts medians into a new array (to preserve the new data coming in) and then finds the median
-	 *
-	 * @return the median of medians
-	 */
-	private VelocityDataPacket internalGetVelocityFromMedians() {
-		VelocityDataPacket[] sortedMedians = medians;
-		int n = 5; //length of medians
-		for (int i = 1; i < n; i++) {
-			VelocityDataPacket key = sortedMedians[i];
-			int j = i - 1;
-			while (j >= 0 && sortedMedians[j].getVelocity() > key.getVelocity()) {
-				sortedMedians[j + 1] = sortedMedians[j];
-				j--;
-			}
-			sortedMedians[j + 1] = key;
-		}
-
-		return sortedMedians[2];
 	}
 
 	/**
@@ -130,9 +91,29 @@ public class Encoder {
 		output = velocity;
 	}
 
+	public enum Direction {
+		FORWARD((byte) 1),
+		REVERSE((byte) -1);
+
+		private final byte multiplier;
+
+		Direction(byte multiplier) {
+			this.multiplier = multiplier;
+		}
+
+		private byte getMultiplier() {
+			return multiplier;
+		}
+	}
+
 	public static class VelocityDataPacket {
 		private final double deltaTime;
 		private final int deltaPosition;
+
+		private VelocityDataPacket(int deltaPosition, double deltaTime) {
+			this.deltaPosition = deltaPosition;
+			this.deltaTime = deltaTime;
+		}
 
 		public double getDeltaTime() {
 			return deltaTime;
@@ -140,11 +121,6 @@ public class Encoder {
 
 		public int getDeltaPosition() {
 			return deltaPosition;
-		}
-
-		private VelocityDataPacket(int deltaPosition, double deltaTime) {
-			this.deltaPosition = deltaPosition;
-			this.deltaTime = deltaTime;
 		}
 
 		public double getVelocity() {

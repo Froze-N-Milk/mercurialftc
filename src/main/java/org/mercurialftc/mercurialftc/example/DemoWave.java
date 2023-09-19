@@ -4,16 +4,16 @@ import org.mercurialftc.mercurialftc.scheduler.commands.LambdaCommand;
 import org.mercurialftc.mercurialftc.silversurfer.encoderticksconverter.Units;
 import org.mercurialftc.mercurialftc.silversurfer.followable.Wave;
 import org.mercurialftc.mercurialftc.silversurfer.followable.WaveBuilder;
+import org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants.MecanumMotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.AngleDegrees;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
-import org.mercurialftc.mercurialftc.silversurfer.followable.MotionConstants;
 
 public class DemoWave {
 	public void makeWave() {
 		WaveBuilder waveBuilder = new WaveBuilder(
 				new Pose2D(),
 				Units.MILLIMETER,
-				new MotionConstants(0, 0, 0, 0, 0, 0)
+				new MecanumMotionConstants(0, 0, 0, 0)
 		)
 				.splineTo(10, 10, new AngleDegrees(100))
 				.waitFor(10)

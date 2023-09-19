@@ -1,7 +1,7 @@
 package org.mercurialftc.mercurialftc.silversurfer.follower;
 
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import org.mercurialftc.mercurialftc.silversurfer.followable.MotionConstants;
+import org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants.MecanumMotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Vector2D;
 import org.mercurialftc.mercurialftc.util.matrix.SimpleMatrix;
 
@@ -18,7 +18,7 @@ public class MecanumArbFollower extends ArbFollower {
 	 * @param br              back right motor
 	 * @param fr              front right motor
 	 */
-	public MecanumArbFollower(MotionConstants motionConstants, DcMotorEx fl, DcMotorEx bl, DcMotorEx br, DcMotorEx fr) {
+	public MecanumArbFollower(MecanumMotionConstants motionConstants, DcMotorEx fl, DcMotorEx bl, DcMotorEx br, DcMotorEx fr) {
 		super(motionConstants);
 		this.fl = fl;
 		this.bl = bl;

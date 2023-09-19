@@ -4,8 +4,8 @@ import org.mercurialftc.mercurialftc.silversurfer.followable.Followable;
 import org.mercurialftc.mercurialftc.silversurfer.followable.curvebuilder.curve.QuinticBezierCurve;
 import org.mercurialftc.mercurialftc.silversurfer.followable.markers.Marker;
 import org.mercurialftc.mercurialftc.silversurfer.followable.markers.MarkerBuilder;
+import org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants.MecanumMotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.ArcLengthHandler;
-import org.mercurialftc.mercurialftc.silversurfer.followable.MotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.followable.curvebuilder.motionprofile.MotionProfile;
 
 import java.util.ArrayList;
@@ -14,10 +14,10 @@ public class FollowableCurve extends Followable {
 	private QuinticBezierCurve[] curves;
 	private CurveBuilder curveBuilder;
 	private ArcLengthHandler arcLengthHandler;
-	private ArrayList<MotionConstants> motionConstantsArray;
+	private ArrayList<MecanumMotionConstants> motionConstantsArray;
 	private MotionProfile motionProfile;
 
-	protected FollowableCurve(CurveBuilder curveBuilder, ArrayList<MotionConstants> motionConstantsArray, ArrayList<MarkerBuilder> unfinishedMarkers) {
+	protected FollowableCurve(CurveBuilder curveBuilder, ArrayList<MecanumMotionConstants> motionConstantsArray, ArrayList<MarkerBuilder> unfinishedMarkers) {
 		this.curveBuilder = curveBuilder;
 		this.curves = curveBuilder.getResult();
 		this.arcLengthHandler = new ArcLengthHandler(this);
@@ -69,7 +69,7 @@ public class FollowableCurve extends Followable {
 		return arcLengthHandler;
 	}
 
-	public ArrayList<MotionConstants> getMotionConstantsArray() {
+	public ArrayList<MecanumMotionConstants> getMotionConstantsArray() {
 		return motionConstantsArray;
 	}
 

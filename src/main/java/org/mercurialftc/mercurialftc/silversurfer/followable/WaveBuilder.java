@@ -6,6 +6,7 @@ import org.mercurialftc.mercurialftc.silversurfer.encoderticksconverter.Units;
 import org.mercurialftc.mercurialftc.silversurfer.followable.curvebuilder.CurveBuilder;
 import org.mercurialftc.mercurialftc.silversurfer.followable.linebuilder.LineBuilder;
 import org.mercurialftc.mercurialftc.silversurfer.followable.markers.Marker;
+import org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants.MecanumMotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.followable.stopbuilder.StopBuilder;
 import org.mercurialftc.mercurialftc.silversurfer.followable.turnbuilder.TurnBuilder;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Angle;
@@ -17,14 +18,14 @@ import java.util.Arrays;
 public class WaveBuilder {
 
 	private final Units units;
-	private final MotionConstants motionConstants;
+	private final MecanumMotionConstants motionConstants;
 	private final ArrayList<Followable> followables;
 	private Pose2D previousPose;
 	private FollowableBuilder builder;
 	private BuildState buildState;
-	private MotionConstants buildingMotionConstants;
+	private MecanumMotionConstants buildingMotionConstants;
 
-	public WaveBuilder(Pose2D startPose, Units units, MotionConstants motionConstants) {
+	public WaveBuilder(Pose2D startPose, Units units, MecanumMotionConstants motionConstants) {
 		this.previousPose = startPose;
 		this.units = units;
 		this.motionConstants = motionConstants;
@@ -39,24 +40,20 @@ public class WaveBuilder {
 	 * @param translationalVelocity new velocity value. will be coerced into being between 0 and the initial max translational velocity value set.
 	 */
 	public WaveBuilder setVelocity(double translationalVelocity) {
-		buildingMotionConstants = new MotionConstants(
+		buildingMotionConstants = new MecanumMotionConstants(
 				Math.min(translationalVelocity, motionConstants.getMaxTranslationalVelocity()),
-				buildingMotionConstants.getMaxAngularVelocity(),
 				buildingMotionConstants.getMaxRotationalVelocity(),
 				buildingMotionConstants.getMaxTranslationalAcceleration(),
-				buildingMotionConstants.getMaxAngularAcceleration(),
 				buildingMotionConstants.getMaxRotationalAcceleration());
 		builder.setMotionConstants(buildingMotionConstants);
 		return this;
 	}
 
 	public WaveBuilder resetVelocity() {
-		buildingMotionConstants = new MotionConstants(
+		buildingMotionConstants = new MecanumMotionConstants(
 				motionConstants.getMaxTranslationalVelocity(),
-				buildingMotionConstants.getMaxAngularVelocity(),
 				buildingMotionConstants.getMaxRotationalVelocity(),
 				buildingMotionConstants.getMaxTranslationalAcceleration(),
-				buildingMotionConstants.getMaxAngularAcceleration(),
 				buildingMotionConstants.getMaxRotationalAcceleration());
 		builder.setMotionConstants(buildingMotionConstants);
 		return this;
@@ -68,24 +65,20 @@ public class WaveBuilder {
 	 * @param translationalAcceleration new acceleration value. will be coerced into being between 0 and the initial max translational acceleration value set.
 	 */
 	public WaveBuilder setAcceleration(double translationalAcceleration) {
-		buildingMotionConstants = new MotionConstants(
+		buildingMotionConstants = new MecanumMotionConstants(
 				buildingMotionConstants.getMaxTranslationalVelocity(),
-				buildingMotionConstants.getMaxAngularVelocity(),
 				buildingMotionConstants.getMaxRotationalVelocity(),
 				Math.min(translationalAcceleration, motionConstants.getMaxTranslationalAcceleration()),
-				buildingMotionConstants.getMaxAngularAcceleration(),
 				buildingMotionConstants.getMaxRotationalAcceleration());
 		builder.setMotionConstants(buildingMotionConstants);
 		return this;
 	}
 
 	public WaveBuilder resetAcceleration() {
-		buildingMotionConstants = new MotionConstants(
+		buildingMotionConstants = new MecanumMotionConstants(
 				buildingMotionConstants.getMaxTranslationalVelocity(),
-				buildingMotionConstants.getMaxAngularVelocity(),
 				buildingMotionConstants.getMaxRotationalVelocity(),
 				motionConstants.getMaxTranslationalAcceleration(),
-				buildingMotionConstants.getMaxAngularAcceleration(),
 				buildingMotionConstants.getMaxRotationalAcceleration());
 		builder.setMotionConstants(buildingMotionConstants);
 		return this;

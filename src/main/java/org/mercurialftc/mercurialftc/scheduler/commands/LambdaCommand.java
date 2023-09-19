@@ -1,10 +1,9 @@
 package org.mercurialftc.mercurialftc.scheduler.commands;
 
+import org.mercurialftc.mercurialftc.scheduler.OpModeEX;
 import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
@@ -14,6 +13,7 @@ public class LambdaCommand extends Command {
 	private final BooleanSupplier commandFinish;
 	private final Consumer<Boolean> commandEnd;
 	private final boolean interruptable;
+	private final Set<OpModeEX.OpModeEXRunStates> runStates;
 
 	/**
 	 * constructs a default lambda command
@@ -28,7 +28,8 @@ public class LambdaCommand extends Command {
 				() -> true,
 				(interrupted) -> {
 				},
-				true
+				true,
+				new HashSet<>()
 		);
 	}
 
@@ -38,7 +39,8 @@ public class LambdaCommand extends Command {
 			Runnable commandMethod,
 			BooleanSupplier commandFinish,
 			Consumer<Boolean> commandEnd,
-			boolean interruptable
+			boolean interruptable,
+			Set<OpModeEX.OpModeEXRunStates> runStates
 	) {
 		super(requiredSubsystems);
 		this.commandInit = commandInit;
@@ -46,6 +48,7 @@ public class LambdaCommand extends Command {
 		this.commandFinish = commandFinish;
 		this.commandEnd = commandEnd;
 		this.interruptable = interruptable;
+		this.runStates = runStates;
 	}
 
 	public LambdaCommand addRequirements(SubsystemInterface... requiredSubsystems) {
@@ -58,7 +61,20 @@ public class LambdaCommand extends Command {
 				this.commandMethod,
 				this.commandFinish,
 				this.commandEnd,
-				this.interruptable
+				this.interruptable,
+				this.runStates
+		);
+	}
+
+	public LambdaCommand addRequirements(Set<SubsystemInterface> requiredSubsystems) {
+		return new LambdaCommand(
+				requiredSubsystems,
+				this.commandInit,
+				this.commandMethod,
+				this.commandFinish,
+				this.commandEnd,
+				this.interruptable,
+				this.runStates
 		);
 	}
 
@@ -69,7 +85,8 @@ public class LambdaCommand extends Command {
 				this.commandMethod,
 				this.commandFinish,
 				this.commandEnd,
-				this.interruptable
+				this.interruptable,
+				this.runStates
 		);
 	}
 
@@ -80,7 +97,8 @@ public class LambdaCommand extends Command {
 				execute,
 				this.commandFinish,
 				this.commandEnd,
-				this.interruptable
+				this.interruptable,
+				this.runStates
 		);
 	}
 
@@ -91,7 +109,8 @@ public class LambdaCommand extends Command {
 				this.commandMethod,
 				finish,
 				this.commandEnd,
-				this.interruptable
+				this.interruptable,
+				this.runStates
 		);
 	}
 
@@ -102,7 +121,20 @@ public class LambdaCommand extends Command {
 				this.commandMethod,
 				this.commandFinish,
 				end,
-				this.interruptable
+				this.interruptable,
+				this.runStates
+		);
+	}
+
+	public LambdaCommand setInterruptable(boolean interruptable) {
+		return new LambdaCommand(
+				this.getRequiredSubsystems(),
+				this.commandInit,
+				this.commandMethod,
+				this.commandFinish,
+				this.commandEnd,
+				interruptable,
+				this.runStates
 		);
 	}
 
@@ -132,14 +164,29 @@ public class LambdaCommand extends Command {
 		return interruptable;
 	}
 
-	public LambdaCommand setInterruptable(boolean interruptable) {
+	@Override
+	public Set<OpModeEX.OpModeEXRunStates> getRunStates() {
+		return runStates;
+	}
+
+	public LambdaCommand setRunStates(OpModeEX.OpModeEXRunStates... runStates) {
 		return new LambdaCommand(
 				this.getRequiredSubsystems(),
 				this.commandInit,
 				this.commandMethod,
 				this.commandFinish,
 				this.commandEnd,
-				interruptable
+				this.interruptable,
+				new HashSet<>(Arrays.asList(runStates))
 		);
+	}
+
+	/**
+	 * ensures that Loop in included at queue time
+	 */
+	@Override
+	public void queue() {
+		if (runStates.isEmpty()) runStates.add(OpModeEX.OpModeEXRunStates.LOOP);
+		super.queue();
 	}
 }

@@ -1,8 +1,8 @@
 package org.mercurialftc.mercurialftc.silversurfer.followable.curvebuilder.motionprofile;
 
 import org.mercurialftc.mercurialftc.silversurfer.followable.Followable;
-import org.mercurialftc.mercurialftc.silversurfer.followable.MotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.followable.curvebuilder.FollowableCurve;
+import org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants.MecanumMotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.AngleRadians;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.ArcLengthHandler;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
@@ -81,7 +81,7 @@ public class MotionProfile {
 	private Followable.Output[] finaliseProfile() {
 		plannedPoints = divideArcLength();
 
-		double[] intersects = findIntersects();
+//		double[] intersects = findIntersects();
 
 		Followable.Output[] outputs = new Followable.Output[plannedPoints];
 
@@ -103,7 +103,7 @@ public class MotionProfile {
 
 		for (int i = 1; i < plannedPoints; i++) {
 
-			MotionConstants motionConstants = spline.getMotionConstantsArray().get(i);
+			MecanumMotionConstants motionConstants = spline.getMotionConstantsArray().get(i);
 			ArcLengthHandler.ArcLengthRelationship curveFromArcLength = arcLengthHandler.findCurveFromArcLength(i * arcSegmentLength);
 
 			AngleRadians targetRotationalPosition = curveFromArcLength.getCurve().getEndPose().getTheta();
@@ -121,15 +121,15 @@ public class MotionProfile {
 			double rotationalVelocity = Math.sqrt((previousRotationalVelocity * previousRotationalVelocity) + 2 * motionConstants.getMaxRotationalAcceleration() * Math.signum(rotationalError) * rotationalBreakControl * rotationDistance); // todo should do for now, possibly need to implement some scaling for the acceleration to dampen or smth
 			rotationalVelocity = Math.min(rotationalVelocity, motionConstants.getMaxRotationalVelocity());
 
-			double vMax = motionConstants.getMaxTranslationalVelocity();
+			double estimatedTangentialReduction = 1 + (Math.sqrt(2) - 1) / 2 + Math.cos(2 * estimatedRotationalPosition.findShortestDistance(curveFromArcLength.getResult().getHeading())) * ((Math.sqrt(2) - 1) / 2);
+
+			double vMax = motionConstants.getMaxTranslationalVelocity() / estimatedTangentialReduction;
 
 			double vMaxRotation = motionConstants.getMaxRotationalVelocity() / rotationalVelocity;
 			// todo make these optional
 			// todo add distance to nearest object
 
-			double isolatedConstraint = Math.min(vMax, vMaxRotation);
-
-			double finalVelocityConstraint = Math.min(isolatedConstraint, intersects[i]);
+			double finalVelocityConstraint = Math.min(vMax, vMaxRotation);
 
 			// ∆t = 2∆s / (v_i + v_{i−1})
 			double deltaT = (2 * arcSegmentLength) / (finalVelocityConstraint + previousVelocity);
@@ -154,6 +154,7 @@ public class MotionProfile {
 		return outputs;
 	}
 
+	/*
 	public double[] findIntersects() {
 		double[] outputVelocities = new double[plannedPoints];
 
@@ -177,6 +178,7 @@ public class MotionProfile {
 
 		return outputVelocities;
 	}
+	 */
 
 	/**
 	 * Sets {@link #arcSegmentLength} to be the new true length of each arc segment.
@@ -195,6 +197,7 @@ public class MotionProfile {
 		return result;
 	}
 
+	/*
 	private double findThreshIntersect(int i, double curvatureI, double curvatureI_1) {
 		double thresh = 0.0; // output
 
@@ -285,4 +288,5 @@ public class MotionProfile {
 
 		return thresh;
 	}
+	 */
 }

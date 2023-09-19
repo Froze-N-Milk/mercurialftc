@@ -1,5 +1,15 @@
 # MercurialFTC
 
+## Desugaring
+
+All versions of mercurialftc need desugaring enabled in order to be able to manage settings using TOML
+
+1. add `coreLibraryDesugaringEnabled true` to the top of your compileOptions block in `build.common.gradle`
+2. add `coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.9'` to the bottom of your dependencies block
+   in `build.dependencies.gradle`
+3. do not update desugar_jdk_libs, it is at the newest version for the version of the gradle AGP used in the
+   FTCRobotController SDK
+
 ## Unstable
 
 This branch is for live testing of new features, and is not reccomended for most users, if you want to use this branch
@@ -7,7 +17,7 @@ as a dependency for your FTCRobotController:
 
 1. add `maven { url "https://jitpack.io" } // Needed for mercurialftc` to your repositories block in
    `build.dependencies.gradle`
-2. add `implementation 'com.github.Froze-N-Milk:mercurialftc:v0.01'` to the bottom of your
+2. add `implementation 'com.github.Froze-N-Milk:mercurialftc:v0.04'` to the bottom of your
    dependencies block
    in
    `build.dependencies.gradle`

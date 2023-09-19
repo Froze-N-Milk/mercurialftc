@@ -1,19 +1,19 @@
 package org.mercurialftc.mercurialftc.example.drive;
 
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.mercurialftc.mercurialftc.scheduler.OpModeEX;
 import org.mercurialftc.mercurialftc.scheduler.triggers.gamepadex.ContinuousInput;
 import org.mercurialftc.mercurialftc.silversurfer.encoderticksconverter.EncoderTicksConverter;
 import org.mercurialftc.mercurialftc.silversurfer.encoderticksconverter.Units;
-import org.mercurialftc.mercurialftc.silversurfer.followable.MotionConstants;
+import org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants.MecanumMotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.follower.GVFWaveFollower;
 import org.mercurialftc.mercurialftc.silversurfer.follower.MecanumArbFollower;
-import org.mercurialftc.mercurialftc.silversurfer.follower.MecanumDriveBase;
+import org.mercurialftc.mercurialftc.silversurfer.follower.TuningMecanumDriveBase;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 import org.mercurialftc.mercurialftc.silversurfer.tracker.TrackerConstants;
 import org.mercurialftc.mercurialftc.silversurfer.tracker.TwoWheelTracker;
@@ -29,8 +29,8 @@ import org.mercurialftc.mercurialftc.util.hardware.cachinghardwaredevice.Caching
  * with an x input, y input and an angular velocity input</p>
  * <p>For auto this shows a guided vector field implementation</p>
  */
-public class DemoMecanumDriveBase extends MecanumDriveBase {
-	public DemoMecanumDriveBase(OpModeEX opModeEX, Pose2D startPose, ContinuousInput x, ContinuousInput y, ContinuousInput t) {
+public class DemoTuningMecanumDriveBase extends TuningMecanumDriveBase {
+	public DemoTuningMecanumDriveBase(OpModeEX opModeEX, Pose2D startPose, ContinuousInput x, ContinuousInput y, ContinuousInput t) {
 		super(opModeEX, startPose, x, y, t);
 	}
 
@@ -70,14 +70,20 @@ public class DemoMecanumDriveBase extends MecanumDriveBase {
 		double currentVoltage = voltageSensor.getVoltage();
 
 		// replace accelerations
-		motionConstants = new MotionConstants(
+		motionConstants = new MecanumMotionConstants(
 				translationalEnforcer.transformVelocity(currentVoltage), //start with these all set at 1
-				angularEnforcer.transformVelocity(currentVoltage),
 				rotationalEnforcer.transformVelocity(currentVoltage),
-				1,
 				1,
 				1
 		);
+
+		IMU_EX imu_ex = new IMU_EX(opModeEX.hardwareMap.get(IMU.class, "imu"), AngleUnit.RADIANS);
+		imu_ex.initialize(new IMU.Parameters(
+				new RevHubOrientationOnRobot(
+						RevHubOrientationOnRobot.LogoFacingDirection.UP,
+						RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD
+				)
+		));
 
 		// replace all, select the tracker which works best for you
 
@@ -99,7 +105,7 @@ public class DemoMecanumDriveBase extends MecanumDriveBase {
 //				new Encoder(br).setDirection(Encoder.Direction.FORWARD), // check that each encoder increases in the positive direction, if not change their directions!
 //				new Encoder(fr).setDirection(Encoder.Direction.REVERSE),
 //				new Encoder(fl).setDirection(Encoder.Direction.FORWARD),
-//				new IMU_EX(opModeEX.hardwareMap.get(IMU.class, "imu"), AngleUnit.RADIANS)
+//				imu_ex
 //		);
 
 		// two wheeled tracker
@@ -116,7 +122,7 @@ public class DemoMecanumDriveBase extends MecanumDriveBase {
 				),
 				new Encoder(br).setDirection(Encoder.Direction.FORWARD), // check that each encoder increases in the positive direction, if not change their directions!
 				new Encoder(fr).setDirection(Encoder.Direction.REVERSE),
-				new IMU_EX(opModeEX.hardwareMap.get(IMU.class, "imu"), AngleUnit.RADIANS)
+				imu_ex
 		);
 
 		mecanumArbFollower = new MecanumArbFollower(
@@ -128,18 +134,5 @@ public class DemoMecanumDriveBase extends MecanumDriveBase {
 				tracker,
 				mecanumArbFollower
 		);
-	}
-
-	public double getCurrent() {
-		double result = 0.0;
-		result += fl.getCurrent(CurrentUnit.AMPS);
-		result += bl.getCurrent(CurrentUnit.AMPS);
-		result += br.getCurrent(CurrentUnit.AMPS);
-		result += fr.getCurrent(CurrentUnit.AMPS);
-		return result / 4.0;
-	}
-
-	public VoltageSensor getVoltageSensor() {
-		return voltageSensor;
 	}
 }

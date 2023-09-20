@@ -121,6 +121,7 @@ public class CurveBuilder extends FollowableBuilder {
 	}
 
 	public Followable build() {
+		getResult();
 		outputTangents = new Vector2D[tangents.length];
 
 		for (int i = 0; i < tangents.length; i++) {

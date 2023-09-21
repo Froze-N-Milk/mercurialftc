@@ -89,7 +89,7 @@ public abstract class TuningMecanumDriveBase extends Subsystem {
 	 */
 	public Command followWave(Wave wave) {
 		return new LambdaCommand()
-				.addRequirements(this)
+				.setRequirements(this)
 				.init(() -> waveFollower.setWave(wave))
 				.execute(() -> waveFollower.update(opModeEX.getElapsedTime().seconds()))
 				.finish(waveFollower::isFinished)
@@ -104,7 +104,7 @@ public abstract class TuningMecanumDriveBase extends Subsystem {
 	 */
 	public Command followWaveInterruptible(Wave wave) {
 		return new LambdaCommand()
-				.addRequirements(this)
+				.setRequirements(this)
 				.init(() -> waveFollower.setWave(wave))
 				.execute(() -> waveFollower.update(opModeEX.getElapsedTime().seconds()))
 				.finish(() -> waveFollower.isFinished() || x.getValue() != 0.0 || y.getValue() != 0.0 || t.getValue() != 0.0)

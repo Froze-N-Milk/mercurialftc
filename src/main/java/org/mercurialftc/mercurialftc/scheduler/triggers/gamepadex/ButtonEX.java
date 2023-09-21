@@ -24,7 +24,7 @@ public class ButtonEX {
 	}
 
 	/**
-	 * must be called at the end of every teleop loop, or other environment in which the {@link GamepadEX} inputs are used, which should be handled by {@link GamepadEX} update method
+	 * must be called at the end of every teleop loop, or other environment in which the {@link GamepadEX} inputs are used, which should be handled by {@link GamepadEX} update method, so no need for a user to call this
 	 */
 	public void endLoopUpdate() {
 		previousState = buttonState();
@@ -58,10 +58,11 @@ public class ButtonEX {
 	 * @param toRun the command to run
 	 * @return self for chaining
 	 */
+	@SuppressWarnings("unused")
 	public ButtonEX whilePressed(@NotNull Command toRun) {
 		new Trigger(() -> (buttonState() && buttonState() != previousState),
 				new LambdaCommand()
-						.addRequirements(toRun.getRequiredSubsystems())
+						.setRequirements(toRun.getRequiredSubsystems())
 						.init(toRun::initialise)
 						.execute(toRun::execute)
 						.end(toRun::end)
@@ -78,10 +79,11 @@ public class ButtonEX {
 	 * @param toRun the command to run when the button
 	 * @return self for chaining
 	 */
+	@SuppressWarnings("unused")
 	public ButtonEX whileReleased(@NotNull Command toRun) {
 		new Trigger(() -> (buttonState() && buttonState() != previousState),
 				new LambdaCommand()
-						.addRequirements(toRun.getRequiredSubsystems())
+						.setRequirements(toRun.getRequiredSubsystems())
 						.init(toRun::initialise)
 						.execute(toRun::execute)
 						.end(toRun::end)
@@ -98,6 +100,7 @@ public class ButtonEX {
 	 * @param toRun the command to queue
 	 * @return self for chaining
 	 */
+	@SuppressWarnings("unused")
 	public ButtonEX onPress(@NotNull Command toRun) {
 		new Trigger(() -> (buttonState() && buttonState() != previousState), toRun);
 		return this;
@@ -110,6 +113,7 @@ public class ButtonEX {
 	 * @param toRun the command to queue
 	 * @return self for chaining
 	 */
+	@SuppressWarnings("unused")
 	public ButtonEX onRelease(@NotNull Command toRun) {
 		new Trigger(() -> (!buttonState() && buttonState() != previousState), toRun);
 		return this;
@@ -122,7 +126,8 @@ public class ButtonEX {
 	 * @param duration the duration of the debouncing to be applied, in seconds
 	 * @return returns the updated button object
 	 */
-	public ButtonEX debounce(@NotNull DebouncingType type, long duration) {
+	@SuppressWarnings("unused")
+	public ButtonEX debounce(@NotNull DebouncingType type, double duration) {
 		switch (type) {
 			case LEADING_EDGE:
 				leadingEdgeDebounce = (long) (duration * 1e9);

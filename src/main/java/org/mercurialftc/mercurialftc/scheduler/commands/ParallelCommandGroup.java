@@ -1,23 +1,30 @@
 package org.mercurialftc.mercurialftc.scheduler.commands;
 
+import org.mercurialftc.mercurialftc.scheduler.OpModeEX;
 import org.mercurialftc.mercurialftc.scheduler.Scheduler;
 import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
 
 import java.util.*;
 
+@SuppressWarnings("unused")
 public class ParallelCommandGroup extends Command {
 	private final Map<CommandSignature, Boolean> commands;
 	private final boolean interruptable;
+	private final Set<SubsystemInterface> requiredSubsystems;
+	private final Set<OpModeEX.OpModeEXRunStates> runStates;
 	private CommandSignature currentCommand;
 
+
 	public ParallelCommandGroup() {
-		super(new HashSet<>());
+		this.requiredSubsystems = new HashSet<>();
+		this.runStates = new HashSet<>(2);
 		interruptable = true;
 		this.commands = new HashMap<>();
 	}
 
-	private ParallelCommandGroup(HashMap<CommandSignature, Boolean> commands, Set<SubsystemInterface> requirements, boolean interruptable) {
-		super(requirements);
+	private ParallelCommandGroup(HashMap<CommandSignature, Boolean> commands, Set<SubsystemInterface> requirements, Set<OpModeEX.OpModeEXRunStates> runStates, boolean interruptable) {
+		this.requiredSubsystems = requirements;
+		this.runStates = runStates;
 		this.interruptable = interruptable;
 		this.commands = commands;
 	}
@@ -35,6 +42,16 @@ public class ParallelCommandGroup extends Command {
 	 * @return a new ParallelCommandGroup, with the added commands
 	 */
 	public ParallelCommandGroup addCommands(CommandSignature... commands) {
+		return addCommands(Arrays.asList(commands));
+	}
+
+	/**
+	 * non-mutating
+	 *
+	 * @param commands new commands to add
+	 * @return a new ParallelCommandGroup, with the added commands
+	 */
+	public ParallelCommandGroup addCommands(List<CommandSignature> commands) {
 		if (this.commands.containsValue(true)) {
 			throw new IllegalStateException(
 					"Commands cannot be added to a composition while it's running");
@@ -42,9 +59,10 @@ public class ParallelCommandGroup extends Command {
 
 		HashMap<CommandSignature, Boolean> newCommandMap = new HashMap<>(this.commands);
 
-
 		Set<SubsystemInterface> newRequirementSet = new HashSet<>(this.getRequiredSubsystems());
 		boolean newInterruptable = interruptable();
+		HashSet<OpModeEX.OpModeEXRunStates> newRunStates = new HashSet<>(2);
+
 
 		for (CommandSignature command : commands) {
 			if (!Collections.disjoint(command.getRequiredSubsystems(), getRequiredSubsystems())) {
@@ -54,11 +72,13 @@ public class ParallelCommandGroup extends Command {
 			newCommandMap.put(command, false);
 			newRequirementSet.addAll(command.getRequiredSubsystems());
 			newInterruptable &= command.interruptable();
+			newRunStates.addAll(command.getRunStates());
 		}
 
 		return new ParallelCommandGroup(
 				newCommandMap,
 				newRequirementSet,
+				newRunStates,
 				newInterruptable
 		);
 	}
@@ -102,6 +122,16 @@ public class ParallelCommandGroup extends Command {
 				}
 			}
 		}
+	}
+
+	@Override
+	public Set<SubsystemInterface> getRequiredSubsystems() {
+		return requiredSubsystems;
+	}
+
+	@Override
+	public Set<OpModeEX.OpModeEXRunStates> getRunStates() {
+		return runStates;
 	}
 
 	@Override

@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
+@SuppressWarnings("unused")
 public class LambdaCommand extends Command {
 	private final Runnable commandInit;
 	private final Runnable commandMethod;
@@ -14,6 +15,7 @@ public class LambdaCommand extends Command {
 	private final Consumer<Boolean> commandEnd;
 	private final boolean interruptable;
 	private final Set<OpModeEX.OpModeEXRunStates> runStates;
+	private final Set<SubsystemInterface> requiredSubsystems;
 
 	/**
 	 * constructs a default lambda command
@@ -29,7 +31,7 @@ public class LambdaCommand extends Command {
 				(interrupted) -> {
 				},
 				true,
-				new HashSet<>()
+				new HashSet<>(2)
 		);
 	}
 
@@ -42,7 +44,7 @@ public class LambdaCommand extends Command {
 			boolean interruptable,
 			Set<OpModeEX.OpModeEXRunStates> runStates
 	) {
-		super(requiredSubsystems);
+		this.requiredSubsystems = requiredSubsystems;
 		this.commandInit = commandInit;
 		this.commandMethod = commandMethod;
 		this.commandFinish = commandFinish;
@@ -51,7 +53,7 @@ public class LambdaCommand extends Command {
 		this.runStates = runStates;
 	}
 
-	public LambdaCommand addRequirements(SubsystemInterface... requiredSubsystems) {
+	public LambdaCommand setRequirements(SubsystemInterface... requiredSubsystems) {
 		Set<SubsystemInterface> requirements = this.getRequiredSubsystems();
 		Collections.addAll(requirements, requiredSubsystems);
 
@@ -66,7 +68,7 @@ public class LambdaCommand extends Command {
 		);
 	}
 
-	public LambdaCommand addRequirements(Set<SubsystemInterface> requiredSubsystems) {
+	public LambdaCommand setRequirements(Set<SubsystemInterface> requiredSubsystems) {
 		return new LambdaCommand(
 				requiredSubsystems,
 				this.commandInit,
@@ -80,7 +82,7 @@ public class LambdaCommand extends Command {
 
 	public LambdaCommand init(Runnable initialise) {
 		return new LambdaCommand(
-				this.getRequiredSubsystems(),
+				this.requiredSubsystems,
 				initialise,
 				this.commandMethod,
 				this.commandFinish,
@@ -92,7 +94,7 @@ public class LambdaCommand extends Command {
 
 	public LambdaCommand execute(Runnable execute) {
 		return new LambdaCommand(
-				this.getRequiredSubsystems(),
+				this.requiredSubsystems,
 				this.commandInit,
 				execute,
 				this.commandFinish,
@@ -104,7 +106,7 @@ public class LambdaCommand extends Command {
 
 	public LambdaCommand finish(BooleanSupplier finish) {
 		return new LambdaCommand(
-				this.getRequiredSubsystems(),
+				this.requiredSubsystems,
 				this.commandInit,
 				this.commandMethod,
 				finish,
@@ -116,7 +118,7 @@ public class LambdaCommand extends Command {
 
 	public LambdaCommand end(Consumer<Boolean> end) {
 		return new LambdaCommand(
-				this.getRequiredSubsystems(),
+				this.requiredSubsystems,
 				this.commandInit,
 				this.commandMethod,
 				this.commandFinish,
@@ -128,7 +130,7 @@ public class LambdaCommand extends Command {
 
 	public LambdaCommand setInterruptable(boolean interruptable) {
 		return new LambdaCommand(
-				this.getRequiredSubsystems(),
+				this.requiredSubsystems,
 				this.commandInit,
 				this.commandMethod,
 				this.commandFinish,
@@ -155,6 +157,11 @@ public class LambdaCommand extends Command {
 	}
 
 	@Override
+	public Set<SubsystemInterface> getRequiredSubsystems() {
+		return requiredSubsystems;
+	}
+
+	@Override
 	public void end(boolean interrupted) {
 		commandEnd.accept(interrupted);
 	}
@@ -166,12 +173,13 @@ public class LambdaCommand extends Command {
 
 	@Override
 	public Set<OpModeEX.OpModeEXRunStates> getRunStates() {
+		if (runStates.isEmpty()) runStates.add(OpModeEX.OpModeEXRunStates.LOOP);
 		return runStates;
 	}
 
 	public LambdaCommand setRunStates(OpModeEX.OpModeEXRunStates... runStates) {
 		return new LambdaCommand(
-				this.getRequiredSubsystems(),
+				this.requiredSubsystems,
 				this.commandInit,
 				this.commandMethod,
 				this.commandFinish,
@@ -181,12 +189,4 @@ public class LambdaCommand extends Command {
 		);
 	}
 
-	/**
-	 * ensures that Loop in included at queue time
-	 */
-	@Override
-	public void queue() {
-		if (runStates.isEmpty()) runStates.add(OpModeEX.OpModeEXRunStates.LOOP);
-		super.queue();
-	}
 }

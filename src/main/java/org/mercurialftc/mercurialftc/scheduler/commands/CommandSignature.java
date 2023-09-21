@@ -38,7 +38,7 @@ public interface CommandSignature {
 	 * @return the set of OpMode run states during which this command is allowed to run, defaults to just {@link org.mercurialftc.mercurialftc.scheduler.OpModeEX.OpModeEXRunStates#LOOP}
 	 */
 	default Set<OpModeEX.OpModeEXRunStates> getRunStates() {
-		HashSet<OpModeEX.OpModeEXRunStates> defaultSet = new HashSet<>();
+		HashSet<OpModeEX.OpModeEXRunStates> defaultSet = new HashSet<>(1);
 		defaultSet.add(OpModeEX.OpModeEXRunStates.LOOP);
 		return defaultSet;
 	}

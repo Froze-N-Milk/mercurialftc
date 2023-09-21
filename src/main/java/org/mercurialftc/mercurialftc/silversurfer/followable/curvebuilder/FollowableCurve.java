@@ -11,11 +11,11 @@ import org.mercurialftc.mercurialftc.silversurfer.followable.curvebuilder.motion
 import java.util.ArrayList;
 
 public class FollowableCurve extends Followable {
+	private final CurveBuilder curveBuilder;
+	private final ArcLengthHandler arcLengthHandler;
+	private final ArrayList<MecanumMotionConstants> motionConstantsArray;
+	private final MotionProfile motionProfile;
 	private QuinticBezierCurve[] curves;
-	private CurveBuilder curveBuilder;
-	private ArcLengthHandler arcLengthHandler;
-	private ArrayList<MecanumMotionConstants> motionConstantsArray;
-	private MotionProfile motionProfile;
 
 	protected FollowableCurve(CurveBuilder curveBuilder, ArrayList<MecanumMotionConstants> motionConstantsArray, ArrayList<MarkerBuilder> unfinishedMarkers) {
 		this.curveBuilder = curveBuilder;

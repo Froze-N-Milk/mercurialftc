@@ -103,8 +103,9 @@ public class MotionProfile {
 
 		for (int i = 1; i < plannedPoints; i++) {
 
-			MecanumMotionConstants motionConstants = spline.getMotionConstantsArray().get(i);
 			ArcLengthHandler.ArcLengthRelationship curveFromArcLength = arcLengthHandler.findCurveFromArcLength(i * arcSegmentLength);
+
+			MecanumMotionConstants motionConstants = spline.getMotionConstantsArray().get(curveFromArcLength.getCurveIndex());
 
 			AngleRadians targetRotationalPosition = curveFromArcLength.getCurve().getEndPose().getTheta();
 			AngleRadians estimatedRotationalPosition = previousEstimatedRotationalPosition.add(previousRotationalVelocity * previousDeltaT).toAngleRadians();

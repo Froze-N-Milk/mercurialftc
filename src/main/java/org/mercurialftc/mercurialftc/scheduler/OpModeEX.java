@@ -141,8 +141,8 @@ public abstract class OpModeEX extends OpMode {
 	@Override
 	public final void start() {
 		telemetry.clear();
-		elapsedTime.reset();
 		startEX();
+		elapsedTime.reset();
 	}
 
 	public abstract void loopEX();

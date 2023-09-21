@@ -13,6 +13,7 @@ import org.mercurialftc.mercurialftc.silversurfer.tracker.Tracker;
 public class GVFWaveFollower extends WaveFollower {
 	private final Tracker tracker;
 	private final ArbFollower arbFollower;
+	private Pose2D targetPose, currentPose;
 
 	public GVFWaveFollower(Tracker tracker, ArbFollower arbFollower) {
 		super(arbFollower.getMotionConstants());
@@ -26,10 +27,10 @@ public class GVFWaveFollower extends WaveFollower {
 
 	@Override
 	protected void followOutput(Followable.Output output, double loopTime) {
-		Pose2D currentPose = tracker.getPose2D();
+		currentPose = tracker.getPose2D();
 		Pose2D previousPose = tracker.getPreviousPose2D();
 
-		Pose2D targetPose = output.getPosition();
+		targetPose = output.getPosition();
 
 		Vector2D translationalDifference = new Vector2D(targetPose.getX() - currentPose.getX(), targetPose.getY() - currentPose.getY());
 		Angle modifiedTranslationVectorAngle = translationalDifference.add(output.getTranslationVector()).getHeading();
@@ -60,5 +61,11 @@ public class GVFWaveFollower extends WaveFollower {
 		modifiedRotationalVelocity = Math.min(modifiedRotationalVelocity, getMotionConstants().getMaxRotationalVelocity());
 
 		arbFollower.follow(modifiedTranslationalVector, modifiedRotationalVelocity);
+	}
+
+	@Override
+	public boolean isFinished() {
+		double translationalError = new Vector2D(targetPose.getX() - currentPose.getX(), targetPose.getY() - currentPose.getY()).getMagnitude();
+		return super.isFinished() && translationalError < 15;
 	}
 }

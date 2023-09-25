@@ -17,7 +17,7 @@ public abstract class Subsystem implements SubsystemInterface {
 		this.defaultCommand.queue();
 	}
 
-	public final Command getDefaultCommand() {
+	public Command getDefaultCommand() {
 		return defaultCommand;
 	}
 

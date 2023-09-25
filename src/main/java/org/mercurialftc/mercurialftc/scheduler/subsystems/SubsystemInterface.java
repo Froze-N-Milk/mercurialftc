@@ -4,28 +4,31 @@ import org.mercurialftc.mercurialftc.scheduler.commands.Command;
 
 public interface SubsystemInterface {
 	Command getDefaultCommand();
-	
+
 	/**
 	 * The code to be run when the OpMode is initialised.
+	 * should include hardware initialisation
 	 */
 	void init();
-	
+
 	/**
-	 * The method that is ran at the start of every loop to facilitate encoder reads
-	 * and any other calculations that need to be ran every loop regardless of the command
+	 * The method that is run at the start of every loop to facilitate encoder reads
+	 * and any other calculations that need to be run every loop regardless of the command.
+	 * Telemetry operations may also be run here.
+	 * Or logging operations.
 	 */
 	void periodic();
-	
+
 	/**
-	 * The default command run by a subsystem, will run every loop until a different command is scheduled over it
+	 * The execute method of the default command run by a subsystem, will run every loop until a different command is scheduled over it,
+	 * afterward, the default command will be queued up over the top
+	 * <p>you can override {@link #getDefaultCommand()} to gain greater control over the default command of a subsystem</p>
 	 */
 	void defaultCommandExecute();
-	
-	
+
+
 	/**
-	 * methods to be run when the subsystem is no longer used,
-	 * for instance when the option to close the subsystem is implemented at the end of an OpMode,
-	 * or when a new scheduler instance is forced.
+	 * methods to be run when the subsystem is no longer used.
 	 */
 	void close();
 }

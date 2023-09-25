@@ -1,6 +1,6 @@
 package org.mercurialftc.mercurialftc.util;
 
-import android.os.Environment;
+import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.jetbrains.annotations.NotNull;
 import org.mercurialftc.mercurialftc.scheduler.Scheduler;
 
@@ -9,6 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 
+@SuppressWarnings("unused")
 public class Log {
 	private final long startTime;
 	private final String now;
@@ -58,18 +59,17 @@ public class Log {
 	 */
 	@NotNull
 	private static String clearToDirectoryPath(String system, int storedLogs) {
-		String directoryPath = Environment.getExternalStorageDirectory().getPath() + "/FIRST/mercurialftc/logs/" + system;
-		File directory = new File(directoryPath);
+		File directory = new File(AppUtil.FIRST_FOLDER, "/mercurialftc/logs/" + system);
 		directory.mkdirs();
 
-		File outdatedLog = new File(directoryPath + "/" + system + (storedLogs - 1) + ".csv");
+		File outdatedLog = new File(directory, system + (storedLogs - 1) + ".csv");
 		outdatedLog.delete();
 		for (int i = storedLogs; i > 0; i--) {
-			File oldLog = new File(directoryPath + "/" + system + (i - 1) + ".csv");
-			File oldLogDestination = new File(directoryPath + "/" + system + (i) + ".csv");
+			File oldLog = new File(directory, system + (i - 1) + ".csv");
+			File oldLogDestination = new File(directory, system + (i) + ".csv");
 			oldLog.renameTo(oldLogDestination);
 		}
-		return directoryPath;
+		return directory.getPath();
 	}
 
 	public void updateLoop(boolean storeTime) {

@@ -1,6 +1,6 @@
 package org.mercurialftc.mercurialftc.scheduler;
 
-import android.os.Environment;
+import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.jetbrains.annotations.NotNull;
 import org.mercurialftc.mercurialftc.scheduler.commands.CommandSignature;
 import org.mercurialftc.mercurialftc.scheduler.configoptions.ConfigOptionsManager;
@@ -63,8 +63,7 @@ public class Scheduler {
 			return;
 		}
 
-		String directoryPath = Environment.getExternalStorageDirectory().getPath() + "/FIRST/mercurialftc/";
-		File configOptionsFile = new File(directoryPath, "configOptions.toml");
+		File configOptionsFile = new File(AppUtil.FIRST_FOLDER, "mercurialftc/configOptions.toml");
 
 		try {
 			/*

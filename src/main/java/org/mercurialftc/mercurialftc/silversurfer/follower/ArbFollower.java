@@ -10,7 +10,7 @@ public abstract class ArbFollower extends WaveFollower {
 	}
 
 	@Override
-	public final void followOutput(Followable.Output output, double loopTime) {
+	public void followOutput(Followable.Output output, double loopTime) {
 		follow(output.getTranslationVector(), output.getRotationalVelocity());
 	}
 

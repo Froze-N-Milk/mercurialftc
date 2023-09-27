@@ -108,7 +108,7 @@ public class CurveBuilder extends FollowableBuilder {
 		// do the last one
 		// 6A + 2tA + 4tB − 6B
 
-		tempA = segments.get(segments.size() - 2).getStartPose();
+		tempA = segments.get(segments.size() - 1).getStartPose();
 		tempB = segments.get(segments.size() - 1).getEndPose();
 
 		temp_tA = outputTangents[tangents.length - 2];

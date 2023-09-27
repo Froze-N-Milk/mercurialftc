@@ -19,6 +19,8 @@ public class GVFWaveFollower extends WaveFollower {
 		super(arbFollower.getMotionConstants());
 		this.tracker = tracker;
 		this.arbFollower = arbFollower;
+		this.targetPose = new Pose2D();
+		this.currentPose = tracker.getPose2D();
 	}
 
 	public ArbFollower getArbFollower() {
@@ -66,6 +68,6 @@ public class GVFWaveFollower extends WaveFollower {
 	@Override
 	public boolean isFinished() {
 		double translationalError = new Vector2D(targetPose.getX() - currentPose.getX(), targetPose.getY() - currentPose.getY()).getMagnitude();
-		return super.isFinished() && translationalError < 15;
+		return super.isFinished() && translationalError < 5;
 	}
 }

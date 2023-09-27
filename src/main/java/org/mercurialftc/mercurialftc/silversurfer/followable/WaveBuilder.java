@@ -45,7 +45,9 @@ public class WaveBuilder {
 				buildingMotionConstants.getMaxRotationalVelocity(),
 				buildingMotionConstants.getMaxTranslationalAcceleration(),
 				buildingMotionConstants.getMaxRotationalAcceleration());
-		builder.setMotionConstants(buildingMotionConstants);
+		if (builder != null) {
+			builder.setMotionConstants(buildingMotionConstants);
+		}
 		return this;
 	}
 
@@ -55,7 +57,10 @@ public class WaveBuilder {
 				buildingMotionConstants.getMaxRotationalVelocity(),
 				buildingMotionConstants.getMaxTranslationalAcceleration(),
 				buildingMotionConstants.getMaxRotationalAcceleration());
-		builder.setMotionConstants(buildingMotionConstants);
+
+		if (builder != null) {
+			builder.setMotionConstants(buildingMotionConstants);
+		}
 		return this;
 	}
 
@@ -70,7 +75,9 @@ public class WaveBuilder {
 				buildingMotionConstants.getMaxRotationalVelocity(),
 				Math.min(translationalAcceleration, motionConstants.getMaxTranslationalAcceleration()),
 				buildingMotionConstants.getMaxRotationalAcceleration());
-		builder.setMotionConstants(buildingMotionConstants);
+		if (builder != null) {
+			builder.setMotionConstants(buildingMotionConstants);
+		}
 		return this;
 	}
 
@@ -80,7 +87,9 @@ public class WaveBuilder {
 				buildingMotionConstants.getMaxRotationalVelocity(),
 				motionConstants.getMaxTranslationalAcceleration(),
 				buildingMotionConstants.getMaxRotationalAcceleration());
-		builder.setMotionConstants(buildingMotionConstants);
+		if (builder != null) {
+			builder.setMotionConstants(buildingMotionConstants);
+		}
 		return this;
 	}
 

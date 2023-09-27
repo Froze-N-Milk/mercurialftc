@@ -218,25 +218,28 @@ public class MotionProfile {
 
 			double rotationalError = previousEstimatedRotationalPosition.findShortestDistance(targetRotationalPosition); //shortest distance from estimated current position to target position
 
-			double rotationalBreakDistance = (previousRotationalVelocity * previousRotationalVelocity) / (2 * motionConstants.getMaxRotationalAcceleration());
+			double rotationalBreakDistance = deltaT * Math.abs(previousRotationalVelocity) + (previousRotationalVelocity * previousRotationalVelocity) / (2 * motionConstants.getMaxRotationalAcceleration());
 
-			int rotationalBreakControl = (int) Math.signum(Math.abs(rotationalError) - rotationalBreakDistance);
+			int rotationalBreakControl = (int) (Math.signum(Math.abs(rotationalError) - rotationalBreakDistance)); // if negative, we should be slowing down
 
-			double rotationalVelocity = previousRotationalVelocity + (deltaT * motionConstants.getMaxRotationalAcceleration() * Math.signum(rotationalError) * rotationalBreakControl);
+			double rotationalVelocity = previousRotationalVelocity + (deltaT * motionConstants.getMaxRotationalAcceleration() * Math.signum(rotationalError));
 
 			int velocitySignum = (int) Math.signum(rotationalVelocity);
 
+			double maxRotationalVelocityBreakLimited = Math.abs(Math.abs(previousRotationalVelocity) + (deltaT * motionConstants.getMaxRotationalAcceleration() * rotationalBreakControl));
 			double maxRotationalVelocityTranslationLimited = motionConstants.getMaxRotationalVelocity() * (outputs[i].getTranslationVector().getMagnitude() / motionConstants.getMaxTranslationalVelocity());
-			double finalRotationalVelocityConstraint = Math.min(maxRotationalVelocityTranslationLimited, Math.abs(rotationalVelocity)) * velocitySignum;
+			double finalRotationalVelocityConstraint = Math.min(maxRotationalVelocityTranslationLimited, maxRotationalVelocityBreakLimited);
+			finalRotationalVelocityConstraint = Math.min(finalRotationalVelocityConstraint, Math.abs(rotationalVelocity)) * velocitySignum;
+
 
 			previousRotationalVelocity = finalRotationalVelocityConstraint;
-			previousEstimatedRotationalPosition.add(finalRotationalVelocityConstraint * deltaT);
+			previousEstimatedRotationalPosition = previousEstimatedRotationalPosition.add(finalRotationalVelocityConstraint * deltaT + 0.5 * (previousRotationalVelocity - finalRotationalVelocityConstraint) * deltaT * 2).toAngleRadians();
 
 			outputs[i] = new Followable.Output(
 					outputs[i].getTranslationVector(),
 					finalRotationalVelocityConstraint,
 					outputs[i].getCallbackTime(),
-					outputs[i].getPosition().add(new Pose2D(0, 0, previousEstimatedRotationalPosition)),
+					new Pose2D(outputs[i].getPosition().getX(), outputs[i].getPosition().getY(), previousEstimatedRotationalPosition),
 					outputs[i].getDestination()
 			);
 		}

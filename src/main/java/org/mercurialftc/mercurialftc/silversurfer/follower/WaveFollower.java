@@ -13,6 +13,7 @@ public abstract class WaveFollower {
 	public WaveFollower(MecanumMotionConstants motionConstants) {
 		this.motionConstants = motionConstants;
 		currentTime = previousTime = 0;
+		finished = false;
 	}
 
 	public final Wave getWave() {
@@ -21,6 +22,7 @@ public abstract class WaveFollower {
 
 	public final void setWave(Wave wave) {
 		this.wave = wave;
+		this.finished = false;
 	}
 
 	public final void update(double currentTime) {

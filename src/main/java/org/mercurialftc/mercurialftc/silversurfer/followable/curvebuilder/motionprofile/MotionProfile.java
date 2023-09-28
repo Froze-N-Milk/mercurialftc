@@ -121,8 +121,8 @@ public class MotionProfile {
 
 			double estimatedTangentialReduction = 1 + (Math.sqrt(2) - 1) / 2 + Math.cos(2 * curveFromArcLength.getFirstDerivative().getHeading().getRadians()) * ((Math.sqrt(2) - 1) / 2);
 
-			double vMax = motionConstants.getMaxTranslationalVelocity() / estimatedTangentialReduction;
-//			double vMax = motionConstants.getMaxTranslationalVelocity();
+//			double vMax = motionConstants.getMaxTranslationalVelocity() / estimatedTangentialReduction;
+			double vMax = motionConstants.getMaxTranslationalVelocity();
 
 			double vMaxAccelerationLimited = Math.sqrt(previousVelocity * previousVelocity + 2 * motionConstants.getMaxTranslationalAcceleration() * arcSegmentLength);
 

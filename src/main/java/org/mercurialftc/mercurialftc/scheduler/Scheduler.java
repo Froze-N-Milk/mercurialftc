@@ -189,6 +189,15 @@ public class Scheduler {
 			}
 		}
 
+
+		// initialises all the commands that are due to be scheduled
+		for (CommandSignature command : commandsToSchedule) {
+			initialiseCommand(command);
+		}
+
+		// empties the queue
+		commandsToSchedule.clear();
+
 		// checks if any subsystems are not being used by any commands, if so, schedules the default command for that subsystem
 		for (SubsystemInterface subsystem : subsystems) {
 			if (!requirements.containsKey(subsystem)) {
@@ -200,6 +209,7 @@ public class Scheduler {
 		for (CommandSignature command : commandsToSchedule) {
 			initialiseCommand(command);
 		}
+
 		// empties the queue
 		commandsToSchedule.clear();
 

@@ -55,6 +55,7 @@ public abstract class Tracker {
 	/**
 	 * must be called frequently for it to be accurate
 	 */
+	@SuppressWarnings("unused")
 	public void updatePose() {
 		previousPose2D = pose2D;
 		updateValues();

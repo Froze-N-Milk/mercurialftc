@@ -137,6 +137,10 @@ public class Scheduler {
 	}
 
 	private void initialiseCommand(CommandSignature command) {
+		if (command == null) return;
+		if (isScheduled(command)) return;
+		if (!command.getRunStates().contains(runState)) return;
+
 		Set<SubsystemInterface> commandRequirements = command.getRequiredSubsystems();
 
 		// if the subsystems required by the command are not required, register it
@@ -165,9 +169,6 @@ public class Scheduler {
 	}
 
 	private void initialiseCommand(CommandSignature command, @NotNull Set<SubsystemInterface> commandRequirements) {
-		if (command == null) return;
-		if (isScheduled(command)) return;
-		if (!command.getRunStates().contains(runState)) return;
 		commands.add(command);
 		for (SubsystemInterface requirement : commandRequirements) {
 			requirements.put(requirement, command);

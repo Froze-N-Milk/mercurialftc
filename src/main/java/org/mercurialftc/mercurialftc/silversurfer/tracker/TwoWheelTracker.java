@@ -1,5 +1,6 @@
 package org.mercurialftc.mercurialftc.silversurfer.tracker;
 
+import org.jetbrains.annotations.NotNull;
 import org.mercurialftc.mercurialftc.silversurfer.encoderticksconverter.Units;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Angle;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
@@ -11,12 +12,14 @@ public class TwoWheelTracker extends Tracker {
 	private Angle currentTheta;
 	private double deltaLeft, deltaMiddle, deltaTheta, previousTheta;
 
-	public TwoWheelTracker(Pose2D initialPose, TrackerConstants.TwoWheelTrackerConstants trackerConstants, Encoder left, Encoder middle, HeadingSupplier headingSupplier) {
+	@SuppressWarnings("unused")
+	public TwoWheelTracker(Pose2D initialPose, TrackerConstants.TwoWheelTrackerConstants trackerConstants, Encoder left, Encoder middle, @NotNull HeadingSupplier headingSupplier) {
 		super(initialPose, trackerConstants);
 		this.left = left;
 		this.middle = middle;
 		this.headingSupplier = headingSupplier;
 		previousTheta = headingSupplier.getHeading().getRadians();
+		setInsistFrequency(1);
 	}
 
 	/**

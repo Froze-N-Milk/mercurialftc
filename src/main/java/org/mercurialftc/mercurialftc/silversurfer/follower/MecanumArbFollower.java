@@ -55,6 +55,14 @@ public class MecanumArbFollower extends ArbFollower {
 
 		SimpleMatrix outputMatrix = transformMatrix.multiply(scalingMatrix.multiply(inputValues));
 
+		double maxPower = 1;
+
+		for (int i = 0; i < outputMatrix.rows(); i++) {
+			maxPower = Math.max(maxPower, Math.abs(outputMatrix.getItem(i, 0)));
+		}
+
+		outputMatrix = outputMatrix.scalarMultiply(1 / maxPower);
+
 		fl.setPower(outputMatrix.getItem(0, 0));
 		bl.setPower(outputMatrix.getItem(1, 0));
 		br.setPower(outputMatrix.getItem(2, 0));

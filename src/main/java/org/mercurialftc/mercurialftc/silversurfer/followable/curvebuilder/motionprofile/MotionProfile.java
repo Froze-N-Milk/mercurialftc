@@ -14,8 +14,8 @@ import java.util.Arrays;
  * motion profile for splines
  */
 public class MotionProfile {
+	private final FollowableCurve spline;
 	private double arcSegmentLength;
-	private FollowableCurve spline;
 	private int plannedPoints;
 
 	public MotionProfile(FollowableCurve spline) {
@@ -86,11 +86,10 @@ public class MotionProfile {
 		Followable.Output[] outputs = new Followable.Output[plannedPoints];
 
 		ArcLengthHandler arcLengthHandler = spline.getArcLengthHandler();
-		double previousDeltaT = 0;
 
 		// handles first case
 		outputs[0] = new Followable.Output(
-				Vector2D.fromPolar(0, arcLengthHandler.findCurveFromArcLength(0).getResult().getHeading()), // the velocity output
+				Vector2D.fromPolar(0, arcLengthHandler.findCurveFromArcLength(0).getFirstDerivative().getHeading()), // the velocity output
 				0,
 				0,
 				arcLengthHandler.findCurveFromArcLength(0).getCurve().getStartPose(),
@@ -120,7 +119,7 @@ public class MotionProfile {
 //			double rotationalVelocity = Math.sqrt((previousRotationalVelocity * previousRotationalVelocity) + 2 * motionConstants.getMaxRotationalAcceleration() * Math.signum(rotationalError) * rotationalBreakControl * rotationDistance); // todo should do for now, possibly need to implement some scaling for the acceleration to dampen or smth
 //			rotationalVelocity = Math.min(rotationalVelocity, motionConstants.getMaxRotationalVelocity());
 
-			double estimatedTangentialReduction = 1 + (Math.sqrt(2) - 1) / 2 + Math.cos(2 * curveFromArcLength.getResult().getHeading().getRadians()) * ((Math.sqrt(2) - 1) / 2);
+			double estimatedTangentialReduction = 1 + (Math.sqrt(2) - 1) / 2 + Math.cos(2 * curveFromArcLength.getFirstDerivative().getHeading().getRadians()) * ((Math.sqrt(2) - 1) / 2);
 
 			double vMax = motionConstants.getMaxTranslationalVelocity() / estimatedTangentialReduction;
 
@@ -133,7 +132,7 @@ public class MotionProfile {
 			double finalVelocityConstraint = Math.min(vMaxAccelerationLimited, vMax);
 
 			outputs[i] = new Followable.Output(
-					Vector2D.fromPolar(finalVelocityConstraint, curveFromArcLength.getResult().getHeading()), // the velocity output
+					Vector2D.fromPolar(finalVelocityConstraint, curveFromArcLength.getFirstDerivative().getHeading()), // the velocity output
 					0,
 					0,
 					new Pose2D(curveFromArcLength.getResult().getX(), curveFromArcLength.getResult().getY(), 0),
@@ -147,7 +146,7 @@ public class MotionProfile {
 
 //		set the final output to be back at 0
 		outputs[outputs.length - 1] = new Followable.Output(
-				Vector2D.fromPolar(0, arcLengthHandler.findCurveFromArcLength(arcLengthHandler.getArcLength()).getResult().getHeading()),
+				Vector2D.fromPolar(0, arcLengthHandler.findCurveFromArcLength(arcLengthHandler.getArcLength()).getFirstDerivative().getHeading()),
 				0,
 				0,
 				arcLengthHandler.findCurveFromArcLength(arcLengthHandler.getArcLength()).getCurve().getEndPose(),

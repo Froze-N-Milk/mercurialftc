@@ -102,6 +102,14 @@ public class ArcLengthHandler {
 			return curve.result(t);
 		}
 
+		public Vector2D getFirstDerivative() {
+			return curve.firstDerivative(t);
+		}
+
+		public Vector2D getSecondDerivative() {
+			return curve.secondDerivative(t);
+		}
+
 		public double getCurvature() {
 			return curve.findCurvature(t);
 		}

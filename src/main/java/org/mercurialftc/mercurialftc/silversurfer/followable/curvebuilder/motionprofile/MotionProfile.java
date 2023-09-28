@@ -119,10 +119,10 @@ public class MotionProfile {
 //			double rotationalVelocity = Math.sqrt((previousRotationalVelocity * previousRotationalVelocity) + 2 * motionConstants.getMaxRotationalAcceleration() * Math.signum(rotationalError) * rotationalBreakControl * rotationDistance); // todo should do for now, possibly need to implement some scaling for the acceleration to dampen or smth
 //			rotationalVelocity = Math.min(rotationalVelocity, motionConstants.getMaxRotationalVelocity());
 
-//			double estimatedTangentialReduction = 1 + (Math.sqrt(2) - 1) / 2 + Math.cos(2 * curveFromArcLength.getFirstDerivative().getHeading().getRadians()) * ((Math.sqrt(2) - 1) / 2);
+			double estimatedTangentialReduction = 1 + (Math.sqrt(2) - 1) / 2 + Math.cos(2 * curveFromArcLength.getFirstDerivative().getHeading().getRadians()) * ((Math.sqrt(2) - 1) / 2);
 
-//			double vMax = motionConstants.getMaxTranslationalVelocity() / estimatedTangentialReduction;
-			double vMax = motionConstants.getMaxTranslationalVelocity();
+			double vMax = motionConstants.getMaxTranslationalVelocity() / estimatedTangentialReduction;
+//			double vMax = motionConstants.getMaxTranslationalVelocity();
 
 			double vMaxAccelerationLimited = Math.sqrt(previousVelocity * previousVelocity + 2 * motionConstants.getMaxTranslationalAcceleration() * arcSegmentLength);
 

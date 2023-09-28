@@ -31,9 +31,8 @@ public class LambdaCommand extends Command {
 				(interrupted) -> {
 				},
 				true,
-				new HashSet<>(0)
+				new HashSet<>(Collections.singletonList(OpModeEX.OpModeEXRunStates.LOOP))
 		);
-		setRunStates(OpModeEX.OpModeEXRunStates.LOOP);
 	}
 
 	private LambdaCommand(

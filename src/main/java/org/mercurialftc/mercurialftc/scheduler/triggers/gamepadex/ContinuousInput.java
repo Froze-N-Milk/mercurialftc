@@ -16,8 +16,7 @@ public class ContinuousInput {
 	public ContinuousInput(DoubleSupplier input) {
 		this.input = input;
 		this.deadZone = 0;
-		this.curveSupplier = new CurveSupplier() {
-		};
+		this.curveSupplier = (i) -> i; // default
 	}
 
 	public ContinuousInput(DoubleSupplier input, double deadZone, CurveSupplier curveSupplier) {
@@ -36,41 +35,44 @@ public class ContinuousInput {
 	}
 
 	/**
-	 * @param percentage range from 0 - 1
+	 * sets the deadzone threshold, which gets applied before curving
+	 * <p>all values with magnitude less than the threshold get moved to 0</p>
+	 *
+	 * @param deadzone the deadzone threshold, with domain [0 - 1]
 	 */
-	public void applyDeadZone(double percentage) {
-		if (percentage < 0) {
-			percentage = 0;
+	@SuppressWarnings("unused")
+	public void applyDeadZone(double deadzone) {
+		if (deadzone < 0) {
+			deadzone = 0;
 		}
-		if (percentage > 1) {
-			percentage = 1;
+		if (deadzone > 1) {
+			deadzone = 1;
 		}
-		this.deadZone = percentage;
+		this.deadZone = deadzone;
 	}
 
+	@SuppressWarnings("unused")
 	public CurveSupplier getCurveSupplier() {
 		return curveSupplier;
 	}
 
 	/**
 	 * set the method to run the input through a function
+	 * the curve gets applied after deadzoning
 	 *
 	 * @param curveSupplier the new curve supplier to use
 	 */
+	@SuppressWarnings("unused")
 	public void setCurveSupplier(CurveSupplier curveSupplier) {
 		this.curveSupplier = curveSupplier;
 	}
 
 	/**
-	 * sets the curve supplier to be parabolic
+	 * sets the curve supplier to be parabolic, see {@link #setCurveSupplier(CurveSupplier)}
 	 */
+	@SuppressWarnings("unused")
 	public void setParabolicCurve() {
-		this.curveSupplier = new CurveSupplier() {
-			@Override
-			public double curve(double input) {
-				return input * input * Math.signum(input);
-			}
-		};
+		this.curveSupplier = input -> input * input * Math.signum(input);
 	}
 
 	/**
@@ -79,6 +81,7 @@ public class ContinuousInput {
 	 * @param threshold the magnitude at which the trigger should run
 	 * @return a new trigger, that returns true when the magnitude of the continuous input is greater than or equal to threshold
 	 */
+	@SuppressWarnings("unused")
 	public Trigger thresholdTrigger(double threshold) {
 		return new Trigger(() -> Math.abs(getValue()) >= threshold);
 	}
@@ -89,6 +92,7 @@ public class ContinuousInput {
 	 * @param threshold the value at which this trigger should run
 	 * @return a new trigger, that returns true when the value of the continuous input is greater than or equal to threshold
 	 */
+	@SuppressWarnings("unused")
 	public Trigger positiveThresholdTrigger(double threshold) {
 		return new Trigger(() -> getValue() >= threshold);
 	}
@@ -99,6 +103,7 @@ public class ContinuousInput {
 	 * @param threshold the value at which the trigger should run
 	 * @return a new trigger, that returns true when the value of the continuous input is less than or equal to threshold
 	 */
+	@SuppressWarnings("unused")
 	public Trigger negativeThresholdTrigger(double threshold) {
 		return new Trigger(() -> getValue() <= threshold);
 	}
@@ -109,13 +114,12 @@ public class ContinuousInput {
 	 *
 	 * @return a new continuous input, with the input values inverted, carries all the features applied to the original
 	 */
+	@SuppressWarnings("unused")
 	public ContinuousInput invert() {
 		return new ContinuousInput(() -> -input.getAsDouble(), deadZone, curveSupplier);
 	}
 
 	public interface CurveSupplier {
-		default double curve(double input) {
-			return input;
-		}
+		double curve(double input);
 	}
 }

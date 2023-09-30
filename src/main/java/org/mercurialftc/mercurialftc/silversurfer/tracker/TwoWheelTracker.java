@@ -18,8 +18,10 @@ public class TwoWheelTracker extends Tracker {
 		this.left = left;
 		this.middle = middle;
 		this.headingSupplier = headingSupplier;
-		previousTheta = headingSupplier.getHeading().getRadians();
+		this.previousTheta = headingSupplier.getHeading().getRadians();
 		setInsistFrequency(1);
+		// sets the imu heading to the initial pose heading
+		resetHeading(initialPose.getTheta());
 	}
 
 	/**
@@ -63,6 +65,7 @@ public class TwoWheelTracker extends Tracker {
 		super.reset();
 		left.reset();
 		middle.reset();
+		resetHeading(super.getInitialPose2D().getTheta());
 	}
 
 	/**

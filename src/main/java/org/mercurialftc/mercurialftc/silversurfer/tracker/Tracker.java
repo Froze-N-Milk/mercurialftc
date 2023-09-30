@@ -14,7 +14,6 @@ public abstract class Tracker {
 	private final SimpleMatrix initialRotationMatrix;
 	private Pose2D pose2D, previousPose2D;
 	private int insistIndex, insistFrequency;
-
 	public Tracker(Pose2D initialPose, TrackerConstants trackerConstants) {
 		this.pose2D = initialPose;
 		this.initialPose2D = initialPose;
@@ -33,6 +32,10 @@ public abstract class Tracker {
 		insistIndex = 0;
 
 		this.previousPose2D = pose2D;
+	}
+
+	public Pose2D getInitialPose2D() {
+		return initialPose2D;
 	}
 
 	/**

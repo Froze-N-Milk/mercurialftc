@@ -105,7 +105,7 @@ public class LineBuilder extends FollowableBuilder {
 			double rotationalVelocity = Math.sqrt((previousRotationalVelocity * previousRotationalVelocity) + 2 * motionConstants.getMaxRotationalAcceleration() * Math.signum(rotationalError) * rotationalBreakControl * rotationDistance); // todo should do for now, possibly need to implement some scaling for the acceleration to dampen or smth
 			rotationalVelocity = Math.min(rotationalVelocity, motionConstants.getMaxRotationalVelocity());
 
-			double vMax = motionConstants.getMaxTranslationalVelocity();
+			double vMax = motionConstants.getMaxTranslationalYVelocity();
 
 			// just used previous rotational velocity bc otherwise things are too circular, may fix up later
 			double vMaxRotation = motionConstants.getMaxRotationalVelocity() / rotationalVelocity;
@@ -114,11 +114,11 @@ public class LineBuilder extends FollowableBuilder {
 
 			double translationalError = new Vector2D(targetPose.getX() - estimatedPose.getX(), targetPose.getY() - estimatedPose.getY()).getMagnitude();
 
-			double translationalBreakDistance = (previousVelocityConstraint * previousVelocityConstraint) / (2 * motionConstants.getMaxTranslationalVelocity());
+			double translationalBreakDistance = (previousVelocityConstraint * previousVelocityConstraint) / (2 * motionConstants.getMaxTranslationalYVelocity());
 
 			int translationalBreakControl = (int) Math.signum(Math.abs(translationalError) - translationalBreakDistance);
 
-			double vMaxStop = Math.sqrt((previousVelocityConstraint * previousVelocityConstraint) + 2 * motionConstants.getMaxTranslationalAcceleration() * translationalBreakControl * segmentOutputSizes[segmentIndex]);
+			double vMaxStop = Math.sqrt((previousVelocityConstraint * previousVelocityConstraint) + 2 * motionConstants.getMaxTranslationalYAcceleration() * translationalBreakControl * segmentOutputSizes[segmentIndex]);
 			;
 
 			double finalVelocityConstraint = Math.min(vMaxStop, Math.min(vMax, vMaxRotation));

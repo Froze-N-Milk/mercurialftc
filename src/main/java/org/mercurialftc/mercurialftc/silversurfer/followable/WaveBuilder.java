@@ -18,46 +18,49 @@ import java.util.Arrays;
 public class WaveBuilder {
 
 	private final Units units;
-	private final MecanumMotionConstants motionConstants;
 	private final ArrayList<Followable> followables;
 	private Pose2D previousPose;
 	private FollowableBuilder builder;
 	private BuildState buildState;
 	private MecanumMotionConstants buildingMotionConstants;
 
+
 	public WaveBuilder(Pose2D startPose, Units units, MecanumMotionConstants motionConstants) {
 		this.previousPose = startPose;
 		this.units = units;
-		this.motionConstants = motionConstants;
 		this.buildingMotionConstants = motionConstants;
 		followables = new ArrayList<>();
 		buildState = BuildState.IDLE;
+		scaleTranslationVelocity(0.8);
+		scaleRotationVelocity(0.8);
+		scaleTranslationAcceleration(0.8);
+		scaleRotationAcceleration(0.8);
 	}
 
 	/**
-	 * sets the max translational velocity for all subsequent build instructions see {@link #resetVelocity} to reset the translational velocity
+	 * scales the translational velocity for all further instructions, calling this method again will override the previously set value
+	 * <p>it is recommended to never use a value above 0.8, in order to ensure that the robot can always meet the demands created by the wave generator</p>
+	 * <p>call this with an argument of 1 (or 0.8 if using the default limits) to reset to full velocity</p>
 	 *
-	 * @param translationalVelocity new velocity value. will be coerced into being between 0 and the initial max translational velocity value set.
+	 * @param scalingMultiplier the scaling multiplier in the domain [0, 1]
+	 * @return self, for method chaining
 	 */
-	public WaveBuilder setVelocity(double translationalVelocity) {
+	@SuppressWarnings({"unused"})
+	public WaveBuilder scaleTranslationVelocity(double scalingMultiplier) {
 		buildingMotionConstants = new MecanumMotionConstants(
-				Math.min(translationalVelocity, motionConstants.getMaxTranslationalVelocity()),
+				scalingMultiplier,
+				buildingMotionConstants.getRotationalVelocityMultiplier(),
+				buildingMotionConstants.getTranslationalAccelerationMultiplier(),
+				buildingMotionConstants.getRotationalAccelerationMultiplier(),
+				buildingMotionConstants.getMaxTranslationalYVelocity(),
+				buildingMotionConstants.getMaxTranslationalXVelocity(),
+				buildingMotionConstants.getMaxTranslationalAngledVelocity(),
 				buildingMotionConstants.getMaxRotationalVelocity(),
-				buildingMotionConstants.getMaxTranslationalAcceleration(),
-				buildingMotionConstants.getMaxRotationalAcceleration());
-		if (builder != null) {
-			builder.setMotionConstants(buildingMotionConstants);
-		}
-		return this;
-	}
-
-	public WaveBuilder resetVelocity() {
-		buildingMotionConstants = new MecanumMotionConstants(
-				motionConstants.getMaxTranslationalVelocity(),
-				buildingMotionConstants.getMaxRotationalVelocity(),
-				buildingMotionConstants.getMaxTranslationalAcceleration(),
-				buildingMotionConstants.getMaxRotationalAcceleration());
-
+				buildingMotionConstants.getMaxTranslationalYAcceleration(),
+				buildingMotionConstants.getMaxTranslationalXAcceleration(),
+				buildingMotionConstants.getMaxTranslationalAngledAcceleration(),
+				buildingMotionConstants.getMaxRotationalAcceleration()
+		);
 		if (builder != null) {
 			builder.setMotionConstants(buildingMotionConstants);
 		}
@@ -65,34 +68,102 @@ public class WaveBuilder {
 	}
 
 	/**
-	 * sets the max translational acceleration for all subsequent build instructions see {@link #resetAcceleration} to reset the translational acceleration
+	 * scales the translational acceleration for all further instructions, calling this method again will override the previously set value
+	 * <p>it is recommended to never use a value above 0.8, in order to ensure that the robot can always meet the demands created by the wave generator</p>
+	 * <p>call this with an argument of 1 (or 0.8 if using the default limits) to reset to full acceleration</p>
 	 *
-	 * @param translationalAcceleration new acceleration value. will be coerced into being between 0 and the initial max translational acceleration value set.
+	 * @param scalingMultiplier the scaling multiplier in the domain [0, 1]
+	 * @return self, for method chaining
 	 */
-	public WaveBuilder setAcceleration(double translationalAcceleration) {
+	@SuppressWarnings("unused")
+	public WaveBuilder scaleTranslationAcceleration(double scalingMultiplier) {
 		buildingMotionConstants = new MecanumMotionConstants(
-				buildingMotionConstants.getMaxTranslationalVelocity(),
+				buildingMotionConstants.getTranslationalVelocityMultiplier(),
+				buildingMotionConstants.getRotationalVelocityMultiplier(),
+				scalingMultiplier,
+				buildingMotionConstants.getRotationalAccelerationMultiplier(),
+				buildingMotionConstants.getMaxTranslationalYVelocity(),
+				buildingMotionConstants.getMaxTranslationalXVelocity(),
+				buildingMotionConstants.getMaxTranslationalAngledVelocity(),
 				buildingMotionConstants.getMaxRotationalVelocity(),
-				Math.min(translationalAcceleration, motionConstants.getMaxTranslationalAcceleration()),
-				buildingMotionConstants.getMaxRotationalAcceleration());
+				buildingMotionConstants.getMaxTranslationalYAcceleration(),
+				buildingMotionConstants.getMaxTranslationalXAcceleration(),
+				buildingMotionConstants.getMaxTranslationalAngledAcceleration(),
+				buildingMotionConstants.getMaxRotationalAcceleration()
+		);
 		if (builder != null) {
 			builder.setMotionConstants(buildingMotionConstants);
 		}
 		return this;
 	}
 
-	public WaveBuilder resetAcceleration() {
+	/**
+	 * scales the rotational velocity for all further instructions, calling this method again will override the previously set value
+	 * <p>it is recommended to never use a value above 0.8, in order to ensure that the robot can always meet the demands created by the wave generator</p>
+	 * <p>call this with an argument of 1 (or 0.8 if using the default limits) to reset to full velocity</p>
+	 *
+	 * @param scalingMultiplier the scaling multiplier in the domain [0, 1]
+	 * @return self, for method chaining
+	 */
+	@SuppressWarnings("unused")
+	public WaveBuilder scaleRotationVelocity(double scalingMultiplier) {
 		buildingMotionConstants = new MecanumMotionConstants(
-				buildingMotionConstants.getMaxTranslationalVelocity(),
+				buildingMotionConstants.getTranslationalVelocityMultiplier(),
+				scalingMultiplier,
+				buildingMotionConstants.getTranslationalAccelerationMultiplier(),
+				buildingMotionConstants.getRotationalAccelerationMultiplier(),
+				buildingMotionConstants.getMaxTranslationalYVelocity(),
+				buildingMotionConstants.getMaxTranslationalXVelocity(),
+				buildingMotionConstants.getMaxTranslationalAngledVelocity(),
 				buildingMotionConstants.getMaxRotationalVelocity(),
-				motionConstants.getMaxTranslationalAcceleration(),
-				buildingMotionConstants.getMaxRotationalAcceleration());
+				buildingMotionConstants.getMaxTranslationalYAcceleration(),
+				buildingMotionConstants.getMaxTranslationalXAcceleration(),
+				buildingMotionConstants.getMaxTranslationalAngledAcceleration(),
+				buildingMotionConstants.getMaxRotationalAcceleration()
+		);
 		if (builder != null) {
 			builder.setMotionConstants(buildingMotionConstants);
 		}
 		return this;
 	}
 
+	/**
+	 * scales the rotational acceleration for all further instructions, calling this method again will override the previously set value
+	 * <p>it is recommended to never use a value above 0.8, in order to ensure that the robot can always meet the demands created by the wave generator</p>
+	 * <p>call this with an argument of 1 (or 0.8 if using the default limits) to reset to full acceleration</p>
+	 *
+	 * @param scalingMultiplier the scaling multiplier in the domain [0, 1]
+	 * @return self, for method chaining
+	 */
+	@SuppressWarnings("unused")
+	public WaveBuilder scaleRotationAcceleration(double scalingMultiplier) {
+		buildingMotionConstants = new MecanumMotionConstants(
+				buildingMotionConstants.getTranslationalVelocityMultiplier(),
+				buildingMotionConstants.getRotationalVelocityMultiplier(),
+				buildingMotionConstants.getTranslationalAccelerationMultiplier(),
+				scalingMultiplier,
+				buildingMotionConstants.getMaxTranslationalYVelocity(),
+				buildingMotionConstants.getMaxTranslationalXVelocity(),
+				buildingMotionConstants.getMaxTranslationalAngledVelocity(),
+				buildingMotionConstants.getMaxRotationalVelocity(),
+				buildingMotionConstants.getMaxTranslationalYAcceleration(),
+				buildingMotionConstants.getMaxTranslationalXAcceleration(),
+				buildingMotionConstants.getMaxTranslationalAngledAcceleration(),
+				buildingMotionConstants.getMaxRotationalAcceleration()
+		);
+		if (builder != null) {
+			builder.setMotionConstants(buildingMotionConstants);
+		}
+		return this;
+	}
+
+	/**
+	 * @param x
+	 * @param y
+	 * @param theta
+	 * @return self, for method chaining
+	 */
+	@SuppressWarnings("unused")
 	public WaveBuilder splineTo(double x, double y, Angle theta) {
 		handleState(BuildState.CURVE);
 		addSegment(units.toMillimeters(x), units.toMillimeters(y), theta);
@@ -103,8 +174,9 @@ public class WaveBuilder {
 	 * instructs the robot to wait in place
 	 *
 	 * @param seconds the time of the wait (in seconds)
-	 * @return
+	 * @return self, for method chaining
 	 */
+	@SuppressWarnings("unused")
 	public WaveBuilder waitFor(double seconds) {
 		handleState(BuildState.STOP);
 		StopBuilder stopBuilder = (StopBuilder) builder;
@@ -116,8 +188,9 @@ public class WaveBuilder {
 	 * turns to the provided angle
 	 *
 	 * @param theta the angle to turn to
-	 * @return
+	 * @return self, for method chaining
 	 */
+	@SuppressWarnings("unused")
 	public WaveBuilder turnTo(Angle theta) {
 		handleState(BuildState.TURN);
 		addSegment(previousPose.getX(), previousPose.getY(), theta);
@@ -128,14 +201,22 @@ public class WaveBuilder {
 	 * turns the provided angle, relative to previous angle
 	 *
 	 * @param theta the angle of the turn to be done
-	 * @return
+	 * @return self, for method chaining
 	 */
+	@SuppressWarnings("unused")
 	public WaveBuilder turn(Angle theta) {
 		handleState(BuildState.TURN);
 		addSegment(previousPose.getX(), previousPose.getY(), previousPose.getTheta().add(theta));
 		return this;
 	}
 
+	/**
+	 * @param x
+	 * @param y
+	 * @param theta
+	 * @return self, for method chaining
+	 */
+	@SuppressWarnings("unused")
 	public WaveBuilder lineTo(double x, double y, Angle theta) {
 		handleState(BuildState.LINE);
 		addSegment(x, y, theta);
@@ -153,8 +234,9 @@ public class WaveBuilder {
 	 *
 	 * @param offset
 	 * @param markerReached
-	 * @return
+	 * @return self, for method chaining
 	 */
+	@SuppressWarnings("unused")
 	public WaveBuilder addOffsetActionMarker(double offset, Command markerReached) {
 		builder.addOffsetCommandMarker(offset, Marker.MarkerType.COMMAND, markerReached);
 		return this;
@@ -165,8 +247,9 @@ public class WaveBuilder {
 	 *
 	 * @param offset
 	 * @param markerReached
-	 * @return
+	 * @return self, for method chaining
 	 */
+	@SuppressWarnings("unused")
 	public WaveBuilder addOffsetActionMarker(double offset, Runnable markerReached) {
 		builder.addOffsetCommandMarker(offset, Marker.MarkerType.LAMBDA, new LambdaCommand().init(markerReached));
 		return this;
@@ -204,6 +287,7 @@ public class WaveBuilder {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	public Wave build() {
 		handleState(BuildState.IDLE);
 

@@ -99,35 +99,16 @@ public class MotionProfile {
 		double previousVelocity = 0;
 
 		for (int i = 1; i < plannedPoints; i++) {
-
 			ArcLengthHandler.ArcLengthRelationship curveFromArcLength = arcLengthHandler.findCurveFromArcLength(i * arcSegmentLength);
 
 			MecanumMotionConstants motionConstants = spline.getMotionConstantsArray().get(curveFromArcLength.getCurveIndex());
 
-//			AngleRadians targetRotationalPosition = curveFromArcLength.getCurve().getEndPose().getTheta();
-//			AngleRadians estimatedRotationalPosition = previousEstimatedRotationalPosition.add(previousRotationalVelocity * previousDeltaT).toAngleRadians();
-//
-//			double rotationalError = estimatedRotationalPosition.findShortestDistance(targetRotationalPosition); //shortest distance from estimated current position to target position
-//
-//			double rotationalBreakDistance = (previousRotationalVelocity * previousRotationalVelocity) / (2 * motionConstants.getMaxRotationalAcceleration());
-//
-//			int rotationalBreakControl = (int) Math.signum(Math.abs(rotationalError) - rotationalBreakDistance);
-//
-//			double rotationDistance = previousEstimatedRotationalPosition.findShortestDistance(estimatedRotationalPosition); // out of date by one planning point
-//
-//			// todo should do for now, possibly need to implement some scaling for the acceleration to dampen or smth
-//			double rotationalVelocity = Math.sqrt((previousRotationalVelocity * previousRotationalVelocity) + 2 * motionConstants.getMaxRotationalAcceleration() * Math.signum(rotationalError) * rotationalBreakControl * rotationDistance); // todo should do for now, possibly need to implement some scaling for the acceleration to dampen or smth
-//			rotationalVelocity = Math.min(rotationalVelocity, motionConstants.getMaxRotationalVelocity());
+			MecanumMotionConstants.DirectionOfTravelLimiter directionOfTravelLimiter = motionConstants.makeDirectionOfTravelLimiter(curveFromArcLength.getFirstDerivative().getHeading());
 
-			// todo test
-			double estimatedTangentialReduction = 1 + (Math.sqrt(2) - 1) / 2 + Math.cos(2 * curveFromArcLength.getFirstDerivative().getHeading().getRadians()) * ((Math.sqrt(2) - 1) / 2);
+			double vMax = directionOfTravelLimiter.getVelocity();
 
-			double vMax = motionConstants.getMaxTranslationalVelocity() / estimatedTangentialReduction;
-//			double vMax = motionConstants.getMaxTranslationalVelocity();
+			double vMaxAccelerationLimited = Math.sqrt(previousVelocity * previousVelocity + 2 * directionOfTravelLimiter.getAcceleration() * arcSegmentLength);
 
-			double vMaxAccelerationLimited = Math.sqrt(previousVelocity * previousVelocity + 2 * (motionConstants.getMaxTranslationalAcceleration() / estimatedTangentialReduction) * arcSegmentLength);
-
-//			double vMaxRotationLimited = motionConstants.getMaxRotationalVelocity() / rotationalVelocity;
 //			// todo add distance to nearest object
 
 			double finalVelocityConstraint = Math.min(vMaxAccelerationLimited, vMax);
@@ -164,10 +145,9 @@ public class MotionProfile {
 			Vector2D translationVector = outputs[i].getTranslationVector();
 			double translationalVelocity = translationVector.getMagnitude();
 
-			// todo test
-			double estimatedTangentialReduction = 1 + (Math.sqrt(2) - 1) / 2 + Math.cos(2 * curveFromArcLength.getFirstDerivative().getHeading().getRadians()) * ((Math.sqrt(2) - 1) / 2);
+			MecanumMotionConstants.DirectionOfTravelLimiter directionOfTravelLimiter = motionConstants.makeDirectionOfTravelLimiter(curveFromArcLength.getFirstDerivative().getHeading());
 
-			double vMaxAccelerationLimited = Math.sqrt(previousVelocity * previousVelocity + 2 * (motionConstants.getMaxTranslationalAcceleration() / estimatedTangentialReduction) * arcSegmentLength);
+			double vMaxAccelerationLimited = Math.sqrt(previousVelocity * previousVelocity + 2 * directionOfTravelLimiter.getAcceleration() * arcSegmentLength);
 
 			double finalVelocityConstraint = Math.min(translationalVelocity, vMaxAccelerationLimited);
 
@@ -230,7 +210,7 @@ public class MotionProfile {
 			int velocitySignum = (int) Math.signum(rotationalVelocity);
 
 			double maxRotationalVelocityBreakLimited = Math.abs(Math.abs(previousRotationalVelocity) + (deltaT * motionConstants.getMaxRotationalAcceleration() * rotationalBreakControl));
-			double maxRotationalVelocityTranslationLimited = motionConstants.getMaxRotationalVelocity() * (outputs[i].getTranslationVector().getMagnitude() / motionConstants.getMaxTranslationalVelocity());
+			double maxRotationalVelocityTranslationLimited = motionConstants.getMaxRotationalVelocity() * (outputs[i].getTranslationVector().getMagnitude() / motionConstants.getMaxTranslationalYVelocity());
 			double finalRotationalVelocityConstraint = Math.min(maxRotationalVelocityTranslationLimited, maxRotationalVelocityBreakLimited);
 			finalRotationalVelocityConstraint = Math.min(finalRotationalVelocityConstraint, Math.abs(rotationalVelocity)) * velocitySignum;
 

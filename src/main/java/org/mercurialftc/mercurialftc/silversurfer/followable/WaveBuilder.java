@@ -31,16 +31,11 @@ public class WaveBuilder {
 		this.buildingMotionConstants = motionConstants;
 		followables = new ArrayList<>();
 		buildState = BuildState.IDLE;
-		scaleTranslationVelocity(0.8);
-		scaleRotationVelocity(0.8);
-		scaleTranslationAcceleration(0.8);
-		scaleRotationAcceleration(0.8);
 	}
 
 	/**
 	 * scales the translational velocity for all further instructions, calling this method again will override the previously set value
-	 * <p>it is recommended to never use a value above 0.8, in order to ensure that the robot can always meet the demands created by the wave generator</p>
-	 * <p>call this with an argument of 1 (or 0.8 if using the default limits) to reset to full velocity</p>
+	 * <p>call this with an argument of 1 to reset to full velocity</p>
 	 *
 	 * @param scalingMultiplier the scaling multiplier in the domain [0, 1]
 	 * @return self, for method chaining
@@ -69,8 +64,7 @@ public class WaveBuilder {
 
 	/**
 	 * scales the translational acceleration for all further instructions, calling this method again will override the previously set value
-	 * <p>it is recommended to never use a value above 0.8, in order to ensure that the robot can always meet the demands created by the wave generator</p>
-	 * <p>call this with an argument of 1 (or 0.8 if using the default limits) to reset to full acceleration</p>
+	 * <p>call this with an argument of 1 to reset to full acceleration</p>
 	 *
 	 * @param scalingMultiplier the scaling multiplier in the domain [0, 1]
 	 * @return self, for method chaining
@@ -99,8 +93,7 @@ public class WaveBuilder {
 
 	/**
 	 * scales the rotational velocity for all further instructions, calling this method again will override the previously set value
-	 * <p>it is recommended to never use a value above 0.8, in order to ensure that the robot can always meet the demands created by the wave generator</p>
-	 * <p>call this with an argument of 1 (or 0.8 if using the default limits) to reset to full velocity</p>
+	 * <p>call this with an argument of 1 to reset to full velocity</p>
 	 *
 	 * @param scalingMultiplier the scaling multiplier in the domain [0, 1]
 	 * @return self, for method chaining
@@ -127,10 +120,12 @@ public class WaveBuilder {
 		return this;
 	}
 
+//	 <p>it is recommended to never use a value above 0.8, in order to ensure that the robot can always meet the demands created by the wave generator</p>
+
+
 	/**
 	 * scales the rotational acceleration for all further instructions, calling this method again will override the previously set value
-	 * <p>it is recommended to never use a value above 0.8, in order to ensure that the robot can always meet the demands created by the wave generator</p>
-	 * <p>call this with an argument of 1 (or 0.8 if using the default limits) to reset to full acceleration</p>
+	 * <p>call this with an argument of 1 to reset to full acceleration</p>
 	 *
 	 * @param scalingMultiplier the scaling multiplier in the domain [0, 1]
 	 * @return self, for method chaining

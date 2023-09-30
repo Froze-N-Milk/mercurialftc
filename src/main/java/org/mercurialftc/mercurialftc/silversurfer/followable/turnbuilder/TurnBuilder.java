@@ -74,7 +74,7 @@ public class TurnBuilder extends FollowableBuilder {
 
 	private Followable.Output[] profile() {
 		Followable.Output[] outputs = new Followable.Output[segmentBreakpoints[segmentBreakpoints.length - 1]];
-		AngleRadians previousEstimatedRotationalPosition = segments.get(0).getPreviousPose().getTheta();
+		AngleRadians previousEstimatedRotationalPosition = segments.get(0).getPreviousPose().getTheta().toAngleRadians();
 		double previousRotationalVelocity = 0;
 		double previousDeltaT = 0;
 		double time = 0;
@@ -85,7 +85,7 @@ public class TurnBuilder extends FollowableBuilder {
 
 			MecanumMotionConstants motionConstants = getMotionConstantsArray().get(segmentIndex);
 
-			AngleRadians targetRotationalPosition = segment.getDestinationPose().getTheta();
+			AngleRadians targetRotationalPosition = segment.getDestinationPose().getTheta().toAngleRadians();
 			AngleRadians estimatedRotationalPosition = previousEstimatedRotationalPosition.add(previousRotationalVelocity * previousDeltaT).toAngleRadians();
 
 			double rotationalError = estimatedRotationalPosition.findShortestDistance(targetRotationalPosition); //shortest distance from estimated current position to target position

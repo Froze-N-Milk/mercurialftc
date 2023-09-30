@@ -189,7 +189,7 @@ public class MotionProfile {
 		// forward pass rotation
 
 		double previousRotationalVelocity = 0;
-		AngleRadians previousEstimatedRotationalPosition = arcLengthHandler.findCurveFromArcLength(0).getCurve().getStartPose().getTheta();
+		AngleRadians previousEstimatedRotationalPosition = arcLengthHandler.findCurveFromArcLength(0).getCurve().getStartPose().getTheta().toAngleRadians();
 
 		for (int i = 1; i < plannedPoints; i++) {
 			ArcLengthHandler.ArcLengthRelationship curveFromArcLength = arcLengthHandler.findCurveFromArcLength(i * arcSegmentLength);
@@ -197,7 +197,7 @@ public class MotionProfile {
 
 			double deltaT = (outputs[i].getCallbackTime() - outputs[i - 1].getCallbackTime());
 
-			AngleRadians targetRotationalPosition = curveFromArcLength.getCurve().getEndPose().getTheta();
+			AngleRadians targetRotationalPosition = curveFromArcLength.getCurve().getEndPose().getTheta().toAngleRadians();
 
 			double rotationalError = previousEstimatedRotationalPosition.findShortestDistance(targetRotationalPosition); //shortest distance from estimated current position to target position
 

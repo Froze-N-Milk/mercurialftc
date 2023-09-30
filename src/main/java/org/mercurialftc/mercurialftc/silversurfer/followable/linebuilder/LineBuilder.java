@@ -90,8 +90,8 @@ public class LineBuilder extends FollowableBuilder {
 			Pose2D targetPose = segment.getDestinationPose();
 			Pose2D estimatedPose = previousEstimatedPose2D.add(previousVectorOutput.getX() * previousDeltaT, previousVectorOutput.getY() * previousDeltaT, new AngleRadians(previousRotationalVelocity * previousDeltaT));
 
-			AngleRadians targetRotationalPosition = segment.getDestinationPose().getTheta();
-			AngleRadians estimatedRotationalPosition = estimatedPose.getTheta();
+			AngleRadians targetRotationalPosition = segment.getDestinationPose().getTheta().toAngleRadians();
+			AngleRadians estimatedRotationalPosition = estimatedPose.getTheta().toAngleRadians();
 
 			double rotationalError = estimatedRotationalPosition.findShortestDistance(targetRotationalPosition); //shortest distance from estimated current position to target position
 

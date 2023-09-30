@@ -1,5 +1,10 @@
 package org.mercurialftc.mercurialftc.silversurfer.geometry;
 
+import androidx.annotation.NonNull;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Locale;
+
 public class AngleRadians extends Angle {
 	private static final double ROTATION = 2.0 * Math.PI;
 
@@ -71,5 +76,12 @@ public class AngleRadians extends Angle {
 	@Override
 	public final AngleRadians toAngleRadians() {
 		return this;
+	}
+
+	@NonNull
+	@NotNull
+	@Override
+	public String toString() {
+		return String.format(Locale.ENGLISH, "type: RADIANS, theta: %f", getTheta());
 	}
 }

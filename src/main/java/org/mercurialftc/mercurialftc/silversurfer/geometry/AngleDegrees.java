@@ -1,5 +1,10 @@
 package org.mercurialftc.mercurialftc.silversurfer.geometry;
 
+import androidx.annotation.NonNull;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Locale;
+
 public class AngleDegrees extends Angle {
 
 	public AngleDegrees(double theta) {
@@ -70,5 +75,12 @@ public class AngleDegrees extends Angle {
 	@Override
 	public final AngleDegrees toAngleDegrees() {
 		return this;
+	}
+
+	@NonNull
+	@NotNull
+	@Override
+	public String toString() {
+		return String.format(Locale.ENGLISH, "type: DEGREES, theta: %f", getTheta());
 	}
 }

@@ -1,5 +1,7 @@
 package org.mercurialftc.mercurialftc.silversurfer.geometry;
 
+import androidx.annotation.Nullable;
+
 /**
  * An absolute angle, in either radians or degrees
  */
@@ -70,4 +72,11 @@ public abstract class Angle {
 	public abstract AngleRadians toAngleRadians();
 
 	public abstract AngleDegrees toAngleDegrees();
+
+	@Override
+	public boolean equals(@Nullable @org.jetbrains.annotations.Nullable Object obj) {
+		if (!(obj instanceof Angle)) return false;
+		Angle other = (Angle) obj;
+		return this.getRadians() == other.getRadians();
+	}
 }

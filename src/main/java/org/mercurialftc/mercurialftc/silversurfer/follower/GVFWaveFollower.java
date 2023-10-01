@@ -31,10 +31,10 @@ public class GVFWaveFollower extends WaveFollower {
 		Pose2D errorPose = output.getPosition().subtract(tracker.getPose2D());
 		Vector2D errorVector = new Vector2D(errorPose.getX(), errorPose.getY());
 
-		accumulatedTranslationalError.add(errorVector.add(errorVector.subtract(previousTranslationalError)));
-
 		Vector2D transformedTranslationVector = output.getTranslationVector();
-		transformedTranslationVector = transformedTranslationVector.add(accumulatedTranslationalError);
+		transformedTranslationVector = transformedTranslationVector.add(errorVector).add(accumulatedTranslationalError);
+
+		accumulatedTranslationalError.add(errorVector.add(errorVector.subtract(previousTranslationalError)));
 
 		MecanumMotionConstants.DirectionOfTravelLimiter directionOfTravelLimiter = arbFollower.getMotionConstants().makeDirectionOfTravelLimiter(transformedTranslationVector.getHeading());
 		transformedTranslationVector = Vector2D.fromPolar(Math.min(directionOfTravelLimiter.getVelocity(), transformedTranslationVector.getMagnitude()), transformedTranslationVector.getHeading());
@@ -51,9 +51,9 @@ public class GVFWaveFollower extends WaveFollower {
 		double acceptableError = tracker.getPreviousPose2D().getTheta().findShortestDistance(tracker.getPose2D().getTheta());
 //		double rotationalVelocity = acceptableError / loopTime;
 
-		accumulatedRotationalError += rotationalError + rotationalError - previousRotationalError;
-
 		transformedRotationalVelocity += rotationalError + accumulatedRotationalError;
+
+		accumulatedRotationalError += rotationalError + rotationalError - previousRotationalError;
 
 		transformedRotationalVelocity = Math.min(getMotionConstants().getMaxRotationalVelocity(), Math.max(-getMotionConstants().getMaxRotationalVelocity(), transformedRotationalVelocity));
 

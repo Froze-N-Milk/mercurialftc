@@ -31,12 +31,12 @@ public class GVFWaveFollower extends WaveFollower {
 		Pose2D errorPose = output.getPosition().subtract(tracker.getPose2D());
 		Vector2D errorVector = new Vector2D(errorPose.getX(), errorPose.getY());
 
-		accumulatedTranslationalError.add(errorVector.subtract(previousTranslationalError));
-
 		Vector2D transformedTranslationVector = output.getTranslationVector();
 		if (errorVector.getMagnitude() > 3) {
-			transformedTranslationVector = transformedTranslationVector.add(accumulatedTranslationalError);
+			transformedTranslationVector = transformedTranslationVector.add(accumulatedTranslationalError).add(errorVector);
 		}
+
+		accumulatedTranslationalError.add(errorVector.subtract(previousTranslationalError));
 
 		MecanumMotionConstants.DirectionOfTravelLimiter directionOfTravelLimiter = arbFollower.getMotionConstants().makeDirectionOfTravelLimiter(transformedTranslationVector.getHeading());
 		transformedTranslationVector = Vector2D.fromPolar(Math.min(directionOfTravelLimiter.getVelocity(), transformedTranslationVector.getMagnitude()), transformedTranslationVector.getHeading());
@@ -53,11 +53,12 @@ public class GVFWaveFollower extends WaveFollower {
 		double acceptableError = tracker.getPreviousPose2D().getTheta().findShortestDistance(tracker.getPose2D().getTheta());
 //		double rotationalVelocity = acceptableError / loopTime;
 
+		if (Math.abs(rotationalError) > Math.abs(acceptableError)) {
+			transformedRotationalVelocity += rotationalError + accumulatedRotationalError;
+		}
+
 		accumulatedRotationalError += rotationalError - previousRotationalError;
 
-		if (Math.abs(rotationalError) > Math.abs(acceptableError)) {
-			transformedRotationalVelocity += accumulatedRotationalError;
-		}
 		transformedRotationalVelocity = Math.min(getMotionConstants().getMaxRotationalVelocity(), Math.max(-getMotionConstants().getMaxRotationalVelocity(), transformedRotationalVelocity));
 
 //		double maxRotationalVelocity = Math.min(getMotionConstants().getMaxRotationalVelocity(), rotationalVelocity + loopTime * getMotionConstants().getMaxRotationalAcceleration());

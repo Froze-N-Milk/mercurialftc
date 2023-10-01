@@ -63,9 +63,10 @@ public abstract class Angle {
 
 	/**
 	 * finds the shortest distance from this to other
+	 * uses the units of the angled this is called from
 	 *
 	 * @param other
-	 * @return
+	 * @return the shortest distance between this and other in the range [-pi, pi] or [-180, 180]
 	 */
 	public abstract double findShortestDistance(Angle other);
 

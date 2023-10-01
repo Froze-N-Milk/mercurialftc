@@ -33,9 +33,9 @@ public class MotionProfile {
 
 	private Followable.Output[] optimise() {
 		double startTime = System.nanoTime() / 1E9; //current relative time in seconds
-		double allowableOptimisationTime = 0.2 + (spline.getCurves().length + 1) * 0.1; //seconds
+		double allowableOptimisationTime = 0.5 + (spline.getCurves().length + 1) * 0.2; //seconds
 
-		double optimisationThreshold = 0.01; // todo find value, in seconds, this should be fine
+		double optimisationThreshold = 0.01;
 
 		double[] deltaSteps = new double[spline.getCurves().length + 1];
 		Arrays.fill(deltaSteps, 2);
@@ -75,6 +75,11 @@ public class MotionProfile {
 			}
 
 		}
+
+//		todo remove
+//		System.out.println("best");
+//		finaliseProfile();
+
 		return bestTrajectory;
 	}
 
@@ -86,16 +91,24 @@ public class MotionProfile {
 
 		ArcLengthHandler arcLengthHandler = spline.getArcLengthHandler();
 
+		// forwards pass for initial velocity and forwards acceleration
+
+		ArcLengthHandler.ArcLengthRelationship previousCurveFromArcLength = arcLengthHandler.findCurveFromArcLength(0);
+
 		// handles first case
 		outputs[0] = new Followable.Output(
-				Vector2D.fromPolar(0, arcLengthHandler.findCurveFromArcLength(0).getFirstDerivative().getHeading()), // the velocity output
+				Vector2D.fromPolar(0, previousCurveFromArcLength.getFirstDerivative().getHeading()), // the velocity output
 				0,
 				0,
-				arcLengthHandler.findCurveFromArcLength(0).getCurve().getStartPose(),
-				arcLengthHandler.findCurveFromArcLength(0).getCurve().getStartPose()
+				previousCurveFromArcLength.getCurve().getStartPose(),
+				previousCurveFromArcLength.getCurve().getStartPose()
 		);
 
 		double previousVelocity = 0;
+
+//		todo remove
+//		double maxCurvature = 0;
+//		double associatedChangeInAngle = 0;
 
 		for (int i = 1; i < plannedPoints; i++) {
 			ArcLengthHandler.ArcLengthRelationship curveFromArcLength = arcLengthHandler.findCurveFromArcLength(i * arcSegmentLength);
@@ -106,11 +119,22 @@ public class MotionProfile {
 
 			double vMax = directionOfTravelLimiter.getVelocity();
 
-			double vMaxAccelerationLimited = Math.sqrt(previousVelocity * previousVelocity + 2 * directionOfTravelLimiter.getAcceleration() * arcSegmentLength);
+			double changeInAngle = previousCurveFromArcLength.getFirstDerivative().getHeading().findShortestDistance(curveFromArcLength.getFirstDerivative().getHeading());
+//			todo remove
+//			if (curveFromArcLength.getCurvature() > maxCurvature) {
+//				maxCurvature = curveFromArcLength.getCurvature();
+//				associatedChangeInAngle = changeInAngle;
+//			}
+
+			double vChangeInAngleLimiter = ((Math.PI / 2) - Math.min(Math.PI / 2, Math.abs(changeInAngle))) / (Math.PI / 2);
+
+			vMax *= vChangeInAngleLimiter;
+
+			double vAccelerationLimited = Math.sqrt(previousVelocity * previousVelocity + 2 * directionOfTravelLimiter.getAcceleration() * arcSegmentLength);
 
 			// todo add distance to nearest object
 
-			double finalVelocityConstraint = Math.min(vMaxAccelerationLimited, vMax);
+			double finalVelocityConstraint = Math.min(vAccelerationLimited, vMax);
 
 			outputs[i] = new Followable.Output(
 					Vector2D.fromPolar(finalVelocityConstraint, curveFromArcLength.getFirstDerivative().getHeading()), // the velocity output
@@ -121,7 +145,12 @@ public class MotionProfile {
 			);
 
 			previousVelocity = finalVelocityConstraint;
+			previousCurveFromArcLength = curveFromArcLength;
 		}
+//		todo remove
+//		System.out.println(maxCurvature);
+//		System.out.println(associatedChangeInAngle);
+//		System.out.println();
 
 //		do a backward pass for accelerational constraints
 

@@ -31,8 +31,10 @@ public class GVFWaveFollower extends WaveFollower {
 		if (errorVector.getMagnitude() > 3) {
 			transformedTranslationVector = transformedTranslationVector.add(errorVector);
 		}
+		
+		MecanumMotionConstants.DirectionOfTravelLimiter directionOfTravelLimiter = arbFollower.getMotionConstants().makeDirectionOfTravelLimiter(transformedTranslationVector.getHeading());
+		transformedTranslationVector = Vector2D.fromPolar(Math.min(directionOfTravelLimiter.getVelocity(), transformedTranslationVector.getMagnitude()), transformedTranslationVector.getHeading());
 
-//		MecanumMotionConstants.DirectionOfTravelLimiter directionOfTravelLimiter = arbFollower.getMotionConstants().makeDirectionOfTravelLimiter(transformedTranslationVector.getHeading());
 
 //		double targetVelocity = transformedTranslationVector.getMagnitude();
 //		double maxVelocity = Math.min(directionOfTravelLimiter.getVelocity(), velocityVector.getMagnitude() + loopTime * directionOfTravelLimiter.getAcceleration());
@@ -48,6 +50,7 @@ public class GVFWaveFollower extends WaveFollower {
 		if (Math.abs(rotationalError) > Math.abs(acceptableError)) {
 			transformedRotationalVelocity += rotationalError;
 		}
+		transformedRotationalVelocity = Math.min(getMotionConstants().getMaxRotationalVelocity(), Math.max(-getMotionConstants().getMaxRotationalVelocity(), transformedRotationalVelocity));
 
 //		double maxRotationalVelocity = Math.min(getMotionConstants().getMaxRotationalVelocity(), rotationalVelocity + loopTime * getMotionConstants().getMaxRotationalAcceleration());
 //		double minRotationalVelocity = Math.max(-getMotionConstants().getMaxRotationalVelocity(), rotationalVelocity - loopTime * getMotionConstants().getMaxRotationalAcceleration());

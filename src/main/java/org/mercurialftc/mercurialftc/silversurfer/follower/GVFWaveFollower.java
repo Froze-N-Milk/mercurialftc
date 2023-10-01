@@ -29,7 +29,7 @@ public class GVFWaveFollower extends WaveFollower {
 
 		Vector2D transformedTranslationVector = output.getTranslationVector();
 		if (errorVector.getMagnitude() > 3) {
-			transformedTranslationVector = transformedTranslationVector.add(errorVector.scalarMultiply(loopTime));
+			transformedTranslationVector = transformedTranslationVector.add(errorVector.scalarMultiply(errorVector.getMagnitude()));
 		}
 
 		MecanumMotionConstants.DirectionOfTravelLimiter directionOfTravelLimiter = arbFollower.getMotionConstants().makeDirectionOfTravelLimiter(transformedTranslationVector.getHeading());
@@ -48,7 +48,7 @@ public class GVFWaveFollower extends WaveFollower {
 //		double rotationalVelocity = acceptableError / loopTime;
 
 		if (Math.abs(rotationalError) > Math.abs(acceptableError)) {
-			transformedRotationalVelocity += rotationalError * loopTime;
+			transformedRotationalVelocity += rotationalError * rotationalError;
 		}
 		transformedRotationalVelocity = Math.min(getMotionConstants().getMaxRotationalVelocity(), Math.max(-getMotionConstants().getMaxRotationalVelocity(), transformedRotationalVelocity));
 

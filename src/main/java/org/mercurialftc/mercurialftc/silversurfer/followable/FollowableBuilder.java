@@ -20,6 +20,7 @@ public abstract class FollowableBuilder {
 		return motionConstantsArray;
 	}
 
+	@SuppressWarnings("unused")
 	protected MecanumMotionConstants getMotionConstants() {
 		return motionConstants;
 	}
@@ -43,6 +44,7 @@ public abstract class FollowableBuilder {
 	 * @param previousPose
 	 * @param destinationPose
 	 */
+	@SuppressWarnings("unused")
 	protected abstract void addSegment(Pose2D previousPose, Pose2D destinationPose);
 
 	/**
@@ -52,6 +54,7 @@ public abstract class FollowableBuilder {
 	 * @param destinationPose
 	 * @return
 	 */
+	@SuppressWarnings("unused")
 	public final FollowableBuilder addFollowableSegment(Pose2D previousPose, Pose2D destinationPose) {
 		addSegment(previousPose, destinationPose);
 		updateMotionConstantsArray();
@@ -64,5 +67,6 @@ public abstract class FollowableBuilder {
 	 * @param offset
 	 * @param markerReached
 	 */
+	@SuppressWarnings("unused")
 	protected abstract void addOffsetCommandMarker(double offset, Marker.MarkerType markerType, Command markerReached);
 }

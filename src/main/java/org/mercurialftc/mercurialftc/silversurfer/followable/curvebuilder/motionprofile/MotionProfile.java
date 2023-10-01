@@ -126,7 +126,7 @@ public class MotionProfile {
 //				associatedChangeInAngle = changeInAngle;
 //			}
 
-			double vChangeInAngleLimiter = ((Math.PI / 2) - Math.min(Math.PI / 2, Math.abs(changeInAngle))) / (Math.PI / 2);
+			double vChangeInAngleLimiter = Math.PI - (Math.abs(changeInAngle) / (Math.PI / 2));
 
 			vMax *= vChangeInAngleLimiter;
 

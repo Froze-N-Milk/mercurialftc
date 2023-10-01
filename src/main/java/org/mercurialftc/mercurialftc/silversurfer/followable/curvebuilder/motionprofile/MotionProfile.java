@@ -1,5 +1,6 @@
 package org.mercurialftc.mercurialftc.silversurfer.followable.curvebuilder.motionprofile;
 
+import org.jetbrains.annotations.NotNull;
 import org.mercurialftc.mercurialftc.silversurfer.followable.Followable;
 import org.mercurialftc.mercurialftc.silversurfer.followable.curvebuilder.FollowableCurve;
 import org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants.MecanumMotionConstants;
@@ -64,7 +65,6 @@ public class MotionProfile {
 
 					int errorSignum = (int) Math.signum(error);
 
-					// todo idk if this will work or not lmao, prolly super inefficient too (should work now ig??)
 					if (errorSignum < 0) {
 						elongationFactors[i] -= deltaSteps[i];
 						deltaSteps[i] *= 0.5;
@@ -78,10 +78,9 @@ public class MotionProfile {
 		return bestTrajectory;
 	}
 
+	@NotNull
 	private Followable.Output[] finaliseProfile() {
 		plannedPoints = divideArcLength();
-
-//		double[] intersects = findIntersects();
 
 		Followable.Output[] outputs = new Followable.Output[plannedPoints];
 
@@ -109,7 +108,7 @@ public class MotionProfile {
 
 			double vMaxAccelerationLimited = Math.sqrt(previousVelocity * previousVelocity + 2 * directionOfTravelLimiter.getAcceleration() * arcSegmentLength);
 
-//			// todo add distance to nearest object
+			// todo add distance to nearest object
 
 			double finalVelocityConstraint = Math.min(vMaxAccelerationLimited, vMax);
 

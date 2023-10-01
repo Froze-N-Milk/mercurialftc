@@ -29,9 +29,9 @@ public class GVFWaveFollower extends WaveFollower {
 
 		Vector2D transformedTranslationVector = output.getTranslationVector();
 		if (errorVector.getMagnitude() > 3) {
-			transformedTranslationVector = transformedTranslationVector.add(errorVector);
+			transformedTranslationVector = transformedTranslationVector.add(errorVector.scalarMultiply(loopTime));
 		}
-		
+
 		MecanumMotionConstants.DirectionOfTravelLimiter directionOfTravelLimiter = arbFollower.getMotionConstants().makeDirectionOfTravelLimiter(transformedTranslationVector.getHeading());
 		transformedTranslationVector = Vector2D.fromPolar(Math.min(directionOfTravelLimiter.getVelocity(), transformedTranslationVector.getMagnitude()), transformedTranslationVector.getHeading());
 
@@ -48,7 +48,7 @@ public class GVFWaveFollower extends WaveFollower {
 //		double rotationalVelocity = acceptableError / loopTime;
 
 		if (Math.abs(rotationalError) > Math.abs(acceptableError)) {
-			transformedRotationalVelocity += rotationalError;
+			transformedRotationalVelocity += rotationalError * loopTime;
 		}
 		transformedRotationalVelocity = Math.min(getMotionConstants().getMaxRotationalVelocity(), Math.max(-getMotionConstants().getMaxRotationalVelocity(), transformedRotationalVelocity));
 
@@ -57,7 +57,7 @@ public class GVFWaveFollower extends WaveFollower {
 
 //		transformedRotationalVelocity = Math.max(minRotationalVelocity, Math.min(transformedRotationalVelocity, maxRotationalVelocity));
 
-		inPosition = errorVector.getMagnitude() < 3 && rotationalError < 0.025;
+		inPosition = errorVector.getMagnitude() < 5 && rotationalError < 0.025;
 
 		Followable.Output tranformedOutput = new Followable.Output(
 				transformedTranslationVector,

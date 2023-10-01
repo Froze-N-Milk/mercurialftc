@@ -1,5 +1,6 @@
 package org.mercurialftc.mercurialftc.silversurfer.followable.curvebuilder;
 
+import org.jetbrains.annotations.NotNull;
 import org.mercurialftc.mercurialftc.silversurfer.followable.Followable;
 import org.mercurialftc.mercurialftc.silversurfer.followable.curvebuilder.curve.QuinticBezierCurve;
 import org.mercurialftc.mercurialftc.silversurfer.followable.markers.Marker;
@@ -15,13 +16,15 @@ public class FollowableCurve extends Followable {
 	private final ArcLengthHandler arcLengthHandler;
 	private final ArrayList<MecanumMotionConstants> motionConstantsArray;
 	private final MotionProfile motionProfile;
+	private final MecanumMotionConstants absoluteMotionConstants;
 	private QuinticBezierCurve[] curves;
 
-	protected FollowableCurve(CurveBuilder curveBuilder, ArrayList<MecanumMotionConstants> motionConstantsArray, ArrayList<MarkerBuilder> unfinishedMarkers) {
+	protected FollowableCurve(@NotNull CurveBuilder curveBuilder, ArrayList<MecanumMotionConstants> motionConstantsArray, @NotNull ArrayList<MarkerBuilder> unfinishedMarkers, MecanumMotionConstants absoluteMotionConstants) {
 		this.curveBuilder = curveBuilder;
 		this.curves = curveBuilder.getResult();
 		this.arcLengthHandler = new ArcLengthHandler(this);
 		this.motionConstantsArray = motionConstantsArray;
+		this.absoluteMotionConstants = absoluteMotionConstants;
 		this.motionProfile = new MotionProfile(this);
 		setOutputs(motionProfile.profile()); // runs the motion profiler on this spline
 
@@ -75,5 +78,9 @@ public class FollowableCurve extends Followable {
 
 	public CurveBuilder getCurveBuilder() {
 		return curveBuilder;
+	}
+
+	public MecanumMotionConstants getAbsoluteMotionConstants() {
+		return absoluteMotionConstants;
 	}
 }

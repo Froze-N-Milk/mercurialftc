@@ -33,7 +33,7 @@ public class MotionProfile {
 
 	private Followable.Output[] optimise() {
 		double startTime = System.nanoTime() / 1E9; //current relative time in seconds
-		double allowableOptimisationTime = 0.5 + (spline.getCurves().length + 1) * 0.2; //seconds
+		double allowableOptimisationTime = 0.3 + (spline.getCurves().length + 1) * 0.1; //seconds
 
 		double optimisationThreshold = 0.01;
 
@@ -238,10 +238,12 @@ public class MotionProfile {
 			int velocitySignum = (int) Math.signum(rotationalVelocity);
 
 			double maxRotationalVelocityBreakLimited = Math.abs(Math.abs(previousRotationalVelocity) + (deltaT * motionConstants.getMaxRotationalAcceleration() * rotationalBreakControl));
-			double maxRotationalVelocityTranslationLimited = motionConstants.getMaxRotationalVelocity() * (outputs[i].getTranslationVector().getMagnitude() / motionConstants.getMaxTranslationalYVelocity());
+
+			MecanumMotionConstants.DirectionOfTravelLimiter absoluteDirectionOfTravelLimiter = spline.getAbsoluteMotionConstants().makeDirectionOfTravelLimiter(outputs[i].getTranslationVector().getHeading());
+
+			double maxRotationalVelocityTranslationLimited = motionConstants.getMaxRotationalVelocity() * (outputs[i].getTranslationVector().getMagnitude() / absoluteDirectionOfTravelLimiter.getVelocity());
 			double finalRotationalVelocityConstraint = Math.min(maxRotationalVelocityTranslationLimited, maxRotationalVelocityBreakLimited);
 			finalRotationalVelocityConstraint = Math.min(finalRotationalVelocityConstraint, Math.abs(rotationalVelocity)) * velocitySignum;
-
 
 			previousRotationalVelocity = finalRotationalVelocityConstraint;
 			previousEstimatedRotationalPosition = previousEstimatedRotationalPosition.add(finalRotationalVelocityConstraint * deltaT + 0.5 * (previousRotationalVelocity - finalRotationalVelocityConstraint) * deltaT * 2).toAngleRadians();

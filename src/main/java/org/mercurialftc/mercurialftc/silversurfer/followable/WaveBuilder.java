@@ -15,20 +15,21 @@ import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+@SuppressWarnings("unused")
 public class WaveBuilder {
 
 	private final Units units;
 	private final ArrayList<Followable> followables;
+	private final MecanumMotionConstants mecanumMotionConstants;
 	private Pose2D previousPose;
 	private FollowableBuilder builder;
 	private BuildState buildState;
 	private MecanumMotionConstants buildingMotionConstants;
 
-
 	public WaveBuilder(Pose2D startPose, Units units, MecanumMotionConstants motionConstants) {
 		this.previousPose = startPose;
 		this.units = units;
-		this.buildingMotionConstants = motionConstants;
+		this.buildingMotionConstants = this.mecanumMotionConstants = motionConstants;
 		followables = new ArrayList<>();
 		buildState = BuildState.IDLE;
 	}
@@ -40,7 +41,6 @@ public class WaveBuilder {
 	 * @param scalingMultiplier the scaling multiplier in the domain [0, 1]
 	 * @return self, for method chaining
 	 */
-	@SuppressWarnings({"unused"})
 	public WaveBuilder scaleTranslationVelocity(double scalingMultiplier) {
 		buildingMotionConstants = new MecanumMotionConstants(
 				scalingMultiplier,
@@ -69,7 +69,6 @@ public class WaveBuilder {
 	 * @param scalingMultiplier the scaling multiplier in the domain [0, 1]
 	 * @return self, for method chaining
 	 */
-	@SuppressWarnings("unused")
 	public WaveBuilder scaleTranslationAcceleration(double scalingMultiplier) {
 		buildingMotionConstants = new MecanumMotionConstants(
 				buildingMotionConstants.getTranslationalVelocityMultiplier(),
@@ -98,7 +97,6 @@ public class WaveBuilder {
 	 * @param scalingMultiplier the scaling multiplier in the domain [0, 1]
 	 * @return self, for method chaining
 	 */
-	@SuppressWarnings("unused")
 	public WaveBuilder scaleRotationVelocity(double scalingMultiplier) {
 		buildingMotionConstants = new MecanumMotionConstants(
 				buildingMotionConstants.getTranslationalVelocityMultiplier(),
@@ -130,7 +128,6 @@ public class WaveBuilder {
 	 * @param scalingMultiplier the scaling multiplier in the domain [0, 1]
 	 * @return self, for method chaining
 	 */
-	@SuppressWarnings("unused")
 	public WaveBuilder scaleRotationAcceleration(double scalingMultiplier) {
 		buildingMotionConstants = new MecanumMotionConstants(
 				buildingMotionConstants.getTranslationalVelocityMultiplier(),
@@ -153,12 +150,15 @@ public class WaveBuilder {
 	}
 
 	/**
+	 * generates and optimises a spline path that passes through all supplied points
+	 * <p>this should be the primary movement method for your waves</p>
+	 * <p>this motion prioritises translation, rather than rotation, if you want to rotate while you drive, and are not rotating enough, you should use {@link #scaleTranslationVelocity(double)} to reduce the translation speed, which will free up the drive base to rotate more</p>
+	 *
 	 * @param x
 	 * @param y
 	 * @param theta
 	 * @return self, for method chaining
 	 */
-	@SuppressWarnings("unused")
 	public WaveBuilder splineTo(double x, double y, Angle theta) {
 		handleState(BuildState.CURVE);
 		addSegment(units.toMillimeters(x), units.toMillimeters(y), theta);
@@ -171,7 +171,6 @@ public class WaveBuilder {
 	 * @param seconds the time of the wait (in seconds)
 	 * @return self, for method chaining
 	 */
-	@SuppressWarnings("unused")
 	public WaveBuilder waitFor(double seconds) {
 		handleState(BuildState.STOP);
 		StopBuilder stopBuilder = (StopBuilder) builder;
@@ -185,7 +184,6 @@ public class WaveBuilder {
 	 * @param theta the angle to turn to
 	 * @return self, for method chaining
 	 */
-	@SuppressWarnings("unused")
 	public WaveBuilder turnTo(Angle theta) {
 		handleState(BuildState.TURN);
 		addSegment(previousPose.getX(), previousPose.getY(), theta);
@@ -198,7 +196,6 @@ public class WaveBuilder {
 	 * @param theta the angle of the turn to be done
 	 * @return self, for method chaining
 	 */
-	@SuppressWarnings("unused")
 	public WaveBuilder turn(Angle theta) {
 		handleState(BuildState.TURN);
 		addSegment(previousPose.getX(), previousPose.getY(), previousPose.getTheta().add(theta));
@@ -211,7 +208,6 @@ public class WaveBuilder {
 	 * @param theta
 	 * @return self, for method chaining
 	 */
-	@SuppressWarnings("unused")
 	public WaveBuilder lineTo(double x, double y, Angle theta) {
 		handleState(BuildState.LINE);
 		addSegment(x, y, theta);
@@ -231,7 +227,6 @@ public class WaveBuilder {
 	 * @param markerReached
 	 * @return self, for method chaining
 	 */
-	@SuppressWarnings("unused")
 	public WaveBuilder addOffsetActionMarker(double offset, Command markerReached) {
 		builder.addOffsetCommandMarker(offset, Marker.MarkerType.COMMAND, markerReached);
 		return this;
@@ -244,7 +239,6 @@ public class WaveBuilder {
 	 * @param markerReached
 	 * @return self, for method chaining
 	 */
-	@SuppressWarnings("unused")
 	public WaveBuilder addOffsetActionMarker(double offset, Runnable markerReached) {
 		builder.addOffsetCommandMarker(offset, Marker.MarkerType.LAMBDA, new LambdaCommand().init(markerReached));
 		return this;
@@ -261,11 +255,15 @@ public class WaveBuilder {
 		}
 		if (buildState != BuildState.IDLE) {
 			followables.add(builder.build());
+
+			// ensures that previous pose is properly handled if a builder does not succeed in meeting targets (e.g. curve builder and turns)
+			Followable.Output[] outputs = followables.get(followables.size() - 1).getOutputs();
+			previousPose = outputs[outputs.length - 1].getPosition();
 		}
 		buildState = newState;
 		switch (newState) {
 			case CURVE:
-				builder = new CurveBuilder(buildingMotionConstants);
+				builder = new CurveBuilder(buildingMotionConstants, mecanumMotionConstants);
 				break;
 			case LINE:
 				builder = new LineBuilder(buildingMotionConstants);
@@ -282,7 +280,6 @@ public class WaveBuilder {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	public Wave build() {
 		handleState(BuildState.IDLE);
 

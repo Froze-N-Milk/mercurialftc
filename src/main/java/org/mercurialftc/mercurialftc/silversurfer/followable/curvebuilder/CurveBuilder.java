@@ -15,17 +15,18 @@ import org.mercurialftc.mercurialftc.silversurfer.geometry.Vector2D;
 import java.util.ArrayList;
 
 public class CurveBuilder extends FollowableBuilder {
-	private ArrayList<CurveSegment> segments;
-	private ArrayList<MarkerBuilder> unfinishedMarkers;
-
+	private final ArrayList<CurveSegment> segments;
+	private final ArrayList<MarkerBuilder> unfinishedMarkers;
+	private final MecanumMotionConstants absoluteMotionConstants;
 	private Vector2D[] tangents;
 	private Vector2D[] outputTangents;
 	private Vector2D[] secondDerivatives;
 
-	public CurveBuilder(MecanumMotionConstants motionConstants) {
+	public CurveBuilder(MecanumMotionConstants motionConstants, MecanumMotionConstants absoluteMotionConstants) {
 		super(motionConstants);
 		this.segments = new ArrayList<>();
 		this.unfinishedMarkers = new ArrayList<>();
+		this.absoluteMotionConstants = absoluteMotionConstants;
 	}
 
 	public void addSegment(Pose2D previousPose, Pose2D destinationPose) {
@@ -132,7 +133,8 @@ public class CurveBuilder extends FollowableBuilder {
 		return new FollowableCurve(
 				this,
 				getMotionConstantsArray(),
-				unfinishedMarkers
+				unfinishedMarkers,
+				absoluteMotionConstants
 		);
 	}
 

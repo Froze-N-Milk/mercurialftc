@@ -19,8 +19,8 @@ public class GVFWaveFollower extends WaveFollower {
 
 	@Override
 	protected void followOutput(@NotNull Followable.Output output, double loopTime) {
-		Pose2D velocityPose = tracker.getPose2D().subtract(tracker.getPreviousPose2D());
-		Vector2D velocityVector = new Vector2D(velocityPose.getX(), velocityPose.getY()).scalarMultiply(1 / loopTime);
+//		Pose2D velocityPose = tracker.getPose2D().subtract(tracker.getPreviousPose2D());
+//		Vector2D velocityVector = new Vector2D(velocityPose.getX(), velocityPose.getY()).scalarMultiply(1 / loopTime);
 
 		Pose2D errorPose = output.getPosition().subtract(tracker.getPose2D());
 		Vector2D errorVector = new Vector2D(errorPose.getX(), errorPose.getY());
@@ -30,27 +30,27 @@ public class GVFWaveFollower extends WaveFollower {
 		transformedTranslationVector = transformedTranslationVector.add(errorVector);
 //		}
 
-		MecanumMotionConstants.DirectionOfTravelLimiter directionOfTravelLimiter = arbFollower.getMotionConstants().makeDirectionOfTravelLimiter(transformedTranslationVector.getHeading());
+//		MecanumMotionConstants.DirectionOfTravelLimiter directionOfTravelLimiter = arbFollower.getMotionConstants().makeDirectionOfTravelLimiter(transformedTranslationVector.getHeading());
 
-		double targetVelocity = transformedTranslationVector.getMagnitude();
-		double maxVelocity = Math.min(directionOfTravelLimiter.getVelocity(), velocityVector.getMagnitude() + loopTime * directionOfTravelLimiter.getAcceleration());
-		double minVelocity = Math.max(0, velocityVector.getMagnitude() - loopTime * directionOfTravelLimiter.getAcceleration());
+//		double targetVelocity = transformedTranslationVector.getMagnitude();
+//		double maxVelocity = Math.min(directionOfTravelLimiter.getVelocity(), velocityVector.getMagnitude() + loopTime * directionOfTravelLimiter.getAcceleration());
+//		double minVelocity = Math.max(0, velocityVector.getMagnitude() - loopTime * directionOfTravelLimiter.getAcceleration());
 
-		transformedTranslationVector = Vector2D.fromPolar(Math.max(minVelocity, Math.min(targetVelocity, maxVelocity)), transformedTranslationVector.getHeading());
+//		transformedTranslationVector = Vector2D.fromPolar(Math.max(minVelocity, Math.min(targetVelocity, maxVelocity)), transformedTranslationVector.getHeading());
 
 		double transformedRotationalVelocity = output.getRotationalVelocity();
 		double rotationalError = tracker.getPose2D().getTheta().findShortestDistance(output.getPosition().getTheta());
-		double acceptableError = tracker.getPreviousPose2D().getTheta().findShortestDistance(tracker.getPose2D().getTheta());
-		double rotationalVelocity = acceptableError / loopTime;
+//		double acceptableError = tracker.getPreviousPose2D().getTheta().findShortestDistance(tracker.getPose2D().getTheta());
+//		double rotationalVelocity = acceptableError / loopTime;
 
 //		if (Math.abs(rotationalError) > Math.abs(acceptableError)) {
 		transformedRotationalVelocity += rotationalError;
 //		}
 
-		double maxRotationalVelocity = Math.min(getMotionConstants().getMaxRotationalVelocity(), rotationalVelocity + loopTime * getMotionConstants().getMaxRotationalAcceleration());
-		double minRotationalVelocity = Math.max(-getMotionConstants().getMaxRotationalVelocity(), rotationalVelocity - loopTime * getMotionConstants().getMaxRotationalAcceleration());
+//		double maxRotationalVelocity = Math.min(getMotionConstants().getMaxRotationalVelocity(), rotationalVelocity + loopTime * getMotionConstants().getMaxRotationalAcceleration());
+//		double minRotationalVelocity = Math.max(-getMotionConstants().getMaxRotationalVelocity(), rotationalVelocity - loopTime * getMotionConstants().getMaxRotationalAcceleration());
 
-		transformedRotationalVelocity = Math.max(minRotationalVelocity, Math.min(transformedRotationalVelocity, maxRotationalVelocity));
+//		transformedRotationalVelocity = Math.max(minRotationalVelocity, Math.min(transformedRotationalVelocity, maxRotationalVelocity));
 
 		Followable.Output tranformedOutput = new Followable.Output(
 				transformedTranslationVector,

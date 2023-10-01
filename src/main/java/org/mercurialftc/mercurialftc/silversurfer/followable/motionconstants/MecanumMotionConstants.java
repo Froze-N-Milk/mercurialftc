@@ -92,10 +92,9 @@ public class MecanumMotionConstants {
 		private DirectionOfTravelLimiter(Angle directionOfTravel, MecanumMotionConstants mecanumMotionConstants) {
 			double yTerm, xTerm, angledModifier;
 			AngleRadians angleDoubled = directionOfTravel.add(directionOfTravel).toAngleRadians();
-			AngleRadians angleQuadrupled = angleDoubled.add(angleDoubled).toAngleRadians();
-			double sin = Math.sin(angleDoubled.getRadians());
-			double cos = Math.cos(angleDoubled.getRadians());
-			double cos2 = Math.cos(angleQuadrupled.getRadians());
+			double sin = Math.sin(directionOfTravel.getRadians());
+			double cos = Math.cos(directionOfTravel.getRadians());
+			double cos2 = Math.cos(angleDoubled.getRadians());
 			yTerm = (sin * sin);
 			xTerm = (cos * cos);
 			angledModifier = (cos2 * cos2);

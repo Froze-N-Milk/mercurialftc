@@ -1,7 +1,7 @@
 package org.mercurialftc.mercurialftc.silversurfer.tracker;
 
-import org.mercurialftc.mercurialftc.silversurfer.geometry.Angle;
-import org.mercurialftc.mercurialftc.silversurfer.geometry.AngleRadians;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.Angle;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.AngleRadians;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 import org.mercurialftc.mercurialftc.util.matrix.SimpleMatrix;
 
@@ -14,6 +14,7 @@ public abstract class Tracker {
 	private final SimpleMatrix initialRotationMatrix;
 	private Pose2D pose2D, previousPose2D;
 	private int insistIndex, insistFrequency;
+
 	public Tracker(Pose2D initialPose, TrackerConstants trackerConstants) {
 		this.pose2D = initialPose;
 		this.initialPose2D = initialPose;

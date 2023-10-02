@@ -3,6 +3,8 @@ package org.mercurialftc.mercurialftc.silversurfer.geometry;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.Angle;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.AngleRadians;
 
 import java.util.Locale;
 

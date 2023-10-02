@@ -1,9 +1,9 @@
 package org.mercurialftc.mercurialftc.util.hardware;
 
 import org.jetbrains.annotations.NotNull;
-import org.mercurialftc.mercurialftc.silversurfer.geometry.Angle;
-import org.mercurialftc.mercurialftc.silversurfer.geometry.AngleDegrees;
-import org.mercurialftc.mercurialftc.silversurfer.geometry.AngleRadians;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.Angle;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.AngleDegrees;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.AngleRadians;
 import org.mercurialftc.mercurialftc.silversurfer.tracker.HeadingSupplier;
 import com.qualcomm.robotcore.hardware.IMU;
 

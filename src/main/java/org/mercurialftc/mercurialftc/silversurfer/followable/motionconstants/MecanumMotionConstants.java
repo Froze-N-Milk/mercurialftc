@@ -1,7 +1,7 @@
 package org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants;
 
-import org.mercurialftc.mercurialftc.silversurfer.geometry.Angle;
-import org.mercurialftc.mercurialftc.silversurfer.geometry.AngleRadians;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.Angle;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.AngleRadians;
 
 public class MecanumMotionConstants {
 	private final double maxTranslationalYVelocity;

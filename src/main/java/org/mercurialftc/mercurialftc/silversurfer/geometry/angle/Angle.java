@@ -1,4 +1,4 @@
-package org.mercurialftc.mercurialftc.silversurfer.geometry;
+package org.mercurialftc.mercurialftc.silversurfer.geometry.angle;
 
 import androidx.annotation.Nullable;
 

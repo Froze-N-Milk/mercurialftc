@@ -1,16 +1,19 @@
 package org.mercurialftc.mercurialftc.silversurfer.geometry;
 
-import android.annotation.SuppressLint;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
 import org.mercurialftc.mercurialftc.silversurfer.encoderticksconverter.Units;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.Angle;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.AngleDegrees;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.AngleRadians;
 
 import java.util.Locale;
 
 /**
  * represents a robot position through a global x and y coordinate (always millimeters internally) and an angle (always radians internally) angles are represented as starting at the positive x-axis and increasing in the anticlockwise direction
  */
+@SuppressWarnings("unused")
 public class Pose2D {
 	private final double x;
 	private final double y;
@@ -25,7 +28,7 @@ public class Pose2D {
 	 * @param theta the robot's angle
 	 * @param units the units used for x and y
 	 */
-	public Pose2D(double x, double y, Angle theta, Units units) {
+	public Pose2D(double x, double y, @NotNull Angle theta, @NotNull Units units) {
 		this.x = units.toMillimeters(x);
 		this.y = units.toMillimeters(y);
 		this.theta = theta.toAngleRadians();
@@ -90,7 +93,7 @@ public class Pose2D {
 	 * @param other
 	 * @return a new pose with the transformation applied to it
 	 */
-	public Pose2D add(Pose2D other) {
+	public Pose2D add(@NotNull Pose2D other) {
 		return new Pose2D(x + other.getX(), y + other.getY(), theta.add(other.getTheta()));
 	}
 
@@ -112,7 +115,6 @@ public class Pose2D {
 	 * @param other
 	 * @return a new pose with the transformation applied to it
 	 */
-	@SuppressWarnings("unused")
 	public Pose2D subtract(@NotNull Pose2D other) {
 		return new Pose2D(x - other.getX(), y - other.getY(), theta.subtract(other.getTheta()));
 	}
@@ -125,9 +127,12 @@ public class Pose2D {
 	 * @param theta
 	 * @return a new pose with the transformation applied to it
 	 */
-	@SuppressWarnings("unused")
 	public Pose2D subtract(double x, double y, Angle theta) {
 		return new Pose2D(this.x - x, this.y - y, this.theta.subtract(theta));
+	}
+
+	public Vector2D toVector2D() {
+		return new Vector2D(this.getX(), this.getY());
 	}
 
 	@Override

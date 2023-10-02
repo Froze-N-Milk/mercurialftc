@@ -2,10 +2,11 @@ package org.mercurialftc.mercurialftc.silversurfer.tracker;
 
 import org.jetbrains.annotations.NotNull;
 import org.mercurialftc.mercurialftc.silversurfer.encoderticksconverter.Units;
-import org.mercurialftc.mercurialftc.silversurfer.geometry.Angle;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.Angle;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 import org.mercurialftc.mercurialftc.util.hardware.Encoder;
 
+@SuppressWarnings("unused")
 public class TwoWheelTracker extends Tracker {
 	private final Encoder left, middle;
 	private final HeadingSupplier headingSupplier;

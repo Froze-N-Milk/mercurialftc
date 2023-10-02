@@ -1,6 +1,6 @@
 package org.mercurialftc.mercurialftc.silversurfer.tracker;
 
-import org.mercurialftc.mercurialftc.silversurfer.geometry.Angle;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.Angle;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 import org.mercurialftc.mercurialftc.util.hardware.Encoder;
 import org.mercurialftc.mercurialftc.util.hardware.IMU_EX;

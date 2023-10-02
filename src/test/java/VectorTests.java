@@ -1,7 +1,7 @@
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mercurialftc.mercurialftc.silversurfer.geometry.AngleDegrees;
-import org.mercurialftc.mercurialftc.silversurfer.geometry.AngleRadians;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.AngleDegrees;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.AngleRadians;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Vector2D;
 
 public class VectorTests {

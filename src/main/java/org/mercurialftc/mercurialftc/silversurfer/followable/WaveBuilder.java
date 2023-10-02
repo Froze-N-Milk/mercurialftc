@@ -9,7 +9,7 @@ import org.mercurialftc.mercurialftc.silversurfer.followable.markers.Marker;
 import org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants.MecanumMotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.followable.stopbuilder.StopBuilder;
 import org.mercurialftc.mercurialftc.silversurfer.followable.turnbuilder.TurnBuilder;
-import org.mercurialftc.mercurialftc.silversurfer.geometry.Angle;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.Angle;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 
 import java.util.ArrayList;

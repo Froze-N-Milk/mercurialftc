@@ -3,7 +3,6 @@ package org.mercurialftc.mercurialftc.silversurfer.follower;
 import org.jetbrains.annotations.NotNull;
 import org.mercurialftc.mercurialftc.silversurfer.followable.Followable;
 import org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants.MecanumMotionConstants;
-import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Vector2D;
 import org.mercurialftc.mercurialftc.silversurfer.tracker.Tracker;
 
@@ -28,15 +27,19 @@ public class GVFWaveFollower extends WaveFollower {
 //		Pose2D velocityPose = tracker.getPose2D().subtract(tracker.getPreviousPose2D());
 //		Vector2D velocityVector = new Vector2D(velocityPose.getX(), velocityPose.getY()).scalarMultiply(1 / loopTime);
 
-		Pose2D errorPose = output.getPosition().subtract(tracker.getPose2D());
-		Vector2D errorVector = new Vector2D(errorPose.getX(), errorPose.getY());
+		Vector2D errorVector = output.getPosition().subtract(tracker.getPose2D()).toVector2D();
 
 		Vector2D transformedTranslationVector = output.getTranslationVector();
-		transformedTranslationVector = transformedTranslationVector.add(errorVector).add(accumulatedTranslationalError);
 
-		accumulatedTranslationalError.add(errorVector.add(errorVector.subtract(previousTranslationalError)));
+		accumulatedTranslationalError = accumulatedTranslationalError.add(errorVector.add(errorVector.subtract(previousTranslationalError)));
+
+
+		accumulatedTranslationalError = Vector2D.fromPolar(Math.max(0, Math.min(accumulatedTranslationalError.getMagnitude(), getMotionConstants().getMaxTranslationalYVelocity())), accumulatedTranslationalError.getHeading());
+
+		transformedTranslationVector = transformedTranslationVector.add(accumulatedTranslationalError);
 
 		MecanumMotionConstants.DirectionOfTravelLimiter directionOfTravelLimiter = arbFollower.getMotionConstants().makeDirectionOfTravelLimiter(transformedTranslationVector.getHeading());
+
 		transformedTranslationVector = Vector2D.fromPolar(Math.min(directionOfTravelLimiter.getVelocity(), transformedTranslationVector.getMagnitude()), transformedTranslationVector.getHeading());
 
 
@@ -51,9 +54,10 @@ public class GVFWaveFollower extends WaveFollower {
 		double acceptableError = tracker.getPreviousPose2D().getTheta().findShortestDistance(tracker.getPose2D().getTheta());
 //		double rotationalVelocity = acceptableError / loopTime;
 
-		transformedRotationalVelocity += rotationalError + accumulatedRotationalError;
+		accumulatedRotationalError += rotationalError + (rotationalError - previousRotationalError);
+		accumulatedRotationalError = Math.max(-Math.PI / 2, Math.min(accumulatedRotationalError, Math.PI / 2));
 
-		accumulatedRotationalError += rotationalError + rotationalError - previousRotationalError;
+		transformedRotationalVelocity += accumulatedRotationalError;
 
 		transformedRotationalVelocity = Math.min(getMotionConstants().getMaxRotationalVelocity(), Math.max(-getMotionConstants().getMaxRotationalVelocity(), transformedRotationalVelocity));
 

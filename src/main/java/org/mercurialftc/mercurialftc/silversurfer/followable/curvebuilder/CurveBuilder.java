@@ -46,7 +46,7 @@ public class CurveBuilder extends FollowableBuilder {
 	private void firstHeuristic() {
 		tangents = new Vector2D[segments.size() + 1]; // there needs to be a tangent for each point, there are 1 more points than there are segments
 		Vector2D tempVector = segments.get(0).getTranslationalVector();
-		tangents[0] = Vector2D.fromPolar(0.5 * tempVector.getMagnitude(), tempVector.getHeading().getRadians());
+		tangents[0] = Vector2D.fromPolar(tempVector.getMagnitude(), tempVector.getHeading().getRadians());
 
 		for (int i = 1; i < tangents.length - 1; i++) {
 			Vector2D BA = segments.get(i - 1).getInverseTranslationalVector();
@@ -57,13 +57,13 @@ public class CurveBuilder extends FollowableBuilder {
 			theta = theta.add(BA.getHeading()).toAngleRadians();
 			theta = theta.add((Math.PI / 2)).toAngleRadians();
 
-			double magnitude = 0.5 * Math.min(BA.getMagnitude(), BC.getMagnitude());
+			double magnitude = Math.min(BA.getMagnitude(), BC.getMagnitude());
 
 			tangents[i] = Vector2D.fromPolar(magnitude, theta);
 		}
 
 		tempVector = segments.get(segments.size() - 1).getTranslationalVector();
-		tangents[tangents.length - 1] = Vector2D.fromPolar(0.5 * tempVector.getMagnitude(), tempVector.getHeading().getRadians());
+		tangents[tangents.length - 1] = Vector2D.fromPolar(tempVector.getMagnitude(), tempVector.getHeading().getRadians());
 	}
 
 	private void secondHeuristic() {
@@ -126,7 +126,7 @@ public class CurveBuilder extends FollowableBuilder {
 
 		outputTangents = new Vector2D[tangents.length];
 		for (int i = 0; i < tangents.length; i++) {
-			elongateTangents(0.5, i);
+			elongateTangents(0.25, i);
 		}
 		secondHeuristic();
 
@@ -139,7 +139,7 @@ public class CurveBuilder extends FollowableBuilder {
 	}
 
 	public QuinticBezierCurve[] getResult() {
-		firstHeuristic();
+//		firstHeuristic();
 		secondHeuristic();
 
 		QuinticBezierCurve[] result = new QuinticBezierCurve[segments.size()];

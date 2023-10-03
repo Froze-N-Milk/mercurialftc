@@ -17,7 +17,7 @@ import java.util.Arrays;
 public class MotionProfile {
 	private final FollowableCurve spline;
 	private double arcSegmentLength;
-	private int plannedPoints;
+	private ArcLengthHandler arcLengthHandler;
 
 	public MotionProfile(FollowableCurve spline) {
 		this.spline = spline;
@@ -42,6 +42,8 @@ public class MotionProfile {
 		double[] elongationFactors = new double[spline.getCurves().length + 1];
 		Arrays.fill(elongationFactors, 2.5);
 
+		this.arcLengthHandler = new ArcLengthHandler(spline);
+
 		Followable.Output[] bestTrajectory = finaliseProfile();
 		while ((System.nanoTime() / 1E9) <= (startTime + allowableOptimisationTime)) {
 			for (int i = 0; i < spline.getCurves().length + 1; i++) { //there are one more tangents than there are segments/curves
@@ -51,6 +53,9 @@ public class MotionProfile {
 
 				while (error > optimisationThreshold) {
 					spline.elongateTangents(elongationFactors[i], i);
+
+					this.arcLengthHandler = new ArcLengthHandler(spline);
+
 					currentTrajectory = finaliseProfile();
 
 					double currentTime = currentTrajectory[currentTrajectory.length - 1].getCallbackTime();
@@ -76,20 +81,14 @@ public class MotionProfile {
 
 		}
 
-//		todo remove
-//		System.out.println("best");
-//		finaliseProfile();
-
 		return bestTrajectory;
 	}
 
 	@NotNull
 	private Followable.Output[] finaliseProfile() {
-		plannedPoints = divideArcLength();
+		int plannedPoints = divideArcLength() + 1;
 
 		Followable.Output[] outputs = new Followable.Output[plannedPoints];
-
-		ArcLengthHandler arcLengthHandler = spline.getArcLengthHandler();
 
 		// forwards pass for initial velocity and forwards acceleration
 
@@ -105,10 +104,6 @@ public class MotionProfile {
 		);
 
 		double previousVelocity = 0;
-
-//		todo remove
-//		double maxCurvature = 0;
-//		double associatedChangeInAngle = 0;
 
 		for (int i = 1; i < plannedPoints; i++) {
 			ArcLengthHandler.ArcLengthRelationship curveFromArcLength = arcLengthHandler.findCurveFromArcLength(i * arcSegmentLength);
@@ -145,10 +140,6 @@ public class MotionProfile {
 			previousVelocity = finalVelocityConstraint;
 			previousCurveFromArcLength = curveFromArcLength;
 		}
-//		todo remove
-//		System.out.println(maxCurvature);
-//		System.out.println(associatedChangeInAngle);
-//		System.out.println();
 
 //		do a backward pass for accelerational constraints
 
@@ -290,7 +281,7 @@ public class MotionProfile {
 	 * @return whole number of segments when the arcLength is divided into approximately 2.5mm lengths.
 	 */
 	private int divideArcLength() {
-		double arcLength = spline.getArcLengthHandler().getBreakpoints()[spline.getArcLengthHandler().getBreakpoints().length - 1];
+		double arcLength = arcLengthHandler.getBreakpoints()[arcLengthHandler.getBreakpoints().length - 1];
 
 		double estimate = arcLength / 2.5; // target segment length
 

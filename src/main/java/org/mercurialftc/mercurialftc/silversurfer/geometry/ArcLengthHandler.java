@@ -1,5 +1,6 @@
 package org.mercurialftc.mercurialftc.silversurfer.geometry;
 
+import org.jetbrains.annotations.NotNull;
 import org.mercurialftc.mercurialftc.silversurfer.followable.curvebuilder.FollowableCurve;
 import org.mercurialftc.mercurialftc.silversurfer.followable.curvebuilder.curve.QuinticBezierCurve;
 
@@ -8,9 +9,10 @@ public class ArcLengthHandler {
 	private final double[] arcLengths;
 	private final FollowableCurve followableCurve;
 
-	public ArcLengthHandler(FollowableCurve followableCurve) {
+	public ArcLengthHandler(@NotNull FollowableCurve followableCurve) {
 		this.followableCurve = followableCurve;
-		this.breakpoints = new double[followableCurve.getCurves().length];
+		this.breakpoints = new double[followableCurve.getCurves().length + 1];
+		breakpoints[0] = 0;
 		this.arcLengths = new double[followableCurve.getCurves().length];
 
 		findArcLengths();
@@ -38,11 +40,13 @@ public class ArcLengthHandler {
 			double arcLength = findArcLength(previousVelocity, curves[i]);
 
 			arcLengths[i] = arcLength;
-			breakpoints[i] = previousArcLength + arcLength;
-			previousArcLength = breakpoints[i];
+			breakpoints[i + 1] = previousArcLength + arcLength;
+			previousArcLength = breakpoints[i + 1];
 
 			previousVelocity = curves[i].firstDerivative(1).getMagnitude();
 		}
+
+		return;
 	}
 
 	private double findArcLength(double previousVelocity, QuinticBezierCurve curve) {
@@ -65,18 +69,18 @@ public class ArcLengthHandler {
 	public ArcLengthRelationship findCurveFromArcLength(double arcLength) {
 		QuinticBezierCurve[] curves = followableCurve.getCurves();
 
-		if (arcLength < breakpoints[0]) {
-			return new ArcLengthRelationship(curves[0], (arcLength / arcLengths[0]), 0);
-		}
+//		if (arcLength < breakpoints[0]) {
+//			return new ArcLengthRelationship(curves[0], (arcLength / arcLengths[0]), 0);
+//		}
 
-		for (int i = 0; i < breakpoints.length - 1; i++) {
+		for (int i = 0; i < breakpoints.length - 2; i++) {
 			if (arcLength >= breakpoints[i] && arcLength < breakpoints[i + 1]) {
 				return new ArcLengthRelationship(curves[i], ((arcLength - breakpoints[i]) / arcLengths[i]), i);
 			}
 		}
 		arcLength = Math.min(arcLength, breakpoints[breakpoints.length - 1]); //ensures that the result is within bounds
 
-		return new ArcLengthRelationship(curves[curves.length - 1], ((arcLength - breakpoints[breakpoints.length - 1]) / arcLengths[arcLengths.length - 1]), curves.length - 1);
+		return new ArcLengthRelationship(curves[curves.length - 1], ((arcLength - breakpoints[breakpoints.length - 2]) / arcLengths[arcLengths.length - 1]), curves.length - 1);
 	}
 
 	public static class ArcLengthRelationship {

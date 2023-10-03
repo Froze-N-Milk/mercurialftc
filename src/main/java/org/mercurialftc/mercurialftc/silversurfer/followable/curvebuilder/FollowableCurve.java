@@ -13,20 +13,21 @@ import java.util.ArrayList;
 
 public class FollowableCurve extends Followable {
 	private final CurveBuilder curveBuilder;
-	private final ArcLengthHandler arcLengthHandler;
 	private final ArrayList<MecanumMotionConstants> motionConstantsArray;
 	private final MotionProfile motionProfile;
 	private final MecanumMotionConstants absoluteMotionConstants;
+	private final double arcLength;
 	private QuinticBezierCurve[] curves;
 
 	protected FollowableCurve(@NotNull CurveBuilder curveBuilder, ArrayList<MecanumMotionConstants> motionConstantsArray, @NotNull ArrayList<MarkerBuilder> unfinishedMarkers, MecanumMotionConstants absoluteMotionConstants) {
 		this.curveBuilder = curveBuilder;
 		this.curves = curveBuilder.getResult();
-		this.arcLengthHandler = new ArcLengthHandler(this);
 		this.motionConstantsArray = motionConstantsArray;
 		this.absoluteMotionConstants = absoluteMotionConstants;
 		this.motionProfile = new MotionProfile(this);
 		setOutputs(motionProfile.profile()); // runs the motion profiler on this spline
+
+		arcLength = new ArcLengthHandler(this).getArcLength();
 
 		Marker[] markers = new Marker[unfinishedMarkers.size()];
 		for (int i = 0; i < unfinishedMarkers.size(); i++) {
@@ -54,7 +55,6 @@ public class FollowableCurve extends Followable {
 			return getOutputs()[0];
 		}
 
-		double arcLength = arcLengthHandler.getBreakpoints()[i];
 		int outputIndex = (int) (arcLength / motionProfile.getArcSegmentLength());
 
 		if (outputIndex > getOutputs().length) {
@@ -66,10 +66,6 @@ public class FollowableCurve extends Followable {
 
 	public QuinticBezierCurve[] getCurves() {
 		return curves;
-	}
-
-	public ArcLengthHandler getArcLengthHandler() {
-		return arcLengthHandler;
 	}
 
 	public ArrayList<MecanumMotionConstants> getMotionConstantsArray() {

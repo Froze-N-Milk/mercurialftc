@@ -29,11 +29,6 @@ public class GVFWaveFollower extends WaveFollower {
 		this.rotationFunctionModifier = 1 / modifiedRotationError(rotationFullOutputDistance);
 	}
 
-	/*
-	 * todo
-	 * change from accumulated error to saving through distance or w/e
-	 */
-
 	@Override
 	protected void followOutput(@NotNull Followable.Output output, double loopTime) {
 		Vector2D errorVector = output.getPosition().subtract(tracker.getPose2D()).toVector2D();

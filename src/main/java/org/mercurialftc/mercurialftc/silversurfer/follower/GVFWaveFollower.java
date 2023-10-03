@@ -25,8 +25,8 @@ public class GVFWaveFollower extends WaveFollower {
 		this.translationFunctionModifier = 1;
 		this.rotationFunctionModifier = 1;
 
-		this.translationFunctionModifier = 1 / modifiedTranslationError(translationFullOutputDistance);
-		this.rotationFunctionModifier = 1 / modifiedRotationError(rotationFullOutputDistance);
+		this.translationFunctionModifier = 1 / modifyTranslationError(translationFullOutputDistance);
+		this.rotationFunctionModifier = 1 / modifyRotationError(rotationFullOutputDistance);
 	}
 
 	@Override
@@ -37,7 +37,7 @@ public class GVFWaveFollower extends WaveFollower {
 
 		MecanumMotionConstants.DirectionOfTravelLimiter directionOfTravelLimiter = arbFollower.getMotionConstants().makeDirectionOfTravelLimiter(errorVector.getHeading());
 
-		Vector2D errorFeedback = Vector2D.fromPolar(modifiedTranslationError(errorVector.getMagnitude()) * directionOfTravelLimiter.getVelocity(), errorVector.getHeading());
+		Vector2D errorFeedback = Vector2D.fromPolar(modifyTranslationError(errorVector.getMagnitude()) * directionOfTravelLimiter.getVelocity(), errorVector.getHeading());
 
 		directionOfTravelLimiter = arbFollower.getMotionConstants().makeDirectionOfTravelLimiter(transformedTranslationVector.getHeading());
 
@@ -47,7 +47,7 @@ public class GVFWaveFollower extends WaveFollower {
 		double transformedRotationalVelocity = output.getRotationalVelocity();
 		double rotationalError = tracker.getPose2D().getTheta().findShortestDistance(output.getPosition().getTheta());
 
-		transformedRotationalVelocity += modifiedRotationError(rotationalError) * getMotionConstants().getMaxRotationalVelocity();
+		transformedRotationalVelocity += modifyRotationError(rotationalError) * getMotionConstants().getMaxRotationalVelocity();
 
 		transformedRotationalVelocity = Math.min(getMotionConstants().getMaxRotationalVelocity(), Math.max(-getMotionConstants().getMaxRotationalVelocity(), transformedRotationalVelocity));
 
@@ -63,12 +63,12 @@ public class GVFWaveFollower extends WaveFollower {
 		arbFollower.followOutput(tranformedOutput, loopTime);
 	}
 
-	private double modifiedTranslationError(double error) {
-		return Math.max(0, Math.min((error / (Math.E * error + translationFullOutputDistance)) * translationFunctionModifier, 1));
+	private double modifyTranslationError(double error) {
+		return Math.max(0, Math.min((error / (Math.E * Math.sqrt(error) + translationFullOutputDistance)) * translationFunctionModifier, 1));
 	}
 
-	private double modifiedRotationError(double error) {
-		return Math.max(-1, Math.min((error / (Math.E * Math.abs(error) + rotationFullOutputDistance)) * rotationFunctionModifier, 1));
+	private double modifyRotationError(double error) {
+		return Math.max(-1, Math.min((error / (Math.E * Math.sqrt(Math.abs(error)) + rotationFullOutputDistance)) * rotationFunctionModifier, 1));
 	}
 
 	@Override

@@ -121,7 +121,9 @@ public class MotionProfile {
 
 			double changeInAngle = previousCurveFromArcLength.getFirstDerivative().getHeading().findShortestDistance(curveFromArcLength.getFirstDerivative().getHeading());
 
-			double vChangeInAngleLimiter = Math.cos(changeInAngle / 2);
+			changeInAngle = Math.max(-Math.PI / 2, Math.min(changeInAngle, Math.PI / 2));
+
+			double vChangeInAngleLimiter = Math.cos(changeInAngle);
 			vChangeInAngleLimiter *= vChangeInAngleLimiter;
 
 			vMax *= vChangeInAngleLimiter;

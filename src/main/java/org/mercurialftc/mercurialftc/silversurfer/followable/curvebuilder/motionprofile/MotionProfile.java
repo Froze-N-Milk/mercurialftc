@@ -120,13 +120,9 @@ public class MotionProfile {
 			double vMax = directionOfTravelLimiter.getVelocity();
 
 			double changeInAngle = previousCurveFromArcLength.getFirstDerivative().getHeading().findShortestDistance(curveFromArcLength.getFirstDerivative().getHeading());
-//			todo remove
-//			if (curveFromArcLength.getCurvature() > maxCurvature) {
-//				maxCurvature = curveFromArcLength.getCurvature();
-//				associatedChangeInAngle = changeInAngle;
-//			}
 
-			double vChangeInAngleLimiter = Math.PI - (Math.abs(changeInAngle) / (Math.PI / 2));
+			double vChangeInAngleLimiter = Math.cos(changeInAngle / 2);
+			vChangeInAngleLimiter *= vChangeInAngleLimiter;
 
 			vMax *= vChangeInAngleLimiter;
 

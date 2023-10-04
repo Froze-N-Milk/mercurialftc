@@ -11,6 +11,8 @@ import org.mercurialftc.mercurialftc.silversurfer.followable.stopbuilder.StopBui
 import org.mercurialftc.mercurialftc.silversurfer.followable.turnbuilder.TurnBuilder;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.Angle;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.obstaclemap.EmptyObstacleMap;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.obstaclemap.ObstacleMap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +29,10 @@ public class WaveBuilder {
 	private MecanumMotionConstants buildingMotionConstants;
 
 	public WaveBuilder(Pose2D startPose, Units units, MecanumMotionConstants motionConstants) {
+		this(startPose, units, motionConstants, new EmptyObstacleMap());
+	}
+
+	public WaveBuilder(Pose2D startPose, Units units, MecanumMotionConstants motionConstants, ObstacleMap obstacleMap) {
 		this.previousPose = startPose;
 		this.units = units;
 		this.buildingMotionConstants = this.mecanumMotionConstants = motionConstants;

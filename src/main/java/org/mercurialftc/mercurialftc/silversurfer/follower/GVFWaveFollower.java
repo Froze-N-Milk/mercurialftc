@@ -4,29 +4,28 @@ import org.jetbrains.annotations.NotNull;
 import org.mercurialftc.mercurialftc.silversurfer.followable.Followable;
 import org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants.MecanumMotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Vector2D;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.obstaclemap.EmptyObstacleMap;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.obstaclemap.ObstacleMap;
 import org.mercurialftc.mercurialftc.silversurfer.tracker.Tracker;
 
 @SuppressWarnings("unused")
 public class GVFWaveFollower extends WaveFollower {
-	private final double translationFullOutputDistance, rotationFullOutputDistance;
 	private final ArbFollower arbFollower;
 	private final Tracker tracker;
-	private double translationFunctionModifier, rotationFunctionModifier;
+	private final double rotationLimiter;
 	private boolean inPosition;
+	private MecanumMotionConstants.DirectionOfTravelLimiter errorDirectionOfTravelLimiter;
 
-	public GVFWaveFollower(@NotNull ArbFollower arbFollower, Tracker tracker) {
+	public GVFWaveFollower(@NotNull ArbFollower arbFollower, @NotNull Tracker tracker, @NotNull ObstacleMap obstacleMap) {
 		super(arbFollower.getMotionConstants());
 		this.arbFollower = arbFollower;
 		this.tracker = tracker;
 
-		this.translationFullOutputDistance = 400; // 400 mm
-		this.rotationFullOutputDistance = Math.PI / 2; // 90 degrees
+		rotationLimiter = Math.sqrt(getMotionConstants().getMaxRotationalVelocity());
+	}
 
-		this.translationFunctionModifier = 1;
-		this.rotationFunctionModifier = 1;
-
-		this.translationFunctionModifier = 1 / modifyTranslationError(translationFullOutputDistance);
-		this.rotationFunctionModifier = 1 / modifyRotationError(rotationFullOutputDistance);
+	public GVFWaveFollower(@NotNull ArbFollower arbFollower, @NotNull Tracker tracker) {
+		this(arbFollower, tracker, new EmptyObstacleMap());
 	}
 
 	@Override
@@ -35,11 +34,11 @@ public class GVFWaveFollower extends WaveFollower {
 
 		Vector2D transformedTranslationVector = output.getTranslationVector();
 
-		MecanumMotionConstants.DirectionOfTravelLimiter directionOfTravelLimiter = arbFollower.getMotionConstants().makeDirectionOfTravelLimiter(errorVector.getHeading());
+		errorDirectionOfTravelLimiter = arbFollower.getMotionConstants().makeDirectionOfTravelLimiter(errorVector.getHeading());
 
-		Vector2D errorFeedback = Vector2D.fromPolar(modifyTranslationError(errorVector.getMagnitude()) * directionOfTravelLimiter.getVelocity(), errorVector.getHeading());
+		Vector2D errorFeedback = Vector2D.fromPolar(modifyTranslationError(errorVector.getMagnitude()) * errorDirectionOfTravelLimiter.getVelocity(), errorVector.getHeading());
 
-		directionOfTravelLimiter = arbFollower.getMotionConstants().makeDirectionOfTravelLimiter(transformedTranslationVector.getHeading());
+		MecanumMotionConstants.DirectionOfTravelLimiter directionOfTravelLimiter = arbFollower.getMotionConstants().makeDirectionOfTravelLimiter(transformedTranslationVector.getHeading());
 
 		transformedTranslationVector = transformedTranslationVector.add(errorFeedback);
 		transformedTranslationVector = Vector2D.fromPolar(Math.min(directionOfTravelLimiter.getVelocity(), transformedTranslationVector.getMagnitude()), transformedTranslationVector.getHeading());
@@ -64,11 +63,15 @@ public class GVFWaveFollower extends WaveFollower {
 	}
 
 	private double modifyTranslationError(double error) {
-		return Math.max(0, Math.min((error / (Math.E * Math.sqrt(error) + translationFullOutputDistance)) * translationFunctionModifier, 1));
+		double output = (Math.sqrt(error) / Math.sqrt(errorDirectionOfTravelLimiter.getVelocity()));
+		output -= tracker.getPose2D().toVector2D().subtract(tracker.getPreviousPose2D().toVector2D()).getMagnitude() / errorDirectionOfTravelLimiter.getVelocity();
+		return Math.max(0, Math.min(output, 1));
 	}
 
 	private double modifyRotationError(double error) {
-		return Math.max(-1, Math.min((error / (Math.E * Math.sqrt(Math.abs(error)) + rotationFullOutputDistance)) * rotationFunctionModifier, 1));
+		double output = (Math.sqrt(Math.abs(error)) / rotationLimiter) * Math.signum(error);
+		output -= tracker.getPose2D().getTheta().findShortestDistance(tracker.getPreviousPose2D().getTheta()) / getMotionConstants().getMaxRotationalVelocity();
+		return Math.max(-1, Math.min(output, 1));
 	}
 
 	@Override

@@ -1,13 +1,15 @@
 package org.mercurialftc.mercurialftc.silversurfer.tracker;
 
+import org.jetbrains.annotations.NotNull;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.Angle;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.AngleRadians;
-import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 import org.mercurialftc.mercurialftc.util.matrix.SimpleMatrix;
 
 /**
  * tracks robot position in millimeters and radians
  */
+@SuppressWarnings("unused")
 public abstract class Tracker {
 	private final Pose2D initialPose2D;
 	private final TrackerConstants trackerConstants;
@@ -15,7 +17,7 @@ public abstract class Tracker {
 	private Pose2D pose2D, previousPose2D;
 	private int insistIndex, insistFrequency;
 
-	public Tracker(Pose2D initialPose, TrackerConstants trackerConstants) {
+	public Tracker(@NotNull Pose2D initialPose, TrackerConstants trackerConstants) {
 		this.pose2D = initialPose;
 		this.initialPose2D = initialPose;
 		double cosInitial = Math.cos(initialPose.getTheta().getRadians());
@@ -59,7 +61,6 @@ public abstract class Tracker {
 	/**
 	 * must be called frequently for it to be accurate
 	 */
-	@SuppressWarnings("unused")
 	public void updatePose() {
 		previousPose2D = pose2D;
 		updateValues();
@@ -144,8 +145,7 @@ public abstract class Tracker {
 	}
 
 	/**
-	 * may set motors associated with encoders to {@link com.qualcomm.robotcore.hardware.DcMotor.RunMode#STOP_AND_RESET_ENCODER}, which may cause issues if not addressed
-	 * <p>ensure that this cannot happen by setting the run mode of said motors after calling this method</p>
+	 * resets the current pose to be the initial pose
 	 */
 	public void reset() {
 		pose2D = initialPose2D;

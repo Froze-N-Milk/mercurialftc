@@ -6,6 +6,7 @@ import org.mercurialftc.mercurialftc.util.hardware.Encoder;
 import org.mercurialftc.mercurialftc.util.hardware.IMU_EX;
 import org.mercurialftc.mercurialftc.util.hardware.ScheduledIMU_EX;
 
+@SuppressWarnings("unused")
 public class InsistentThreeWheelTracker extends ThreeWheelTracker {
 	private final HeadingSupplier headingSupplier;
 
@@ -13,7 +14,6 @@ public class InsistentThreeWheelTracker extends ThreeWheelTracker {
 	 * @param headingSupplier Either {@link IMU_EX} (recommended for if the IMU isn't being used for anything else, will save on loop time) or {@link ScheduledIMU_EX} (will read from the IMU every loop)
 	 * @param insistFrequency how often the heading supplier is cross-checked to keep the heading accurate
 	 */
-	@SuppressWarnings("unused")
 	public InsistentThreeWheelTracker(Pose2D initialPose, TrackerConstants.ThreeWheelTrackerConstants trackerConstants, Encoder left, Encoder right, Encoder middle, HeadingSupplier headingSupplier, int insistFrequency) {
 		super(initialPose, trackerConstants, left, right, middle);
 		setInsistFrequency(insistFrequency);
@@ -27,7 +27,6 @@ public class InsistentThreeWheelTracker extends ThreeWheelTracker {
 	 *
 	 * @param headingSupplier Either {@link IMU_EX} (recommended for if the IMU isn't being used for anything else, will save on loop time) or {@link ScheduledIMU_EX} (will read from the IMU every loop)
 	 */
-	@SuppressWarnings("unused")
 	public InsistentThreeWheelTracker(Pose2D initialPose, TrackerConstants.ThreeWheelTrackerConstants trackerConstants, Encoder left, Encoder right, Encoder middle, HeadingSupplier headingSupplier) {
 		this(initialPose, trackerConstants, left, right, middle, headingSupplier, 10);
 	}
@@ -48,7 +47,6 @@ public class InsistentThreeWheelTracker extends ThreeWheelTracker {
 	}
 
 	@Override
-	@SuppressWarnings("unused")
 	public void resetHeading() {
 		headingSupplier.resetHeading();
 	}

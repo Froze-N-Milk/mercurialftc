@@ -23,6 +23,7 @@ public class WaveBuilder {
 	private final Units units;
 	private final ArrayList<Followable> followables;
 	private final MecanumMotionConstants mecanumMotionConstants;
+	private final ObstacleMap obstacleMap;
 	private Pose2D previousPose;
 	private FollowableBuilder builder;
 	private BuildState buildState;
@@ -36,6 +37,7 @@ public class WaveBuilder {
 		this.previousPose = startPose;
 		this.units = units;
 		this.buildingMotionConstants = this.mecanumMotionConstants = motionConstants;
+		this.obstacleMap = obstacleMap;
 		followables = new ArrayList<>();
 		buildState = BuildState.IDLE;
 	}
@@ -269,7 +271,7 @@ public class WaveBuilder {
 		buildState = newState;
 		switch (newState) {
 			case CURVE:
-				builder = new CurveBuilder(buildingMotionConstants, mecanumMotionConstants);
+				builder = new CurveBuilder(buildingMotionConstants, mecanumMotionConstants, obstacleMap);
 				break;
 			case LINE:
 				builder = new LineBuilder(buildingMotionConstants);

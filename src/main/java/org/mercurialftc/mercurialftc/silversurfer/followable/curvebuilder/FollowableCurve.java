@@ -8,6 +8,7 @@ import org.mercurialftc.mercurialftc.silversurfer.followable.markers.MarkerBuild
 import org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants.MecanumMotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.ArcLengthHandler;
 import org.mercurialftc.mercurialftc.silversurfer.followable.curvebuilder.motionprofile.MotionProfile;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.obstaclemap.ObstacleMap;
 
 import java.util.ArrayList;
 
@@ -19,12 +20,12 @@ public class FollowableCurve extends Followable {
 	private final double arcLength;
 	private QuinticBezierCurve[] curves;
 
-	protected FollowableCurve(@NotNull CurveBuilder curveBuilder, ArrayList<MecanumMotionConstants> motionConstantsArray, @NotNull ArrayList<MarkerBuilder> unfinishedMarkers, MecanumMotionConstants absoluteMotionConstants) {
+	protected FollowableCurve(@NotNull CurveBuilder curveBuilder, ArrayList<MecanumMotionConstants> motionConstantsArray, @NotNull ArrayList<MarkerBuilder> unfinishedMarkers, MecanumMotionConstants absoluteMotionConstants, ObstacleMap obstacleMap) {
 		this.curveBuilder = curveBuilder;
 		this.curves = curveBuilder.getResult();
 		this.motionConstantsArray = motionConstantsArray;
 		this.absoluteMotionConstants = absoluteMotionConstants;
-		this.motionProfile = new MotionProfile(this);
+		this.motionProfile = new MotionProfile(this, obstacleMap);
 		setOutputs(motionProfile.profile()); // runs the motion profiler on this spline
 
 		arcLength = new ArcLengthHandler(this).getArcLength();

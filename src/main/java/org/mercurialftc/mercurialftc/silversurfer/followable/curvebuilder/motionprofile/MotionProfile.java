@@ -8,6 +8,7 @@ import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.AngleRadians;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.ArcLengthHandler;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Vector2D;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.obstaclemap.ObstacleMap;
 
 import java.util.Arrays;
 
@@ -16,11 +17,13 @@ import java.util.Arrays;
  */
 public class MotionProfile {
 	private final FollowableCurve spline;
+	private final ObstacleMap obstacleMap;
 	private double arcSegmentLength;
 	private ArcLengthHandler arcLengthHandler;
 
-	public MotionProfile(FollowableCurve spline) {
+	public MotionProfile(FollowableCurve spline, ObstacleMap obstacleMap) {
 		this.spline = spline;
+		this.obstacleMap = obstacleMap;
 	}
 
 	public double getArcSegmentLength() {
@@ -125,9 +128,9 @@ public class MotionProfile {
 
 			double vAccelerationLimited = Math.sqrt(previousVelocity * previousVelocity + 2 * directionOfTravelLimiter.getAcceleration() * arcSegmentLength);
 
-			// todo add distance to nearest object
+			double vObstacleLimited = Math.sqrt(2 * directionOfTravelLimiter.getAcceleration() * obstacleMap.closestObstacleVector(curveFromArcLength.getResult()).getMagnitude());
 
-			double finalVelocityConstraint = Math.min(vAccelerationLimited, vMax);
+			double finalVelocityConstraint = Math.min(Math.min(vAccelerationLimited, vMax), vObstacleLimited);
 
 			outputs[i] = new Followable.Output(
 					Vector2D.fromPolar(finalVelocityConstraint, curveFromArcLength.getFirstDerivative().getHeading()), // the velocity output

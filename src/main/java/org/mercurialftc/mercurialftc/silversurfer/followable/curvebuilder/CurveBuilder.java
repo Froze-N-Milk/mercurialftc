@@ -11,6 +11,7 @@ import org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants.Mec
 import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.AngleRadians;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Vector2D;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.obstaclemap.ObstacleMap;
 
 import java.util.ArrayList;
 
@@ -18,12 +19,14 @@ public class CurveBuilder extends FollowableBuilder {
 	private final ArrayList<CurveSegment> segments;
 	private final ArrayList<MarkerBuilder> unfinishedMarkers;
 	private final MecanumMotionConstants absoluteMotionConstants;
+	private final ObstacleMap obstacleMap;
 	private Vector2D[] tangents;
 	private Vector2D[] outputTangents;
 	private Vector2D[] secondDerivatives;
 
-	public CurveBuilder(MecanumMotionConstants motionConstants, MecanumMotionConstants absoluteMotionConstants) {
+	public CurveBuilder(MecanumMotionConstants motionConstants, MecanumMotionConstants absoluteMotionConstants, ObstacleMap obstacleMap) {
 		super(motionConstants);
+		this.obstacleMap = obstacleMap;
 		this.segments = new ArrayList<>();
 		this.unfinishedMarkers = new ArrayList<>();
 		this.absoluteMotionConstants = absoluteMotionConstants;
@@ -134,12 +137,13 @@ public class CurveBuilder extends FollowableBuilder {
 				this,
 				getMotionConstantsArray(),
 				unfinishedMarkers,
-				absoluteMotionConstants
+				absoluteMotionConstants,
+				obstacleMap
 		);
 	}
 
 	public QuinticBezierCurve[] getResult() {
-//		firstHeuristic();
+//		firstHeuristic(); does not need to be re-run
 		secondHeuristic();
 
 		QuinticBezierCurve[] result = new QuinticBezierCurve[segments.size()];

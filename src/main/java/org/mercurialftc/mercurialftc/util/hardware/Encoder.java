@@ -2,6 +2,7 @@ package org.mercurialftc.mercurialftc.util.hardware;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import org.jetbrains.annotations.NotNull;
 
 public class Encoder {
 	private final DcMotor motor;
@@ -16,7 +17,7 @@ public class Encoder {
 	 *
 	 * @param motor the motor that the encoder is plugged into,
 	 */
-	public Encoder(DcMotor motor) {
+	public Encoder(@NotNull DcMotor motor) {
 		this.motor = motor;
 		this.direction = Direction.FORWARD;
 

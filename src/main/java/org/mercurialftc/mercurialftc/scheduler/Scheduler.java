@@ -184,7 +184,7 @@ public class Scheduler {
 				cancelCommand(command, false);
 			}
 			// checks to see if we have exited the valid run states for this command, if so, cancels and interrupts the command.
-			if (!command.getRunStates().contains(runState)) {
+			else if (!command.getRunStates().contains(runState)) {
 				cancelCommand(command, true);
 			}
 		}

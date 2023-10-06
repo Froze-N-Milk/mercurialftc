@@ -128,7 +128,11 @@ public class MotionProfile {
 
 			double vAccelerationLimited = Math.sqrt(previousVelocity * previousVelocity + 2 * directionOfTravelLimiter.getAcceleration() * arcSegmentLength);
 
-			double vObstacleLimited = Math.sqrt(2 * directionOfTravelLimiter.getAcceleration() * obstacleMap.closestObstacleVector(curveFromArcLength.getResult()).getMagnitude());
+			double vObstacleLimited = Double.POSITIVE_INFINITY;
+			Vector2D closestObstacle = obstacleMap.closestObstacleVector(curveFromArcLength.getResult());
+			if(closestObstacle != null) {
+				vObstacleLimited = Math.sqrt(2 * directionOfTravelLimiter.getAcceleration() * closestObstacle.getMagnitude());
+			}
 
 			double finalVelocityConstraint = Math.min(Math.min(vAccelerationLimited, vMax), vObstacleLimited);
 

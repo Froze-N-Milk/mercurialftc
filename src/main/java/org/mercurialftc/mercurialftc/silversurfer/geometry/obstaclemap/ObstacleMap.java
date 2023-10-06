@@ -17,7 +17,7 @@ public interface ObstacleMap {
 	Obstacle[] getObstacles();
 
 	default Vector2D closestObstacleVector(@NotNull Vector2D position) {
-		Vector2D result = Vector2D.fromPolar(Double.POSITIVE_INFINITY, 0);
+		Vector2D result = null;
 		double shortestDistance = Double.POSITIVE_INFINITY;
 		for (Obstacle obstacle : getAdditionalObstacles()) {
 			Vector2D distanceVector = obstacle.distance(position);
@@ -35,7 +35,10 @@ public interface ObstacleMap {
 				shortestDistance = distance;
 			}
 		}
-		return result.add(Vector2D.fromPolar(getRobotSize(), result.getHeading()));
+		if(result != null) {
+			result = result.add(Vector2D.fromPolar(getRobotSize(), result.getHeading()));
+		}
+		return result;
 	}
 
 	default Vector2D closestObstacleVector(@NotNull Pose2D position) {

@@ -75,7 +75,7 @@ public class GVFWaveFollower extends WaveFollower {
 	private double modifyRotationError(double error) {
 		double output = (Math.sqrt(Math.abs(error)) / rotationLimiter) * Math.signum(error);
 		double deltaError = tracker.getPose2D().getTheta().findShortestDistance(tracker.getPreviousPose2D().getTheta());
-		output -= (deltaError * deltaError) / getMotionConstants().getMaxRotationalVelocity() * Math.signum(deltaError);
+		output -= (deltaError) / getMotionConstants().getMaxRotationalVelocity();
 		return Math.max(-1, Math.min(output, 1));
 	}
 

@@ -178,7 +178,7 @@ public class Scheduler {
 
 	public void pollCommands(OpModeEX.OpModeEXRunStates runState) {
 		this.runState = runState;
-		// checks to see if any commands are finished, if so, queues them to be canceled
+		// checks to see if any commands are finished, if so, cancels them
 		for (CommandSignature command : commands) {
 			if (command.finished()) {
 				cancelCommand(command, false);

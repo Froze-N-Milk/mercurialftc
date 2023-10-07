@@ -64,13 +64,13 @@ public class GVFWaveFollower extends WaveFollower {
 
 	private double modifyTranslationError(double error) {
 		double output = Math.sqrt(error / errorDirectionOfTravelLimiter.getVelocity());
-//		output -= tracker.getPose2D().toVector2D().subtract(tracker.getPreviousPose2D().toVector2D()).getMagnitude() / errorDirectionOfTravelLimiter.getVelocity();
+		output -= (tracker.getPose2D().toVector2D().subtract(tracker.getPreviousPose2D().toVector2D()).getMagnitude() * 2) / errorDirectionOfTravelLimiter.getVelocity();
 		return Math.max(0, Math.min(output, 1));
 	}
 
 	private double modifyRotationError(double error) {
 		double output = (Math.sqrt(Math.abs(error)) / rotationLimiter) * Math.signum(error);
-//		output -= tracker.getPose2D().getTheta().findShortestDistance(tracker.getPreviousPose2D().getTheta()) / getMotionConstants().getMaxRotationalVelocity();
+		output -= (tracker.getPose2D().getTheta().findShortestDistance(tracker.getPreviousPose2D().getTheta()) * 2) / getMotionConstants().getMaxRotationalVelocity();
 		return Math.max(-1, Math.min(output, 1));
 	}
 

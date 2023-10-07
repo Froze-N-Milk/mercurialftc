@@ -14,7 +14,7 @@ public class CenterStageObstacleMap implements ObstacleMap {
 	private final double robotSize;
 
 	/**
-	 * @param unit                the units for your tile size
+	 * @param unit                the units for your tile and robot size
 	 * @param tileSize            the size length of one tile, this allows this map to adapt to different tile sizes at your own field or at competitions
 	 * @param additionalObstacles a list of additional obstacles that you can manipulate in order to add your own realtime obstacle avoidance and detection
 	 * @param robotSize           the radius of the robot, you should test with setting this to either 1/2 the width of the robot (representative of the robot driving forwards and backwards) or the longest radius you can measure (to fully prevent running into an obstacle). picking the latter option may affect the willingness of your robot to go through tight spaces during auto
@@ -22,7 +22,7 @@ public class CenterStageObstacleMap implements ObstacleMap {
 	public CenterStageObstacleMap(@NotNull Units unit, double tileSize, ArrayList<Obstacle> additionalObstacles, double robotSize) {
 		this.additionalObstacles = additionalObstacles;
 		tileSize = unit.toMillimeters(tileSize);
-		this.robotSize = robotSize;
+		this.robotSize = unit.toMillimeters(robotSize);
 		this.obstacles = new Obstacle[]{
 				// trusses
 

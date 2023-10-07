@@ -36,7 +36,7 @@ public interface ObstacleMap {
 			}
 		}
 		if (result != null) {
-			result = Vector2D.fromPolar(Math.min(0, result.getMagnitude() - getRobotSize()), result.getHeading());
+			result = Vector2D.fromPolar(Math.max(0, result.getMagnitude() - getRobotSize()), result.getHeading());
 		}
 		return result;
 	}

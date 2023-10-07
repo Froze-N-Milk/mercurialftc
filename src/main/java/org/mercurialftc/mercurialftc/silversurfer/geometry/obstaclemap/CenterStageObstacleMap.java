@@ -24,6 +24,18 @@ public class CenterStageObstacleMap implements ObstacleMap {
 		tileSize = unit.toMillimeters(tileSize);
 		this.robotSize = unit.toMillimeters(robotSize);
 		this.obstacles = new Obstacle[]{
+				// walls
+
+				//left
+				new RectangularObstacle(Units.MILLIMETER, -3.1 * tileSize, -3.1 * tileSize, -3 * tileSize, 3.1 * tileSize),
+				//right
+				new RectangularObstacle(Units.MILLIMETER, 3 * tileSize, -3.1 * tileSize, 3.1 * tileSize, 3.1 * tileSize),
+				//top
+				new RectangularObstacle(Units.MILLIMETER, -3.1 * tileSize, 3 * tileSize, 3.1 * tileSize, 3.1 * tileSize),
+				//bottom
+				new RectangularObstacle(Units.MILLIMETER, -3.1 * tileSize, -3.1 * tileSize, 3.1 * tileSize, -3 * tileSize),
+
+
 				// trusses
 
 				// blue

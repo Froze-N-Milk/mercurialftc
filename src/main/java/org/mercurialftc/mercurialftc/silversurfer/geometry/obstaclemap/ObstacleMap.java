@@ -35,8 +35,8 @@ public interface ObstacleMap {
 				shortestDistance = distance;
 			}
 		}
-		if(result != null) {
-			result = result.add(Vector2D.fromPolar(getRobotSize(), result.getHeading()));
+		if (result != null) {
+			result = Vector2D.fromPolar(Math.min(0, result.getMagnitude() - getRobotSize()), result.getHeading());
 		}
 		return result;
 	}

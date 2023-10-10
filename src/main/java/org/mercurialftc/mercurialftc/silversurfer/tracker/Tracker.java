@@ -2,6 +2,7 @@ package org.mercurialftc.mercurialftc.silversurfer.tracker;
 
 import org.jetbrains.annotations.NotNull;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.Vector2D;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.Angle;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.AngleRadians;
 import org.mercurialftc.mercurialftc.util.matrix.SimpleMatrix;
@@ -15,6 +16,7 @@ public abstract class Tracker {
 	private final TrackerConstants trackerConstants;
 	private final SimpleMatrix initialRotationMatrix;
 	private Pose2D pose2D, previousPose2D;
+	private Vector2D translationVector;
 	private int insistIndex, insistFrequency;
 
 	public Tracker(@NotNull Pose2D initialPose, TrackerConstants trackerConstants) {
@@ -35,6 +37,11 @@ public abstract class Tracker {
 		insistIndex = 0;
 
 		this.previousPose2D = pose2D;
+		this.translationVector = new Vector2D();
+	}
+
+	public Vector2D getTranslationVector() {
+		return translationVector;
 	}
 
 	public Pose2D getInitialPose2D() {
@@ -62,7 +69,6 @@ public abstract class Tracker {
 	 * must be called frequently for it to be accurate
 	 */
 	public void updatePose() {
-		previousPose2D = pose2D;
 		updateValues();
 
 		double dt = findDeltaTheta();
@@ -118,6 +124,9 @@ public abstract class Tracker {
 			insistIndex++;
 			insistIndex %= insistFrequency;
 		}
+
+		translationVector = pose2D.toVector2D().subtract(previousPose2D.toVector2D());
+		previousPose2D = pose2D;
 	}
 
 	/**

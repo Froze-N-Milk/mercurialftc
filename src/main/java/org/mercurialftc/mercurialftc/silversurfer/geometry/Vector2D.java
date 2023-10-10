@@ -172,6 +172,15 @@ public class Vector2D {
 		return new Vector2D(cos * getX() - sin * getY(), sin * getX() + cos * getY());
 	}
 
+	/**
+	 * non-mutating
+	 *
+	 * @return a new vector with the same heading but a magnitude of 1
+	 */
+	public Vector2D getUnitVector() {
+		return fromPolar(1, this.getHeading());
+	}
+
 	@Override
 	public boolean equals(@Nullable @org.jetbrains.annotations.Nullable Object obj) {
 		if (!(obj instanceof Vector2D)) return false;

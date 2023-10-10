@@ -68,7 +68,7 @@ public class GVFWaveFollower extends WaveFollower {
 	private double modifyTranslationError(double error, double loopTime) {
 		double output = Math.sqrt(error / errorDirectionOfTravelLimiter.getVelocity());
 		double deltaError = tracker.getTranslationVector().getMagnitude();
-		output -= ((deltaError / loopTime) * (deltaError / loopTime)) / errorDirectionOfTravelLimiter.getVelocity(); // todo try this, respects time rather than arbitrarily squaring
+		output -= (deltaError / loopTime) / errorDirectionOfTravelLimiter.getVelocity(); // todo try this, respects time rather than arbitrarily squaring
 //		output -= Math.max(0, (deltaError * deltaError) / errorDirectionOfTravelLimiter.getVelocity());
 		return Math.max(0, Math.min(output, 1));
 	}
@@ -76,7 +76,7 @@ public class GVFWaveFollower extends WaveFollower {
 	private double modifyRotationError(double error, double loopTime) {
 		double output = (Math.sqrt(Math.abs(error)) / rotationLimiter) * Math.signum(error);
 		double deltaError = tracker.getPose2D().getTheta().findShortestDistance(tracker.getPreviousPose2D().getTheta());
-		output -= ((deltaError / loopTime) * (deltaError / loopTime)) / getMotionConstants().getMaxRotationalVelocity(); // todo as above
+		output -= (deltaError / loopTime) / getMotionConstants().getMaxRotationalVelocity(); // todo as above
 		return Math.max(-1, Math.min(output, 1));
 	}
 

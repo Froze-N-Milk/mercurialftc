@@ -45,8 +45,6 @@ public class ArcLengthHandler {
 
 			previousVelocity = curves[i].firstDerivative(1).getMagnitude();
 		}
-
-		return;
 	}
 
 	private double findArcLength(double previousVelocity, QuinticBezierCurve curve) {

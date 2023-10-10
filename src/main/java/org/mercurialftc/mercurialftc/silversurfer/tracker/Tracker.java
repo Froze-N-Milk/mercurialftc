@@ -69,6 +69,8 @@ public abstract class Tracker {
 	 * must be called frequently for it to be accurate
 	 */
 	public void updatePose() {
+		translationVector = pose2D.toVector2D().subtract(previousPose2D.toVector2D());
+		previousPose2D = pose2D;
 		updateValues();
 
 		double dt = findDeltaTheta();
@@ -124,9 +126,6 @@ public abstract class Tracker {
 			insistIndex++;
 			insistIndex %= insistFrequency;
 		}
-
-		translationVector = pose2D.toVector2D().subtract(previousPose2D.toVector2D());
-		previousPose2D = pose2D;
 	}
 
 	/**

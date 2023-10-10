@@ -67,7 +67,7 @@ public class GVFWaveFollower extends WaveFollower {
 
 	private double modifyTranslationError(double error, double loopTime) {
 		double output = Math.sqrt(error / errorDirectionOfTravelLimiter.getVelocity());
-		double deltaError = tracker.getPose2D().toVector2D().subtract(tracker.getPreviousPose2D().toVector2D()).getMagnitude();
+		double deltaError = tracker.getTranslationVector().getMagnitude();
 		output -= (deltaError / loopTime) / errorDirectionOfTravelLimiter.getVelocity(); // todo try this, respects time rather than arbitrarily squaring
 //		output -= Math.max(0, (deltaError * deltaError) / errorDirectionOfTravelLimiter.getVelocity());
 		return Math.max(0, Math.min(output, 1));

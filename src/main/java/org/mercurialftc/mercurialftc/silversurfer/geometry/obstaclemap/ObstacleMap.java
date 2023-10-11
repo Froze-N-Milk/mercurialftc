@@ -44,4 +44,42 @@ public interface ObstacleMap {
 	default Vector2D closestObstacleVector(@NotNull Pose2D position) {
 		return closestObstacleVector(position.toVector2D());
 	}
+
+	default Vector2D obstacleAvoidanceVector(@NotNull Vector2D position) {
+		Vector2D one = null;
+		Vector2D two = null;
+		double shortestDistance = Double.POSITIVE_INFINITY;
+		for (Obstacle obstacle : getAdditionalObstacles()) {
+			Vector2D distanceVector = obstacle.distance(position);
+			double distance = distanceVector.getMagnitude();
+			if (distance < shortestDistance) {
+				two = one;
+				one = distanceVector;
+				shortestDistance = distance;
+			}
+		}
+		for (Obstacle obstacle : getObstacles()) {
+			Vector2D distanceVector = obstacle.distance(position);
+			double distance = distanceVector.getMagnitude();
+			if (distance < shortestDistance) {
+				two = one;
+				one = distanceVector;
+				shortestDistance = distance;
+			}
+		}
+		if (one != null) {
+			one = Vector2D.fromPolar(Math.max(0, one.getMagnitude() - getRobotSize()), one.getHeading());
+		}
+		if (two != null) {
+			two = Vector2D.fromPolar(Math.max(0, two.getMagnitude() - getRobotSize()), two.getHeading());
+		}
+		Vector2D result = null;
+		if (one != null) result = one;
+		if (two != null) result = result.add(two);
+		return result;
+	}
+
+	default Vector2D obstacleAvoidanceVector(@NotNull Pose2D position) {
+		return obstacleAvoidanceVector(position.toVector2D());
+	}
 }

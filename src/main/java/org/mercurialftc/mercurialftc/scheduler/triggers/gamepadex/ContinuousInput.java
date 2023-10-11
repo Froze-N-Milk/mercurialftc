@@ -76,32 +76,41 @@ public class ContinuousInput {
 
 	/**
 	 * cares only about the magnitude, not the sign, also see {@link #positiveThresholdTrigger(double, Command)} and {@link #negativeThresholdTrigger(double, Command)}
+	 * creates a new trigger, that returns true when the magnitude of the continuous input is greater than or equal to threshold
 	 *
 	 * @param threshold the magnitude at which the trigger should run
-	 * @return a new trigger, that returns true when the magnitude of the continuous input is greater than or equal to threshold
+	 * @param toRun     the command to run when the condition is met
+	 * @return self, for chaining
 	 */
-	public Trigger thresholdTrigger(double threshold, Command toRun) {
-		return new Trigger(() -> Math.abs(getValue()) >= threshold, toRun);
+	public ContinuousInput thresholdTrigger(double threshold, Command toRun) {
+		new Trigger(() -> Math.abs(getValue()) >= threshold, toRun);
+		return this;
 	}
 
 	/**
 	 * cares about the sign of the value, will run when value is above or equal to the threshold, also see {@link #negativeThresholdTrigger(double, Command)} and {@link #thresholdTrigger(double)}
+	 * creates a new trigger, that returns true when the value of the continuous input is greater than or equal to threshold
 	 *
 	 * @param threshold the value at which this trigger should run
-	 * @return a new trigger, that returns true when the value of the continuous input is greater than or equal to threshold
+	 * @param toRun     the command to run when the condition is met
+	 * @return self, for chaining
 	 */
-	public Trigger positiveThresholdTrigger(double threshold, Command toRun) {
-		return new Trigger(() -> getValue() >= threshold, toRun);
+	public ContinuousInput positiveThresholdTrigger(double threshold, Command toRun) {
+		new Trigger(() -> getValue() >= threshold, toRun);
+		return this;
 	}
 
 	/**
 	 * cares about the sign of the value, will run when value is below or equal to the threshold, also see {@link #positiveThresholdTrigger(double, Command)} and {@link #thresholdTrigger(double)}
+	 * creates and registers a new trigger, that returns true when the value of the continuous input is less than or equal to threshold
 	 *
 	 * @param threshold the value at which the trigger should run
-	 * @return a new trigger, that returns true when the value of the continuous input is less than or equal to threshold
+	 * @param toRun     the command to run when the condition is met
+	 * @return self, for chaining
 	 */
-	public Trigger negativeThresholdTrigger(double threshold, Command toRun) {
-		return new Trigger(() -> getValue() <= threshold, toRun);
+	public ContinuousInput negativeThresholdTrigger(double threshold, Command toRun) {
+		new Trigger(() -> getValue() <= threshold, toRun);
+		return this;
 	}
 
 	/**

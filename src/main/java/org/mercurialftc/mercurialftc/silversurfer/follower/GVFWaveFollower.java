@@ -15,6 +15,7 @@ public class GVFWaveFollower extends WaveFollower {
 	private final double rotationLimiter;
 	private boolean inPosition;
 	private MecanumMotionConstants.DirectionOfTravelLimiter errorDirectionOfTravelLimiter;
+	private double previousTranslationError, previousRotationError;
 
 	public GVFWaveFollower(@NotNull ArbFollower arbFollower, @NotNull Tracker tracker, @NotNull ObstacleMap obstacleMap) {
 		super(arbFollower.getMotionConstants());
@@ -34,10 +35,12 @@ public class GVFWaveFollower extends WaveFollower {
 
 		Vector2D transformedTranslationVector = output.getTranslationVector();
 
-		if (errorVector.getMagnitude() > 2.5) {
+		double errorVectorMagnitude = errorVector.getMagnitude();
+
+		if (errorVectorMagnitude > 2) {
 			errorDirectionOfTravelLimiter = arbFollower.getMotionConstants().makeDirectionOfTravelLimiter(errorVector.getHeading());
 
-			Vector2D errorFeedback = Vector2D.fromPolar(modifyTranslationError(errorVector.getMagnitude(), loopTime) * errorDirectionOfTravelLimiter.getVelocity(), errorVector.getHeading());
+			Vector2D errorFeedback = Vector2D.fromPolar(modifyTranslationError(errorVectorMagnitude, errorVectorMagnitude - previousTranslationError, loopTime) * errorDirectionOfTravelLimiter.getVelocity(), errorVector.getHeading());
 
 			transformedTranslationVector = transformedTranslationVector.add(errorFeedback);
 
@@ -48,12 +51,12 @@ public class GVFWaveFollower extends WaveFollower {
 		double rotationalError = tracker.getPose2D().getTheta().findShortestDistance(output.getPosition().getTheta());
 
 		if (Math.abs(rotationalError) > 0.035) {
-			transformedRotationalVelocity += modifyRotationError(rotationalError, loopTime) * getMotionConstants().getMaxRotationalVelocity();
+			transformedRotationalVelocity += modifyRotationError(rotationalError, rotationalError - previousRotationError, loopTime) * getMotionConstants().getMaxRotationalVelocity();
 
 			transformedRotationalVelocity = Math.min(getMotionConstants().getMaxRotationalVelocity(), Math.max(-getMotionConstants().getMaxRotationalVelocity(), transformedRotationalVelocity));
 		}
 
-		inPosition = errorVector.getMagnitude() < 5 && rotationalError < 0.035;
+		inPosition = errorVectorMagnitude < 5 && rotationalError < 0.035;
 
 		Followable.Output tranformedOutput = new Followable.Output(
 				transformedTranslationVector,
@@ -63,20 +66,20 @@ public class GVFWaveFollower extends WaveFollower {
 				output.getDestination()
 		);
 		arbFollower.followOutput(tranformedOutput, loopTime);
+
+		previousRotationError = rotationalError;
+		previousTranslationError = errorVectorMagnitude;
 	}
 
-	private double modifyTranslationError(double error, double loopTime) {
+	private double modifyTranslationError(double error, double deltaError, double loopTime) {
 		double output = Math.sqrt(error / errorDirectionOfTravelLimiter.getVelocity());
-		double deltaError = tracker.getTranslationVector().getMagnitude();
-		output -= (deltaError / loopTime) / errorDirectionOfTravelLimiter.getVelocity(); // todo try this, respects time rather than arbitrarily squaring
-//		output -= Math.max(0, (deltaError * deltaError) / errorDirectionOfTravelLimiter.getVelocity());
+		output += (deltaError / loopTime) / errorDirectionOfTravelLimiter.getVelocity();
 		return Math.max(0, Math.min(output, 1));
 	}
 
-	private double modifyRotationError(double error, double loopTime) {
+	private double modifyRotationError(double error, double deltaError, double loopTime) {
 		double output = (Math.sqrt(Math.abs(error)) / rotationLimiter) * Math.signum(error);
-		double deltaError = tracker.getPose2D().getTheta().findShortestDistance(tracker.getPreviousPose2D().getTheta());
-		output -= (deltaError / loopTime) / getMotionConstants().getMaxRotationalVelocity(); // todo as above
+		output += (deltaError / loopTime) / getMotionConstants().getMaxRotationalVelocity();
 		return Math.max(-1, Math.min(output, 1));
 	}
 

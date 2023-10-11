@@ -48,23 +48,32 @@ public interface ObstacleMap {
 	default Vector2D obstacleAvoidanceVector(@NotNull Vector2D position) {
 		Vector2D one = null;
 		Vector2D two = null;
-		double shortestDistance = Double.POSITIVE_INFINITY;
+		double shortestDistanceOne = Double.POSITIVE_INFINITY;
+		double shortestDistanceTwo = Double.POSITIVE_INFINITY;
 		for (Obstacle obstacle : getAdditionalObstacles()) {
 			Vector2D distanceVector = obstacle.distance(position);
 			double distance = distanceVector.getMagnitude();
-			if (distance < shortestDistance) {
+			if (distance < shortestDistanceOne) {
 				two = one;
 				one = distanceVector;
-				shortestDistance = distance;
+				shortestDistanceTwo = shortestDistanceOne;
+				shortestDistanceOne = distance;
+			} else if (distance < shortestDistanceTwo) {
+				two = distanceVector;
+				shortestDistanceTwo = distance;
 			}
 		}
 		for (Obstacle obstacle : getObstacles()) {
 			Vector2D distanceVector = obstacle.distance(position);
 			double distance = distanceVector.getMagnitude();
-			if (distance < shortestDistance) {
+			if (distance < shortestDistanceOne) {
 				two = one;
 				one = distanceVector;
-				shortestDistance = distance;
+				shortestDistanceTwo = shortestDistanceOne;
+				shortestDistanceOne = distance;
+			} else if (distance < shortestDistanceTwo) {
+				two = distanceVector;
+				shortestDistanceTwo = distance;
 			}
 		}
 		if (one != null) {

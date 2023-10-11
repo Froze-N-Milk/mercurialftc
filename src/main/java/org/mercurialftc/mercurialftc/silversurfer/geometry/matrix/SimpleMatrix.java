@@ -1,4 +1,4 @@
-package org.mercurialftc.mercurialftc.util.matrix;
+package org.mercurialftc.mercurialftc.silversurfer.geometry.matrix;
 
 public class SimpleMatrix {
 	private final double[][] matrix;

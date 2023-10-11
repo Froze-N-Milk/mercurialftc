@@ -7,7 +7,7 @@ import org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants.Mec
 import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.AngleRadians;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Vector2D;
 import org.mercurialftc.mercurialftc.silversurfer.tracker.Tracker;
-import org.mercurialftc.mercurialftc.util.matrix.SimpleMatrix;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.matrix.SimpleMatrix;
 
 public class MecanumArbFollower extends ArbFollower {
 	private final DcMotorEx fl, bl, br, fr;

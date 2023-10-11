@@ -5,7 +5,7 @@ import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Vector2D;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.Angle;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.AngleRadians;
-import org.mercurialftc.mercurialftc.util.matrix.SimpleMatrix;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.matrix.SimpleMatrix;
 
 /**
  * tracks robot position in millimeters and radians

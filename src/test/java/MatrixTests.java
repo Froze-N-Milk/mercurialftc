@@ -1,5 +1,5 @@
 import org.junit.jupiter.api.Test;
-import org.mercurialftc.mercurialftc.util.matrix.SimpleMatrix;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.matrix.SimpleMatrix;
 
 import java.util.Arrays;
 

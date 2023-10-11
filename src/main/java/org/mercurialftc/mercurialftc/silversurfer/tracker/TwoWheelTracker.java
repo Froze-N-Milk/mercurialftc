@@ -7,14 +7,14 @@ import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 import org.mercurialftc.mercurialftc.util.hardware.Encoder;
 
 @SuppressWarnings("unused")
-public class TwoWheelTracker extends Tracker {
+public class TwoWheelTracker extends WheeledTracker {
 	private final Encoder left, middle;
 	private final HeadingSupplier headingSupplier;
 	private Angle currentTheta;
 	private double deltaLeft, deltaMiddle, deltaTheta, previousTheta;
 
 	@SuppressWarnings("unused")
-	public TwoWheelTracker(Pose2D initialPose, TrackerConstants.TwoWheelTrackerConstants trackerConstants, Encoder left, Encoder middle, @NotNull HeadingSupplier headingSupplier) {
+	public TwoWheelTracker(Pose2D initialPose, WheeledTrackerConstants.TwoWheeledTrackerConstants trackerConstants, Encoder left, Encoder middle, @NotNull HeadingSupplier headingSupplier) {
 		super(initialPose, trackerConstants);
 		this.left = left;
 		this.middle = middle;
@@ -34,7 +34,7 @@ public class TwoWheelTracker extends Tracker {
 		middle.updateVelocity();
 		headingSupplier.updateHeading();
 
-		TrackerConstants trackerConstants = getTrackerConstants();
+		WheeledTrackerConstants trackerConstants = getTrackerConstants();
 
 		currentTheta = headingSupplier.getHeading();
 

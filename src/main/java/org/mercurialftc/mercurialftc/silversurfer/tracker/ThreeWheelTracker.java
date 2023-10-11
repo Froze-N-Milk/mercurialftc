@@ -4,11 +4,11 @@ import org.mercurialftc.mercurialftc.silversurfer.encoderticksconverter.Units;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 import org.mercurialftc.mercurialftc.util.hardware.Encoder;
 
-public class ThreeWheelTracker extends Tracker {
+public class ThreeWheelTracker extends WheeledTracker {
 	private final Encoder left, right, middle;
 	private double deltaLeft, deltaRight, deltaMiddle;
 
-	public ThreeWheelTracker(Pose2D initialPose, TrackerConstants.ThreeWheelTrackerConstants trackerConstants, Encoder left, Encoder right, Encoder middle) {
+	public ThreeWheelTracker(Pose2D initialPose, WheeledTrackerConstants.ThreeWheeledTrackerConstants trackerConstants, Encoder left, Encoder right, Encoder middle) {
 		super(initialPose, trackerConstants);
 		this.left = left;
 		this.right = right;
@@ -24,7 +24,7 @@ public class ThreeWheelTracker extends Tracker {
 		right.updateVelocity();
 		middle.updateVelocity();
 
-		TrackerConstants trackerConstants = getTrackerConstants();
+		WheeledTrackerConstants trackerConstants = getTrackerConstants();
 
 		deltaLeft = trackerConstants.getLeftTicksConverter().toUnits(left.getVelocityDataPacket().getDeltaPosition(), Units.MILLIMETER);
 		deltaRight = trackerConstants.getRightTicksConverter().toUnits(right.getVelocityDataPacket().getDeltaPosition(), Units.MILLIMETER);

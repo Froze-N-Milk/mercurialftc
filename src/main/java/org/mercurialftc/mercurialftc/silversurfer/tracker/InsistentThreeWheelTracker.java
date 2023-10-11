@@ -14,7 +14,7 @@ public class InsistentThreeWheelTracker extends ThreeWheelTracker {
 	 * @param headingSupplier Either {@link IMU_EX} (recommended for if the IMU isn't being used for anything else, will save on loop time) or {@link ScheduledIMU_EX} (will read from the IMU every loop)
 	 * @param insistFrequency how often the heading supplier is cross-checked to keep the heading accurate
 	 */
-	public InsistentThreeWheelTracker(Pose2D initialPose, TrackerConstants.ThreeWheelTrackerConstants trackerConstants, Encoder left, Encoder right, Encoder middle, HeadingSupplier headingSupplier, int insistFrequency) {
+	public InsistentThreeWheelTracker(Pose2D initialPose, WheeledTrackerConstants.ThreeWheeledTrackerConstants trackerConstants, Encoder left, Encoder right, Encoder middle, HeadingSupplier headingSupplier, int insistFrequency) {
 		super(initialPose, trackerConstants, left, right, middle);
 		setInsistFrequency(insistFrequency);
 		this.headingSupplier = headingSupplier;
@@ -27,7 +27,7 @@ public class InsistentThreeWheelTracker extends ThreeWheelTracker {
 	 *
 	 * @param headingSupplier Either {@link IMU_EX} (recommended for if the IMU isn't being used for anything else, will save on loop time) or {@link ScheduledIMU_EX} (will read from the IMU every loop)
 	 */
-	public InsistentThreeWheelTracker(Pose2D initialPose, TrackerConstants.ThreeWheelTrackerConstants trackerConstants, Encoder left, Encoder right, Encoder middle, HeadingSupplier headingSupplier) {
+	public InsistentThreeWheelTracker(Pose2D initialPose, WheeledTrackerConstants.ThreeWheeledTrackerConstants trackerConstants, Encoder left, Encoder right, Encoder middle, HeadingSupplier headingSupplier) {
 		this(initialPose, trackerConstants, left, right, middle, headingSupplier, 10);
 	}
 

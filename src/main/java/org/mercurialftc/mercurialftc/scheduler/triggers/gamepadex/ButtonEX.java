@@ -10,6 +10,7 @@ import java.util.function.BooleanSupplier;
 /**
  * allows for the powerful binding of commands to boolean conditions, especially those supplied by gamepad inputs and sensors
  */
+@SuppressWarnings("unused")
 public class ButtonEX {
 	private final BooleanSupplier internalInput;
 	private boolean previousState;
@@ -35,7 +36,6 @@ public class ButtonEX {
 	 *
 	 * @return returns the boolean value of the button with debouncing used
 	 */
-
 	public boolean buttonState() {
 		if (processedInput != previousState) {
 			lastCheck = System.nanoTime();
@@ -58,7 +58,6 @@ public class ButtonEX {
 	 * @param toRun the command to run
 	 * @return self for chaining
 	 */
-	@SuppressWarnings("unused")
 	public ButtonEX whilePressed(@NotNull Command toRun) {
 		new Trigger(() -> (buttonState() && buttonState() != previousState),
 				new LambdaCommand()
@@ -79,7 +78,6 @@ public class ButtonEX {
 	 * @param toRun the command to run when the button
 	 * @return self for chaining
 	 */
-	@SuppressWarnings("unused")
 	public ButtonEX whileReleased(@NotNull Command toRun) {
 		new Trigger(() -> (buttonState() && buttonState() != previousState),
 				new LambdaCommand()
@@ -100,7 +98,6 @@ public class ButtonEX {
 	 * @param toRun the command to queue
 	 * @return self for chaining
 	 */
-	@SuppressWarnings("unused")
 	public ButtonEX onPress(@NotNull Command toRun) {
 		new Trigger(() -> (buttonState() && buttonState() != previousState), toRun);
 		return this;
@@ -113,7 +110,6 @@ public class ButtonEX {
 	 * @param toRun the command to queue
 	 * @return self for chaining
 	 */
-	@SuppressWarnings("unused")
 	public ButtonEX onRelease(@NotNull Command toRun) {
 		new Trigger(() -> (!buttonState() && buttonState() != previousState), toRun);
 		return this;
@@ -126,7 +122,6 @@ public class ButtonEX {
 	 * @param duration the duration of the debouncing to be applied, in seconds
 	 * @return returns the updated button object
 	 */
-	@SuppressWarnings("unused")
 	public ButtonEX debounce(@NotNull DebouncingType type, double duration) {
 		switch (type) {
 			case LEADING_EDGE:

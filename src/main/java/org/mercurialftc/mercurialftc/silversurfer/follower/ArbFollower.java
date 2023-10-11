@@ -11,7 +11,7 @@ public abstract class ArbFollower extends WaveFollower {
 	}
 
 	/**
-	 * transforms the output into unit instructions for use in {@link #follow(Vector2D, double)}
+	 * transforms the output into unit instructions for use in {@link #follow(Vector2D, double, double)}
 	 */
 	@Override
 	protected abstract void followOutput(@NotNull Followable.Output output, double loopTime);
@@ -22,5 +22,5 @@ public abstract class ArbFollower extends WaveFollower {
 	 * @param translationVector  should be a unit vector
 	 * @param rotationalVelocity should be in the domain [-1, 1]
 	 */
-	public abstract void follow(Vector2D translationVector, double rotationalVelocity);
+	public abstract void follow(Vector2D translationVector, double rotationalVelocity, double loopTime);
 }

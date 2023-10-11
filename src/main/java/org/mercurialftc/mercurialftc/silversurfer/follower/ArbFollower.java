@@ -14,7 +14,7 @@ public abstract class ArbFollower extends WaveFollower {
 	 * transforms the output into unit instructions for use in {@link #follow(Vector2D, double)}
 	 */
 	@Override
-	public abstract void followOutput(@NotNull Followable.Output output, double loopTime);
+	protected abstract void followOutput(@NotNull Followable.Output output, double loopTime);
 
 	/**
 	 * takes in driver inputs, rotates them and sends them to the wheels

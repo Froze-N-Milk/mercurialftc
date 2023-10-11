@@ -48,7 +48,7 @@ public class MecanumArbFollower extends ArbFollower {
 	 * @param loopTime current loop time, to ensure performance
 	 */
 	@Override
-	public void followOutput(@NotNull Followable.Output output, double loopTime) {
+	protected void followOutput(@NotNull Followable.Output output, double loopTime) {
 		MecanumMotionConstants.DirectionOfTravelLimiter directionOfTravelLimiter = getMotionConstants().makeDirectionOfTravelLimiter(output.getTranslationVector().getHeading());
 
 		Vector2D translationVector = output.getTranslationVector().scalarMultiply(1 / directionOfTravelLimiter.getVelocity());

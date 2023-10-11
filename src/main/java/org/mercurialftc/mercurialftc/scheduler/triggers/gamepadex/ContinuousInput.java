@@ -1,5 +1,7 @@
 package org.mercurialftc.mercurialftc.scheduler.triggers.gamepadex;
 
+import org.mercurialftc.mercurialftc.scheduler.commands.Command;
+import org.mercurialftc.mercurialftc.scheduler.commands.CommandSignature;
 import org.mercurialftc.mercurialftc.scheduler.triggers.Trigger;
 
 import java.util.function.DoubleSupplier;
@@ -8,6 +10,7 @@ import java.util.function.DoubleSupplier;
  * allows deadzones and curving to be applied to a double supplier, designed for usages with the input ranges [0, 1] and [-1, 1]
  * used through {@link GamepadEX} to enhance the power of the sticks and triggers
  */
+@SuppressWarnings("unused")
 public class ContinuousInput {
 	private final DoubleSupplier input;
 	private double deadZone;
@@ -40,7 +43,6 @@ public class ContinuousInput {
 	 *
 	 * @param deadzone the deadzone threshold, with domain [0 - 1]
 	 */
-	@SuppressWarnings("unused")
 	public void applyDeadZone(double deadzone) {
 		if (deadzone < 0) {
 			deadzone = 0;
@@ -51,7 +53,6 @@ public class ContinuousInput {
 		this.deadZone = deadzone;
 	}
 
-	@SuppressWarnings("unused")
 	public CurveSupplier getCurveSupplier() {
 		return curveSupplier;
 	}
@@ -62,7 +63,6 @@ public class ContinuousInput {
 	 *
 	 * @param curveSupplier the new curve supplier to use
 	 */
-	@SuppressWarnings("unused")
 	public void setCurveSupplier(CurveSupplier curveSupplier) {
 		this.curveSupplier = curveSupplier;
 	}
@@ -70,42 +70,38 @@ public class ContinuousInput {
 	/**
 	 * sets the curve supplier to be parabolic, see {@link #setCurveSupplier(CurveSupplier)}
 	 */
-	@SuppressWarnings("unused")
 	public void setParabolicCurve() {
 		this.curveSupplier = input -> input * input * Math.signum(input);
 	}
 
 	/**
-	 * cares only about the magnitude, not the sign, also see {@link #positiveThresholdTrigger(double)} and {@link #negativeThresholdTrigger(double)}
+	 * cares only about the magnitude, not the sign, also see {@link #positiveThresholdTrigger(double, Command)} and {@link #negativeThresholdTrigger(double, Command)}
 	 *
 	 * @param threshold the magnitude at which the trigger should run
 	 * @return a new trigger, that returns true when the magnitude of the continuous input is greater than or equal to threshold
 	 */
-	@SuppressWarnings("unused")
-	public Trigger thresholdTrigger(double threshold) {
-		return new Trigger(() -> Math.abs(getValue()) >= threshold);
+	public Trigger thresholdTrigger(double threshold, Command toRun) {
+		return new Trigger(() -> Math.abs(getValue()) >= threshold, toRun);
 	}
 
 	/**
-	 * cares about the sign of the value, will run when value is above or equal to the threshold, also see {@link #negativeThresholdTrigger(double)} and {@link #thresholdTrigger(double)}
+	 * cares about the sign of the value, will run when value is above or equal to the threshold, also see {@link #negativeThresholdTrigger(double, Command)} and {@link #thresholdTrigger(double)}
 	 *
 	 * @param threshold the value at which this trigger should run
 	 * @return a new trigger, that returns true when the value of the continuous input is greater than or equal to threshold
 	 */
-	@SuppressWarnings("unused")
-	public Trigger positiveThresholdTrigger(double threshold) {
-		return new Trigger(() -> getValue() >= threshold);
+	public Trigger positiveThresholdTrigger(double threshold, Command toRun) {
+		return new Trigger(() -> getValue() >= threshold, toRun);
 	}
 
 	/**
-	 * cares about the sign of the value, will run when value is below or equal to the threshold, also see {@link #positiveThresholdTrigger(double)} and {@link #thresholdTrigger(double)}
+	 * cares about the sign of the value, will run when value is below or equal to the threshold, also see {@link #positiveThresholdTrigger(double, Command)} and {@link #thresholdTrigger(double)}
 	 *
 	 * @param threshold the value at which the trigger should run
 	 * @return a new trigger, that returns true when the value of the continuous input is less than or equal to threshold
 	 */
-	@SuppressWarnings("unused")
-	public Trigger negativeThresholdTrigger(double threshold) {
-		return new Trigger(() -> getValue() <= threshold);
+	public Trigger negativeThresholdTrigger(double threshold, Command toRun) {
+		return new Trigger(() -> getValue() <= threshold, toRun);
 	}
 
 	/**
@@ -114,7 +110,6 @@ public class ContinuousInput {
 	 *
 	 * @return a new continuous input, with the input values inverted, carries all the features applied to the original
 	 */
-	@SuppressWarnings("unused")
 	public ContinuousInput invert() {
 		return new ContinuousInput(() -> -input.getAsDouble(), deadZone, curveSupplier);
 	}

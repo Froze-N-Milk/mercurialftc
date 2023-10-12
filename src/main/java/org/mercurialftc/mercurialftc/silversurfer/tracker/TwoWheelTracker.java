@@ -10,8 +10,8 @@ import org.mercurialftc.mercurialftc.util.hardware.Encoder;
 public class TwoWheelTracker extends WheeledTracker {
 	private final Encoder left, middle;
 	private final HeadingSupplier headingSupplier;
-	private Angle currentTheta;
-	private double deltaLeft, deltaMiddle, deltaTheta, previousTheta;
+	private Angle currentTheta, previousTheta;
+	private double deltaLeft, deltaMiddle, deltaTheta;
 
 	public TwoWheelTracker(Pose2D initialPose, WheeledTrackerConstants.TwoWheeledTrackerConstants trackerConstants, Encoder left, Encoder middle, @NotNull HeadingSupplier headingSupplier) {
 		super(initialPose, trackerConstants);
@@ -19,7 +19,7 @@ public class TwoWheelTracker extends WheeledTracker {
 		this.middle = middle;
 		this.headingSupplier = headingSupplier;
 		this.currentTheta = initialPose.getTheta();
-		this.previousTheta = initialPose.getTheta().getRadians();
+		this.previousTheta = initialPose.getTheta();
 		setInsistFrequency(1);
 		// sets the imu heading to the initial pose heading
 		resetHeading(initialPose.getTheta());
@@ -40,9 +40,9 @@ public class TwoWheelTracker extends WheeledTracker {
 
 		deltaLeft = trackerConstants.getLeftTicksConverter().toUnits(left.getVelocityDataPacket().getDeltaPosition(), Units.MILLIMETER);
 		deltaMiddle = trackerConstants.getMiddleTicksConverter().toUnits(middle.getVelocityDataPacket().getDeltaPosition(), Units.MILLIMETER);
-		deltaTheta = currentTheta.getRadians() - previousTheta;
+		deltaTheta = previousTheta.findShortestDistance(currentTheta);
 
-		previousTheta = headingSupplier.getHeading().getRadians();
+		previousTheta = headingSupplier.getHeading();
 	}
 
 	/**

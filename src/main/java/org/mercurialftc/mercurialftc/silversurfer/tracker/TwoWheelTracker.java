@@ -13,7 +13,6 @@ public class TwoWheelTracker extends WheeledTracker {
 	private Angle currentTheta;
 	private double deltaLeft, deltaMiddle, deltaTheta, previousTheta;
 
-	@SuppressWarnings("unused")
 	public TwoWheelTracker(Pose2D initialPose, WheeledTrackerConstants.TwoWheeledTrackerConstants trackerConstants, Encoder left, Encoder middle, @NotNull HeadingSupplier headingSupplier) {
 		super(initialPose, trackerConstants);
 		this.left = left;

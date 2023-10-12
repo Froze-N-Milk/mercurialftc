@@ -13,7 +13,6 @@ import org.mercurialftc.mercurialftc.silversurfer.geometry.matrix.SimpleMatrix;
 public abstract class WheeledTracker implements Tracker {
 	private final Pose2D initialPose2D;
 	private final WheeledTrackerConstants trackerConstants;
-	private final SimpleMatrix initialRotationMatrix;
 	private Pose2D pose2D, previousPose2D;
 	private Vector2D deltaPositionVector;
 	private int insistIndex, insistFrequency;
@@ -21,15 +20,7 @@ public abstract class WheeledTracker implements Tracker {
 	public WheeledTracker(@NotNull Pose2D initialPose, WheeledTrackerConstants trackerConstants) {
 		this.pose2D = initialPose;
 		this.initialPose2D = initialPose;
-		double cosInitial = Math.cos(initialPose.getTheta().getRadians());
-		double sinInitial = Math.sin(initialPose.getTheta().getRadians());
-		initialRotationMatrix = new SimpleMatrix(
-				new double[][]{
-						{cosInitial, -sinInitial, 0},
-						{sinInitial, cosInitial, 0},
-						{0, 0, 1}
-				}
-		);
+
 		this.trackerConstants = trackerConstants;
 
 		insistFrequency = 0;
@@ -72,6 +63,16 @@ public abstract class WheeledTracker implements Tracker {
 		previousPose2D = pose2D;
 		updateValues();
 
+		double cos = Math.cos(pose2D.getTheta().getRadians());
+		double sin = Math.sin(pose2D.getTheta().getRadians());
+		SimpleMatrix rotationMatrix = new SimpleMatrix(
+				new double[][]{
+						{cos, -sin, 0},
+						{sin, cos, 0},
+						{0, 0, 1}
+				}
+		);
+
 		double dt = findDeltaTheta();
 		double dc = findDeltaXc();
 		double dp = findDeltaXp();
@@ -102,29 +103,29 @@ public abstract class WheeledTracker implements Tracker {
 
 		/*
 		{
-			{(cosInitial * term0 + (- sinInitial) * term1), (cosInitial * term2 + (- sinInitial) * term0)},
-			{(sinInitial * term0 + cosInitial * term1), (sinInitial * term2 + cosInitial * term0)}
+			{(cos * term0 + (- sin) * term1), (cos * term2 + (- sin) * term0)},
+			{(sin * term0 + cos * term1), (sin * term2 + cos * term0)}
 		}
 
 		{
-			dc * (cosInitial * term0 + (- sinInitial) * term1) + dp * (cosInitial * term2 + (- sinInitial) * term0),
-			dc * (sinInitial * term0 + cosInitial * term1) + dp * (sinInitial * term2 + cosInitial * term0)}
+			dc * (cos * term0 + (- sin) * term1) + dp * (cos * term2 + (- sin) * term0),
+			dc * (sin * term0 + cos * term1) + dp * (sin * term2 + cos * term0)}
 		}
 		 */
 
-//		double d//		double deltaY = dp * (sinInitial * term0 + cosInitial * term1) + dc * (sinInitial * term2 + cosInitial * term0);eltaX = dp * (cosInitial * term0 - sinInitial * term1) + dc * (cosInitial * term2 - sinInitial * term0);
+//		double d//		double deltaY = dp * (sin * term0 + cos * term1) + dc * (sin * term2 + cos * term0);eltaX = dp * (cos * term0 - sin * term1) + dc * (cos * term2 - sin * term0);
 
-		SimpleMatrix twistResult = initialRotationMatrix.multiply(twistMatrix).multiply(inputMatrix);
+		SimpleMatrix twistResult = rotationMatrix.multiply(twistMatrix).multiply(inputMatrix);
 
 		pose2D = pose2D.add(twistResult.getItem(0, 0) * trackerConstants.getXMult(), twistResult.getItem(1, 0) * trackerConstants.getYMult(), new AngleRadians(twistResult.getItem(2, 0)));
 
-//		if (insistFrequency > 0) {
-//			if (insistIndex == 0) {
-//				insist();
-//			}
-//			insistIndex++;
-//			insistIndex %= insistFrequency;
-//		}
+		if (insistFrequency > 0) {
+			if (insistIndex == 0) {
+				insist();
+			}
+			insistIndex++;
+			insistIndex %= insistFrequency;
+		}
 	}
 
 	/**

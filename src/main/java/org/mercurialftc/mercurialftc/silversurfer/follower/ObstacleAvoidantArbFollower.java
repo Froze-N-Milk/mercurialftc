@@ -24,23 +24,23 @@ public class ObstacleAvoidantArbFollower extends ArbFollower {
 
 	@Override
 	protected void followOutput(@NotNull Followable.Output output, double loopTime) {
-		Vector2D obstacleAvoidanceVector = obstacleMap.obstacleAvoidanceVector(tracker.getPose2D());
+		Vector2D obstacleDistanceVector = obstacleMap.closestObstacleVector(tracker.getPose2D());
 
 		Vector2D transformedTranslationVector = output.getTranslationVector();
 
-		if (obstacleAvoidanceVector != null) {
-			obstacleAvoidanceDirectionOfTravelLimiter = arbFollower.getMotionConstants().makeDirectionOfTravelLimiter(obstacleAvoidanceVector.getHeading());
+		if (obstacleDistanceVector != null) {
+			obstacleAvoidanceDirectionOfTravelLimiter = arbFollower.getMotionConstants().makeDirectionOfTravelLimiter(obstacleDistanceVector.getHeading());
 
-			double obstacleAvoidanceVectorMagnitude = obstacleAvoidanceVector.getMagnitude();
+			double obstacleDistanceVectorMagnitude = obstacleDistanceVector.getMagnitude();
 
-			Vector2D obstacleFeedback = Vector2D.fromPolar(modifyObstacleAvoidance(obstacleAvoidanceVectorMagnitude, obstacleAvoidanceVectorMagnitude - previousObstacleAvoidanceVectorMagnitude, loopTime) * obstacleAvoidanceDirectionOfTravelLimiter.getVelocity(), obstacleAvoidanceVector.getHeading());
+			Vector2D obstacleFeedback = Vector2D.fromPolar(modifyObstacleAvoidance(obstacleDistanceVectorMagnitude, obstacleDistanceVectorMagnitude - previousObstacleAvoidanceVectorMagnitude, loopTime) * obstacleAvoidanceDirectionOfTravelLimiter.getVelocity(), obstacleDistanceVector.getHeading());
 
-			transformedTranslationVector = transformedTranslationVector.add(obstacleFeedback);
+			transformedTranslationVector = transformedTranslationVector.add(Vector2D.fromPolar(obstacleFeedback.dot(transformedTranslationVector), obstacleDistanceVectorMagnitude)); // todo test with and without the dotting
 
 			MecanumMotionConstants.DirectionOfTravelLimiter directionOfTravelLimiter = arbFollower.getMotionConstants().makeDirectionOfTravelLimiter(transformedTranslationVector.getHeading());
 			transformedTranslationVector = Vector2D.fromPolar(Math.min(directionOfTravelLimiter.getVelocity(), transformedTranslationVector.getMagnitude()), transformedTranslationVector.getHeading());
 
-			previousObstacleAvoidanceVectorMagnitude = obstacleAvoidanceVectorMagnitude;
+			previousObstacleAvoidanceVectorMagnitude = obstacleDistanceVectorMagnitude;
 		}
 
 		arbFollower.followOutput(
@@ -56,28 +56,28 @@ public class ObstacleAvoidantArbFollower extends ArbFollower {
 	}
 
 	private double modifyObstacleAvoidance(double obstacleDistance, double deltaObstacleDistance, double loopTime) {
-		double output = Math.sqrt(obstacleDistance / obstacleAvoidanceDirectionOfTravelLimiter.getVelocity());
-		output += (deltaObstacleDistance / loopTime) / obstacleAvoidanceDirectionOfTravelLimiter.getVelocity();
-		return Math.max(0, Math.min(output, 1));
+		double output = 10 / -obstacleDistance; // the obstacle vector points us towards the obstacle, so we need to return a negative velocity to move us away
+		output += (deltaObstacleDistance / loopTime) / obstacleAvoidanceDirectionOfTravelLimiter.getVelocity(); // dampening
+		return Math.max(-1, Math.min(output, 0));
 	}
 
 	@Override
 	public void follow(Vector2D translationVector, double rotationalVelocity, double loopTime) {
-		Vector2D obstacleAvoidanceVector = obstacleMap.obstacleAvoidanceVector(tracker.getPose2D());
+		Vector2D obstacleDistanceVector = obstacleMap.closestObstacleVector(tracker.getPose2D());
 
-		if (obstacleAvoidanceVector != null) {
-			obstacleAvoidanceDirectionOfTravelLimiter = arbFollower.getMotionConstants().makeDirectionOfTravelLimiter(obstacleAvoidanceVector.getHeading());
+		if (obstacleDistanceVector != null) {
+			obstacleAvoidanceDirectionOfTravelLimiter = arbFollower.getMotionConstants().makeDirectionOfTravelLimiter(obstacleDistanceVector.getHeading());
 
-			double obstacleAvoidanceVectorMagnitude = obstacleAvoidanceVector.getMagnitude();
+			double obstacleDistanceVectorMagnitude = obstacleDistanceVector.getMagnitude();
 
-			Vector2D obstacleFeedback = Vector2D.fromPolar(modifyObstacleAvoidance(obstacleAvoidanceVectorMagnitude, obstacleAvoidanceVectorMagnitude - previousObstacleAvoidanceVectorMagnitude, loopTime), obstacleAvoidanceVector.getHeading());
+			Vector2D obstacleFeedback = Vector2D.fromPolar(modifyObstacleAvoidance(obstacleDistanceVectorMagnitude, obstacleDistanceVectorMagnitude - previousObstacleAvoidanceVectorMagnitude, loopTime), obstacleDistanceVector.getHeading());
 
-			translationVector = translationVector.add(obstacleFeedback);
+			translationVector = translationVector.add(Vector2D.fromPolar(obstacleFeedback.dot(translationVector), obstacleDistanceVectorMagnitude));
 
 			MecanumMotionConstants.DirectionOfTravelLimiter directionOfTravelLimiter = arbFollower.getMotionConstants().makeDirectionOfTravelLimiter(translationVector.getHeading());
 			translationVector = Vector2D.fromPolar(Math.min(directionOfTravelLimiter.getVelocity(), translationVector.getMagnitude()), translationVector.getHeading());
 
-			previousObstacleAvoidanceVectorMagnitude = obstacleAvoidanceVectorMagnitude;
+			previousObstacleAvoidanceVectorMagnitude = obstacleDistanceVectorMagnitude;
 		}
 
 		arbFollower.follow(translationVector, rotationalVelocity, loopTime);

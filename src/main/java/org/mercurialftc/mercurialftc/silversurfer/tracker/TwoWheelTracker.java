@@ -50,7 +50,7 @@ public class TwoWheelTracker extends WheeledTracker {
 	 */
 	@Override
 	protected double findDeltaXc() {
-		return deltaLeft;
+		return deltaLeft + (getTrackerConstants().getLateralDistance() * findDeltaTheta());
 	}
 
 	/**
@@ -58,7 +58,7 @@ public class TwoWheelTracker extends WheeledTracker {
 	 */
 	@Override
 	protected double findDeltaXp() {
-		return deltaMiddle - (getTrackerConstants().getForwardOffset() * findDeltaTheta());
+		return deltaMiddle + (getTrackerConstants().getForwardOffset() * findDeltaTheta());
 	}
 
 	@Override

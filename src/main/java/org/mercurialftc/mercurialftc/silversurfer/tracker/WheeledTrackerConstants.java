@@ -89,8 +89,8 @@ public abstract class WheeledTrackerConstants {
 		 * @param leftTicksConverter   the encoder ticks converter for the left sensor
 		 * @param middleTicksConverter the encoder ticks converter for the perpendicular sensor
 		 */
-		public TwoWheeledTrackerConstants(Units units, double forwardOffset, double xMult, double yMult, EncoderTicksConverter leftTicksConverter, EncoderTicksConverter middleTicksConverter) {
-			super(units, 0, forwardOffset, xMult, yMult, leftTicksConverter, new EncoderTicksConverter(0, Units.MILLIMETER), middleTicksConverter);
+		public TwoWheeledTrackerConstants(Units units, double forwardOffset, double lateralOffset, double xMult, double yMult, EncoderTicksConverter leftTicksConverter, EncoderTicksConverter middleTicksConverter) {
+			super(units, lateralOffset, forwardOffset, xMult, yMult, leftTicksConverter, new EncoderTicksConverter(0, Units.MILLIMETER), middleTicksConverter);
 		}
 	}
 }

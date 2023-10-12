@@ -27,13 +27,13 @@ public class CenterStageObstacleMap implements ObstacleMap {
 				// walls
 
 				//left
-				new RectangularObstacle(Units.MILLIMETER, -3.1 * tileSize, -3.1 * tileSize, -3 * tileSize, 3.1 * tileSize),
+				new RectangularObstacle(Units.MILLIMETER, Double.NEGATIVE_INFINITY, -3.1 * tileSize, -3 * tileSize, 3.1 * tileSize),
 				//right
-				new RectangularObstacle(Units.MILLIMETER, 3 * tileSize, -3.1 * tileSize, 3.1 * tileSize, 3.1 * tileSize),
+				new RectangularObstacle(Units.MILLIMETER, 3 * tileSize, -3.1 * tileSize, Double.POSITIVE_INFINITY, 3.1 * tileSize),
 				//top
-				new RectangularObstacle(Units.MILLIMETER, -3.1 * tileSize, 3 * tileSize, 3.1 * tileSize, 3.1 * tileSize),
+				new RectangularObstacle(Units.MILLIMETER, -3.1 * tileSize, 3 * tileSize, 3.1 * tileSize, Double.POSITIVE_INFINITY),
 				//bottom
-				new RectangularObstacle(Units.MILLIMETER, -3.1 * tileSize, -3.1 * tileSize, 3.1 * tileSize, -3 * tileSize),
+				new RectangularObstacle(Units.MILLIMETER, -3.1 * tileSize, Double.NEGATIVE_INFINITY, 3.1 * tileSize, -3 * tileSize),
 
 
 				// trusses

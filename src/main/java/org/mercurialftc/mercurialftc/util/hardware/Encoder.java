@@ -23,6 +23,8 @@ public class Encoder {
 
 		previousTime = System.nanoTime() / 1e9;
 		previousPosition = motor.getCurrentPosition();
+
+		output = new VelocityDataPacket(0, 1);
 	}
 
 	/**
@@ -76,8 +78,6 @@ public class Encoder {
 	/**
 	 * <p>needs to be called once per loop to be accurate</p>
 	 * <p>if using this in a {@link org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface} subclass, chuck it in the periodic loop, and never think about it again</p>
-	 *
-	 * @return measured velocity
 	 */
 	public void updateVelocity() {
 		int currentPosition = getCurrentPosition();

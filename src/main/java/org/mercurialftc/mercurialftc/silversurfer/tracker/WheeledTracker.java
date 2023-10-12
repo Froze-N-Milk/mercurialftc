@@ -118,13 +118,13 @@ public abstract class WheeledTracker implements Tracker {
 
 		pose2D = pose2D.add(twistResult.getItem(0, 0) * trackerConstants.getXMult(), twistResult.getItem(1, 0) * trackerConstants.getYMult(), new AngleRadians(twistResult.getItem(2, 0)));
 
-		if (insistFrequency > 0) {
-			if (insistIndex == 0) {
-				insist();
-			}
-			insistIndex++;
-			insistIndex %= insistFrequency;
-		}
+//		if (insistFrequency > 0) {
+//			if (insistIndex == 0) {
+//				insist();
+//			}
+//			insistIndex++;
+//			insistIndex %= insistFrequency;
+//		}
 	}
 
 	/**

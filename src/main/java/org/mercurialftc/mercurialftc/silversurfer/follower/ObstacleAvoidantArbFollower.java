@@ -35,7 +35,7 @@ public class ObstacleAvoidantArbFollower extends ArbFollower {
 
 			Vector2D obstacleFeedback = Vector2D.fromPolar(modifyObstacleAvoidance(obstacleDistanceVectorMagnitude, obstacleDistanceVectorMagnitude - previousObstacleAvoidanceVectorMagnitude, loopTime) * obstacleAvoidanceDirectionOfTravelLimiter.getVelocity(), obstacleDistanceVector.getHeading());
 
-			transformedTranslationVector = transformedTranslationVector.add(Vector2D.fromPolar(obstacleFeedback.dot(transformedTranslationVector), obstacleDistanceVectorMagnitude)); // todo test with and without the dotting
+			transformedTranslationVector = transformedTranslationVector.add(obstacleFeedback);
 
 			MecanumMotionConstants.DirectionOfTravelLimiter directionOfTravelLimiter = arbFollower.getMotionConstants().makeDirectionOfTravelLimiter(transformedTranslationVector.getHeading());
 			transformedTranslationVector = Vector2D.fromPolar(Math.min(directionOfTravelLimiter.getVelocity(), transformedTranslationVector.getMagnitude()), transformedTranslationVector.getHeading());
@@ -72,7 +72,7 @@ public class ObstacleAvoidantArbFollower extends ArbFollower {
 
 			Vector2D obstacleFeedback = Vector2D.fromPolar(modifyObstacleAvoidance(obstacleDistanceVectorMagnitude, obstacleDistanceVectorMagnitude - previousObstacleAvoidanceVectorMagnitude, loopTime), obstacleDistanceVector.getHeading());
 
-			translationVector = translationVector.add(Vector2D.fromPolar(obstacleFeedback.dot(translationVector), obstacleDistanceVectorMagnitude));
+			translationVector = translationVector.add(obstacleFeedback);
 
 			MecanumMotionConstants.DirectionOfTravelLimiter directionOfTravelLimiter = arbFollower.getMotionConstants().makeDirectionOfTravelLimiter(translationVector.getHeading());
 			translationVector = Vector2D.fromPolar(Math.min(directionOfTravelLimiter.getVelocity(), translationVector.getMagnitude()), translationVector.getHeading());

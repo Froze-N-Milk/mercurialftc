@@ -57,8 +57,8 @@ public class ObstacleAvoidantArbFollower extends ArbFollower {
 
 	private double modifyObstacleAvoidance(double obstacleDistance, double deltaObstacleDistance, double loopTime) {
 		obstacleDistance = Math.max(0.001, obstacleDistance);
-		double output = 25 / -obstacleDistance; // the obstacle vector points us towards the obstacle, so we need to return a negative velocity to move us away
-		output -= ((deltaObstacleDistance * -deltaObstacleDistance) / loopTime) / obstacleAvoidanceDirectionOfTravelLimiter.getVelocity(); // dampening
+		double output = 50 / -obstacleDistance; // the obstacle vector points us towards the obstacle, so we need to return a negative velocity to move us away
+		output -= (deltaObstacleDistance / loopTime) / obstacleAvoidanceDirectionOfTravelLimiter.getVelocity(); // dampening
 		return Math.max(-1, Math.min(output, 0));
 	}
 

@@ -11,7 +11,9 @@ import java.util.function.BooleanSupplier;
  * allows for the powerful binding of commands to boolean conditions, especially those supplied by gamepad inputs and sensors
  */
 @SuppressWarnings("unused")
-public class Binding implements BindingInterface<Binding> {
+public class Binding<B extends Binding<B>> {
+	@SuppressWarnings("unchecked")
+	private final B thisAsB = (B) this;
 	private final BooleanSupplier internalInput;
 	private boolean previousState;
 	private long leadingEdgeDebounce;
@@ -25,13 +27,11 @@ public class Binding implements BindingInterface<Binding> {
 		this.internalInput = internalInput;
 	}
 
-	@Override
 	public void endLoopUpdate() {
 		previousToggleState = toggledOn;
 		previousState = state();
 	}
 
-	@Override
 	public boolean state() {
 		if (processedInput != previousState) {
 			lastCheck = System.nanoTime();
@@ -48,8 +48,7 @@ public class Binding implements BindingInterface<Binding> {
 		return processedInput;
 	}
 
-	@Override
-	public Binding whileTrue(@NotNull CommandSignature toRun) {
+	public B whileTrue(@NotNull CommandSignature toRun) {
 		new Trigger(() -> (state() && state() != previousState),
 				new LambdaCommand()
 						.setRequirements(toRun.getRequiredSubsystems())
@@ -59,11 +58,10 @@ public class Binding implements BindingInterface<Binding> {
 						.finish(() -> !state() || toRun.finished())
 						.setInterruptable(toRun.interruptable())
 		);
-		return this;
+		return thisAsB;
 	}
 
-	@Override
-	public Binding whileFalse(@NotNull CommandSignature toRun) {
+	public B whileFalse(@NotNull CommandSignature toRun) {
 		new Trigger(() -> (state() && state() != previousState),
 				new LambdaCommand()
 						.setRequirements(toRun.getRequiredSubsystems())
@@ -74,17 +72,15 @@ public class Binding implements BindingInterface<Binding> {
 						.finish(() -> state() || toRun.finished())
 						.setInterruptable(toRun.interruptable())
 		);
-		return this;
+		return thisAsB;
 	}
 
-	@Override
-	public Binding onTrue(@NotNull CommandSignature toRun) {
+	public B onTrue(@NotNull CommandSignature toRun) {
 		new Trigger(() -> (state() && state() != previousState), toRun);
-		return this;
+		return thisAsB;
 	}
 
-	@Override
-	public Binding toggle(@NotNull CommandSignature toRun) {
+	public B toggle(@NotNull CommandSignature toRun) {
 		new Trigger(() -> {
 			state();
 			return toggledOn && !previousToggleState;
@@ -98,17 +94,15 @@ public class Binding implements BindingInterface<Binding> {
 						.finish(() -> !toggledOn || toRun.finished())
 						.setInterruptable(toRun.interruptable())
 		);
-		return this;
+		return thisAsB;
 	}
 
-	@Override
-	public Binding onFalse(@NotNull CommandSignature toRun) {
+	public B onFalse(@NotNull CommandSignature toRun) {
 		new Trigger(() -> (!state() && state() != previousState), toRun);
-		return this;
+		return thisAsB;
 	}
 
-	@Override
-	public Binding debounce(@NotNull DebouncingType type, double duration) {
+	public B debounce(@NotNull DebouncingType type, double duration) {
 		switch (type) {
 			case LEADING_EDGE:
 				leadingEdgeDebounce = (long) (duration * 1e9);
@@ -121,6 +115,12 @@ public class Binding implements BindingInterface<Binding> {
 				trailingEdgeDebounce = (long) (duration * 1e9);
 				break;
 		}
-		return this;
+		return thisAsB;
+	}
+
+	public enum DebouncingType {
+		LEADING_EDGE,
+		TRAILING_EDGE,
+		BOTH
 	}
 }

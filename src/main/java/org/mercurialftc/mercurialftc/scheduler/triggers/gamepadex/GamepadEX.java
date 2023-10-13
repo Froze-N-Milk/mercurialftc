@@ -2,7 +2,7 @@ package org.mercurialftc.mercurialftc.scheduler.triggers.gamepadex;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
 
-@SuppressWarnings("unused")
+@SuppressWarnings("unused rawtypes")
 public class GamepadEX {
 	private final Binding
 			a,

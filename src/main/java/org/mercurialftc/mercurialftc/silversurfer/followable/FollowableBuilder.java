@@ -1,12 +1,13 @@
 package org.mercurialftc.mercurialftc.silversurfer.followable;
 
-import org.mercurialftc.mercurialftc.scheduler.commands.Command;
+import org.mercurialftc.mercurialftc.scheduler.commands.CommandSignature;
 import org.mercurialftc.mercurialftc.silversurfer.followable.markers.Marker;
 import org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants.MecanumMotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 
 import java.util.ArrayList;
 
+@SuppressWarnings("unused")
 public abstract class FollowableBuilder {
 	private final ArrayList<MecanumMotionConstants> motionConstantsArray;
 	private MecanumMotionConstants motionConstants; // the motion constants used to build all current segments
@@ -20,7 +21,6 @@ public abstract class FollowableBuilder {
 		return motionConstantsArray;
 	}
 
-	@SuppressWarnings("unused")
 	protected MecanumMotionConstants getMotionConstants() {
 		return motionConstants;
 	}
@@ -44,7 +44,6 @@ public abstract class FollowableBuilder {
 	 * @param previousPose
 	 * @param destinationPose
 	 */
-	@SuppressWarnings("unused")
 	protected abstract void addSegment(Pose2D previousPose, Pose2D destinationPose);
 
 	/**
@@ -54,7 +53,6 @@ public abstract class FollowableBuilder {
 	 * @param destinationPose
 	 * @return
 	 */
-	@SuppressWarnings("unused")
 	public final FollowableBuilder addFollowableSegment(Pose2D previousPose, Pose2D destinationPose) {
 		addSegment(previousPose, destinationPose);
 		updateMotionConstantsArray();
@@ -62,11 +60,10 @@ public abstract class FollowableBuilder {
 	}
 
 	/**
-	 * todo fill in
+	 * sets a callback command to occur with a timed offset reference to the end of the instruction before it.
 	 *
-	 * @param offset
-	 * @param markerReached
+	 * @param offset        a relative offset, in seconds
+	 * @param markerReached the command to run
 	 */
-	@SuppressWarnings("unused")
-	protected abstract void addOffsetCommandMarker(double offset, Marker.MarkerType markerType, Command markerReached);
+	protected abstract void addOffsetCommandMarker(double offset, Marker.MarkerType markerType, CommandSignature markerReached);
 }

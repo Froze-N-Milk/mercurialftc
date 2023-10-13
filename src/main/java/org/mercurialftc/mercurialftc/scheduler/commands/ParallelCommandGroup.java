@@ -1,5 +1,6 @@
 package org.mercurialftc.mercurialftc.scheduler.commands;
 
+import org.jetbrains.annotations.NotNull;
 import org.mercurialftc.mercurialftc.scheduler.OpModeEX;
 import org.mercurialftc.mercurialftc.scheduler.Scheduler;
 import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
@@ -7,7 +8,7 @@ import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
 import java.util.*;
 
 @SuppressWarnings("unused")
-public class ParallelCommandGroup extends Command {
+public class ParallelCommandGroup implements CommandSignature {
 	private final Map<CommandSignature, Boolean> commands;
 	private final boolean interruptable;
 	private final Set<SubsystemInterface> requiredSubsystems;
@@ -22,17 +23,18 @@ public class ParallelCommandGroup extends Command {
 		this.commands = new HashMap<>();
 	}
 
-	private ParallelCommandGroup(HashMap<CommandSignature, Boolean> commands, Set<SubsystemInterface> requirements, Set<OpModeEX.OpModeEXRunStates> runStates, boolean interruptable) {
+	private ParallelCommandGroup(@NotNull HashMap<CommandSignature, Boolean> commands, Set<SubsystemInterface> requirements, Set<OpModeEX.OpModeEXRunStates> runStates, boolean interruptable) {
 		this.requiredSubsystems = requirements;
 		this.runStates = runStates;
 		this.interruptable = interruptable;
 		this.commands = commands;
+
+		Scheduler.getSchedulerInstance().registerComposedCommands(commands.keySet());
 	}
 
 	@Override
 	public void queue() {
-		Scheduler.getSchedulerInstance().registerComposedCommands(commands.keySet().toArray(new CommandSignature[0]));
-		super.queue();
+		CommandSignature.super.queue();
 	}
 
 	/**

@@ -8,7 +8,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 @SuppressWarnings("unused")
-public class LambdaCommand extends Command {
+public class LambdaCommand implements CommandSignature {
 	private final Runnable commandInit;
 	private final Runnable commandMethod;
 	private final BooleanSupplier commandFinish;
@@ -189,4 +189,15 @@ public class LambdaCommand extends Command {
 		);
 	}
 
+	public LambdaCommand setRunStates(Set<OpModeEX.OpModeEXRunStates> runStates) {
+		return new LambdaCommand(
+				this.requiredSubsystems,
+				this.commandInit,
+				this.commandMethod,
+				this.commandFinish,
+				this.commandEnd,
+				this.interruptable,
+				runStates
+		);
+	}
 }

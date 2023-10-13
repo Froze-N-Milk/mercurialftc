@@ -9,6 +9,7 @@ import org.mercurialftc.mercurialftc.scheduler.triggers.gamepadex.GamepadEX;
 
 import java.util.List;
 
+@SuppressWarnings("unused")
 public abstract class OpModeEX extends OpMode {
 	private GamepadEX
 			gamepadEX1,

@@ -1,6 +1,6 @@
 package org.mercurialftc.mercurialftc.silversurfer.followable;
 
-import org.mercurialftc.mercurialftc.scheduler.commands.Command;
+import org.mercurialftc.mercurialftc.scheduler.commands.CommandSignature;
 import org.mercurialftc.mercurialftc.scheduler.commands.LambdaCommand;
 import org.mercurialftc.mercurialftc.silversurfer.encoderticksconverter.Units;
 import org.mercurialftc.mercurialftc.silversurfer.followable.curvebuilder.CurveBuilder;
@@ -253,13 +253,13 @@ public class WaveBuilder {
 	}
 
 	/**
-	 * sets a callback action to occur with a timed offset reference to the end of the instruction before it.
+	 * sets a callback command to occur with a timed offset reference to the end of the instruction before it.
 	 *
-	 * @param offset
-	 * @param markerReached
+	 * @param offset        a relative offset, in seconds
+	 * @param markerReached the command to run
 	 * @return self, for method chaining
 	 */
-	public WaveBuilder addOffsetActionMarker(double offset, Command markerReached) {
+	public WaveBuilder addOffsetActionMarker(double offset, CommandSignature markerReached) {
 		builder.addOffsetCommandMarker(offset, Marker.MarkerType.COMMAND, markerReached);
 		return this;
 	}
@@ -267,8 +267,8 @@ public class WaveBuilder {
 	/**
 	 * sets a callback action to occur with a timed offset reference to the end of the instruction before it.
 	 *
-	 * @param offset
-	 * @param markerReached
+	 * @param offset        a relative offset, in seconds
+	 * @param markerReached the method to run
 	 * @return self, for method chaining
 	 */
 	public WaveBuilder addOffsetActionMarker(double offset, Runnable markerReached) {

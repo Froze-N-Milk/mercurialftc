@@ -26,21 +26,21 @@ public class ChangeSchedulerConfig extends OpModeEX {
 
 	@Override
 	public void registerTriggers() {
-		gamepadEX1().dpad_up().onPress(
+		gamepadEX1().dpad_up().onTrue(
 				new LambdaCommand().init(() -> {
 					selection++;
 					if (selection < 0) selection += selectionSize;
 					selection %= selectionSize;
 				})
 		);
-		gamepadEX1().dpad_down().onPress(
+		gamepadEX1().dpad_down().onTrue(
 				new LambdaCommand().init(() -> {
 					selection--;
 					if (selection < 0) selection += selectionSize;
 					selection %= selectionSize;
 				})
 		);
-		gamepadEX1().a().onPress(
+		gamepadEX1().a().onTrue(
 				new LambdaCommand().init(() -> {
 					Scheduler.getConfigOptionsManager().updateValue(selectionString, Boolean.FALSE.equals(Scheduler.getConfigOptionsManager().getTomlParseResult().getBoolean(selectionString)));
 					try {

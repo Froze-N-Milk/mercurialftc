@@ -7,7 +7,7 @@ import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
 import java.util.*;
 
 @SuppressWarnings("unused")
-public class SequentialCommandGroup extends Command {
+public class SequentialCommandGroup implements CommandSignature {
 	private final ArrayList<CommandSignature> commands;
 	private final boolean interruptable;
 	private final Set<SubsystemInterface> requiredSubsystems;
@@ -29,12 +29,12 @@ public class SequentialCommandGroup extends Command {
 		this.commands = commands;
 		this.interruptable = interruptable;
 		commandIndex = -1;
+		Scheduler.getSchedulerInstance().registerComposedCommands(commands);
 	}
 
 	@Override
 	public void queue() {
-		Scheduler.getSchedulerInstance().registerComposedCommands(commands);
-		super.queue();
+		CommandSignature.super.queue();
 	}
 
 	/**

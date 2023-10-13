@@ -1,6 +1,6 @@
 package org.mercurialftc.mercurialftc.silversurfer.followable.turnbuilder;
 
-import org.mercurialftc.mercurialftc.scheduler.commands.Command;
+import org.mercurialftc.mercurialftc.scheduler.commands.CommandSignature;
 import org.mercurialftc.mercurialftc.silversurfer.followable.Followable;
 import org.mercurialftc.mercurialftc.silversurfer.followable.FollowableBuilder;
 import org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants.MecanumMotionConstants;
@@ -140,7 +140,7 @@ public class TurnBuilder extends FollowableBuilder {
 	}
 
 	@Override
-	protected void addOffsetCommandMarker(double offset, Marker.MarkerType markerType, Command markerReached) {
+	protected void addOffsetCommandMarker(double offset, Marker.MarkerType markerType, CommandSignature markerReached) {
 		unfinishedMarkers.add(new MarkerBuilder(
 				markerReached,
 				markerType,

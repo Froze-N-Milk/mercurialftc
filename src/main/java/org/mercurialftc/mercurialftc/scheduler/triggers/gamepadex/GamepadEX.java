@@ -2,56 +2,72 @@ package org.mercurialftc.mercurialftc.scheduler.triggers.gamepadex;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
 
+@SuppressWarnings("unused")
 public class GamepadEX {
-
-	private final ButtonEX
+	private final Binding
 			a,
 			b,
 			x,
 			y,
-
-	dpad_up,
+			circle,
+			square,
+			cross,
+			triangle,
+			dpad_up,
 			dpad_down,
 			dpad_left,
 			dpad_right,
-
-	left_bumper,
+			left_bumper,
 			right_bumper,
-
-	left_stick_button,
+			left_stick_button,
 			right_stick_button,
-
-	back;
+			back,
+			start,
+			share,
+			guide,
+			options,
+			ps,
+			touchpad_finger_1,
+			touchpad_finger_2;
 	private final ContinuousInput
 			leftX,
 			leftY,
 			rightX,
 			rightY,
-
-	left_trigger,
+			left_trigger,
 			right_trigger;
-	Gamepad gamepad;
 
 	public GamepadEX(Gamepad gamepad) {
-		this.gamepad = gamepad;
 
-		a = new ButtonEX(() -> gamepad.a);
-		b = new ButtonEX(() -> gamepad.b);
-		x = new ButtonEX(() -> gamepad.x);
-		y = new ButtonEX(() -> gamepad.y);
+		a = new Binding(() -> gamepad.a);
+		b = new Binding(() -> gamepad.b);
+		x = new Binding(() -> gamepad.x);
+		y = new Binding(() -> gamepad.y);
 
-		dpad_up = new ButtonEX(() -> gamepad.dpad_up);
-		dpad_down = new ButtonEX(() -> gamepad.dpad_down);
-		dpad_left = new ButtonEX(() -> gamepad.dpad_left);
-		dpad_right = new ButtonEX(() -> gamepad.dpad_right);
+		circle = new Binding(() -> gamepad.circle);
+		square = new Binding(() -> gamepad.square);
+		cross = new Binding(() -> gamepad.cross);
+		triangle = new Binding(() -> gamepad.triangle);
 
-		left_bumper = new ButtonEX(() -> gamepad.left_bumper);
-		right_bumper = new ButtonEX(() -> gamepad.right_bumper);
+		dpad_up = new Binding(() -> gamepad.dpad_up);
+		dpad_down = new Binding(() -> gamepad.dpad_down);
+		dpad_left = new Binding(() -> gamepad.dpad_left);
+		dpad_right = new Binding(() -> gamepad.dpad_right);
 
-		left_stick_button = new ButtonEX(() -> gamepad.left_stick_button);
-		right_stick_button = new ButtonEX(() -> gamepad.right_stick_button);
+		left_bumper = new Binding(() -> gamepad.left_bumper);
+		right_bumper = new Binding(() -> gamepad.right_bumper);
 
-		back = new ButtonEX(() -> gamepad.back);
+		left_stick_button = new Binding(() -> gamepad.left_stick_button);
+		right_stick_button = new Binding(() -> gamepad.right_stick_button);
+
+		back = new Binding(() -> gamepad.back);
+		start = new Binding(() -> gamepad.start);
+		share = new Binding(() -> gamepad.share);
+		guide = new Binding(() -> gamepad.guide);
+		options = new Binding(() -> gamepad.options);
+		ps = new Binding(() -> gamepad.ps);
+		touchpad_finger_1 = new Binding(() -> gamepad.touchpad_finger_1);
+		touchpad_finger_2 = new Binding(() -> gamepad.touchpad_finger_2);
 
 		leftX = new ContinuousInput(() -> gamepad.left_stick_x);
 		leftY = new ContinuousInput(() -> -gamepad.left_stick_y);
@@ -62,55 +78,99 @@ public class GamepadEX {
 		right_trigger = new ContinuousInput(() -> gamepad.right_trigger);
 	}
 
-	public ButtonEX a() {
+	public Binding circle() {
+		return circle;
+	}
+
+	public Binding square() {
+		return square;
+	}
+
+	public Binding cross() {
+		return cross;
+	}
+
+	public Binding triangle() {
+		return triangle;
+	}
+
+	public Binding start() {
+		return start;
+	}
+
+	public Binding share() {
+		return share;
+	}
+
+	public Binding guide() {
+		return guide;
+	}
+
+	public Binding options() {
+		return options;
+	}
+
+	public Binding ps() {
+		return ps;
+	}
+
+	public Binding touchpad_finger_1() {
+		return touchpad_finger_1;
+	}
+
+	public Binding touchpad_finger_2() {
+		return touchpad_finger_2;
+	}
+
+	public Binding a() {
 		return a;
 	}
 
-	public ButtonEX b() {
+	public Binding b() {
 		return b;
 	}
 
-	public ButtonEX x() {
+	public Binding x() {
 		return x;
 	}
 
-	public ButtonEX y() {
+	public Binding y() {
 		return y;
 	}
 
-	public ButtonEX dpad_up() {
+	public Binding dpad_up() {
 		return dpad_up;
 	}
 
-	public ButtonEX dpad_down() {
+	public Binding dpad_down() {
 		return dpad_down;
 	}
 
-	public ButtonEX dpad_left() {
+	public Binding dpad_left() {
 		return dpad_left;
 	}
 
-	public ButtonEX dpad_right() {
+	public Binding dpad_right() {
 		return dpad_right;
 	}
 
-	public ButtonEX left_bumper() {
+	public Binding left_bumper() {
 		return left_bumper;
 	}
 
-	public ButtonEX right_bumper() {
+	public Binding right_bumper() {
 		return right_bumper;
 	}
 
-	public ButtonEX left_stick_button() {
+	public Binding left_stick_button() {
 		return left_stick_button;
 	}
 
-	public ButtonEX right_stick_button() {
+	public Binding right_stick_button() {
 		return right_stick_button;
 	}
 
-	public ButtonEX back() {
+	public Binding back() {
 		return back;
 	}
 

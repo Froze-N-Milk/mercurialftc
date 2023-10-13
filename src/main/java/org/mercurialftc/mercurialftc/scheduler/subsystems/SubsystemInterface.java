@@ -1,9 +1,9 @@
 package org.mercurialftc.mercurialftc.scheduler.subsystems;
 
-import org.mercurialftc.mercurialftc.scheduler.commands.Command;
+import org.mercurialftc.mercurialftc.scheduler.commands.CommandSignature;
 
 public interface SubsystemInterface {
-	Command getDefaultCommand();
+	CommandSignature getDefaultCommand();
 
 	/**
 	 * The code to be run when the OpMode is initialised.

@@ -1,6 +1,6 @@
 package org.mercurialftc.mercurialftc.silversurfer.followable.curvebuilder;
 
-import org.mercurialftc.mercurialftc.scheduler.commands.Command;
+import org.mercurialftc.mercurialftc.scheduler.commands.CommandSignature;
 import org.mercurialftc.mercurialftc.silversurfer.followable.Followable;
 import org.mercurialftc.mercurialftc.silversurfer.followable.FollowableBuilder;
 import org.mercurialftc.mercurialftc.silversurfer.followable.curvebuilder.curve.CurveSegment;
@@ -37,7 +37,7 @@ public class CurveBuilder extends FollowableBuilder {
 	}
 
 	@Override
-	public void addOffsetCommandMarker(double offset, Marker.MarkerType markerType, Command markerReached) {
+	public void addOffsetCommandMarker(double offset, Marker.MarkerType markerType, CommandSignature markerReached) {
 		unfinishedMarkers.add(
 				new MarkerBuilder(markerReached, markerType, offset, segments.size() - 1)
 		);

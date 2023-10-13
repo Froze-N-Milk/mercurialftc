@@ -1,17 +1,18 @@
 package org.mercurialftc.mercurialftc.silversurfer.followable.markers;
 
 import org.jetbrains.annotations.NotNull;
-import org.mercurialftc.mercurialftc.scheduler.commands.Command;
+import org.mercurialftc.mercurialftc.scheduler.commands.CommandSignature;
 import org.mercurialftc.mercurialftc.silversurfer.followable.curvebuilder.FollowableCurve;
 import org.mercurialftc.mercurialftc.silversurfer.followable.linebuilder.FollowableLine;
 import org.mercurialftc.mercurialftc.silversurfer.followable.turnbuilder.FollowableTurn;
 
 public class MarkerBuilder {
 	private final Marker.MarkerType markerType;
-	private final Command markerReached;
+	private final CommandSignature markerReached;
 	private final double offset;
 	private final int referenceIndex;
-	public MarkerBuilder(Command markerReached, Marker.MarkerType markerType, double offset, int referenceIndex) {
+
+	public MarkerBuilder(CommandSignature markerReached, Marker.MarkerType markerType, double offset, int referenceIndex) {
 		this.markerReached = markerReached;
 		this.markerType = markerType;
 		this.offset = offset;

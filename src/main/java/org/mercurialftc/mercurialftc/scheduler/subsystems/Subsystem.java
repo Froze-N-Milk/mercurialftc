@@ -2,13 +2,13 @@ package org.mercurialftc.mercurialftc.scheduler.subsystems;
 
 import org.jetbrains.annotations.NotNull;
 import org.mercurialftc.mercurialftc.scheduler.OpModeEX;
-import org.mercurialftc.mercurialftc.scheduler.commands.Command;
+import org.mercurialftc.mercurialftc.scheduler.commands.CommandSignature;
 import org.mercurialftc.mercurialftc.scheduler.commands.LambdaCommand;
 
 @SuppressWarnings("unused")
 public abstract class Subsystem implements SubsystemInterface {
 	public final OpModeEX opModeEX;
-	private final Command defaultCommand;
+	private final CommandSignature defaultCommand;
 
 	public Subsystem(@NotNull OpModeEX opModeEX) {
 		this.defaultCommand = new LambdaCommand().setRequirements(this).setInterruptable(true).execute(this::defaultCommandExecute).finish(() -> false);
@@ -17,7 +17,7 @@ public abstract class Subsystem implements SubsystemInterface {
 		this.defaultCommand.queue();
 	}
 
-	public Command getDefaultCommand() {
+	public CommandSignature getDefaultCommand() {
 		return defaultCommand;
 	}
 

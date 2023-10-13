@@ -1,6 +1,6 @@
 package org.mercurialftc.mercurialftc.silversurfer.followable.stopbuilder;
 
-import org.mercurialftc.mercurialftc.scheduler.commands.Command;
+import org.mercurialftc.mercurialftc.scheduler.commands.CommandSignature;
 import org.mercurialftc.mercurialftc.silversurfer.followable.Followable;
 import org.mercurialftc.mercurialftc.silversurfer.followable.FollowableBuilder;
 import org.mercurialftc.mercurialftc.silversurfer.followable.markers.Marker;
@@ -57,7 +57,7 @@ public class StopBuilder extends FollowableBuilder {
 	}
 
 	@Override
-	protected void addOffsetCommandMarker(double offset, Marker.MarkerType markerType, Command markerReached) {
+	protected void addOffsetCommandMarker(double offset, Marker.MarkerType markerType, CommandSignature markerReached) {
 		markers.add(new Marker(
 				markerReached, markerType,
 				previousWait + offset

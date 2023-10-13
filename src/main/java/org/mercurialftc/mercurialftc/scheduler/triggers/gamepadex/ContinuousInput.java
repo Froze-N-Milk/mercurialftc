@@ -1,8 +1,6 @@
 package org.mercurialftc.mercurialftc.scheduler.triggers.gamepadex;
 
-import org.mercurialftc.mercurialftc.scheduler.commands.Command;
-import org.mercurialftc.mercurialftc.scheduler.commands.CommandSignature;
-import org.mercurialftc.mercurialftc.scheduler.triggers.Trigger;
+import org.mercurialftc.mercurialftc.scheduler.triggers.gamepadex.domainbindingbuilder.DomainBindingBuilder;
 
 import java.util.function.DoubleSupplier;
 
@@ -11,7 +9,7 @@ import java.util.function.DoubleSupplier;
  * used through {@link GamepadEX} to enhance the power of the sticks and triggers
  */
 @SuppressWarnings("unused")
-public class ContinuousInput {
+public class ContinuousInput implements DoubleSupplier {
 	private final DoubleSupplier input;
 	private double deadZone;
 	private CurveSupplier curveSupplier;
@@ -28,7 +26,7 @@ public class ContinuousInput {
 		this.curveSupplier = curveSupplier;
 	}
 
-	public double getValue() {
+	public double getAsDouble() {
 		double value = input.getAsDouble();
 		if (Math.abs(value) <= deadZone) {
 			value = 0;
@@ -75,42 +73,12 @@ public class ContinuousInput {
 	}
 
 	/**
-	 * cares only about the magnitude, not the sign, also see {@link #positiveThresholdTrigger(double, Command)} and {@link #negativeThresholdTrigger(double, Command)}
-	 * creates a new trigger, that returns true when the magnitude of the continuous input is greater than or equal to threshold
+	 * begin the domain binding process to bind a command to this
 	 *
-	 * @param threshold the magnitude at which the trigger should run
-	 * @param toRun     the command to run when the condition is met
-	 * @return self, for chaining
+	 * @return
 	 */
-	public ContinuousInput thresholdTrigger(double threshold, Command toRun) {
-		new Trigger(() -> Math.abs(getValue()) >= threshold, toRun);
-		return this;
-	}
-
-	/**
-	 * cares about the sign of the value, will run when value is above or equal to the threshold, also see {@link #negativeThresholdTrigger(double, Command)} and {@link #thresholdTrigger(double)}
-	 * creates a new trigger, that returns true when the value of the continuous input is greater than or equal to threshold
-	 *
-	 * @param threshold the value at which this trigger should run
-	 * @param toRun     the command to run when the condition is met
-	 * @return self, for chaining
-	 */
-	public ContinuousInput positiveThresholdTrigger(double threshold, Command toRun) {
-		new Trigger(() -> getValue() >= threshold, toRun);
-		return this;
-	}
-
-	/**
-	 * cares about the sign of the value, will run when value is below or equal to the threshold, also see {@link #positiveThresholdTrigger(double, Command)} and {@link #thresholdTrigger(double)}
-	 * creates and registers a new trigger, that returns true when the value of the continuous input is less than or equal to threshold
-	 *
-	 * @param threshold the value at which the trigger should run
-	 * @param toRun     the command to run when the condition is met
-	 * @return self, for chaining
-	 */
-	public ContinuousInput negativeThresholdTrigger(double threshold, Command toRun) {
-		new Trigger(() -> getValue() <= threshold, toRun);
-		return this;
+	public DomainBindingBuilder<ContinuousInput> buildBinding() {
+		return new DomainBindingBuilder<>(this);
 	}
 
 	/**
@@ -122,6 +90,7 @@ public class ContinuousInput {
 	public ContinuousInput invert() {
 		return new ContinuousInput(() -> -input.getAsDouble(), deadZone, curveSupplier);
 	}
+
 
 	public interface CurveSupplier {
 		double curve(double input);

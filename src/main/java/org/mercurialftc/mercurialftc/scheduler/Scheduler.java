@@ -269,8 +269,7 @@ public class Scheduler {
 	 */
 	public void registerComposedCommands(CommandSignature... commands) {
 		Set<CommandSignature> commandSet = new HashSet<>(Arrays.asList(commands));
-		requireNotComposed(commandSet);
-		composedCommands.addAll(commandSet);
+		registerComposedCommands(commandSet);
 	}
 
 	/**
@@ -280,7 +279,19 @@ public class Scheduler {
 	 * @param commands the commands to register
 	 * @throws IllegalArgumentException if the given commands have already been composed.
 	 */
-	public void registerComposedCommands(ArrayList<CommandSignature> commands) {
+	public void registerComposedCommands(Set<CommandSignature> commands) {
+		requireNotComposed(commands);
+		composedCommands.addAll(commands);
+	}
+
+	/**
+	 * Register commands as composed. An exception will be thrown if these commands are scheduled
+	 * directly or added to a composition.
+	 *
+	 * @param commands the commands to register
+	 * @throws IllegalArgumentException if the given commands have already been composed.
+	 */
+	public void registerComposedCommands(List<CommandSignature> commands) {
 		Set<CommandSignature> commandSet = new HashSet<>(commands);
 		requireNotComposed(commandSet);
 		composedCommands.addAll(commandSet);

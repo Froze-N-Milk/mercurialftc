@@ -1,6 +1,7 @@
 package org.mercurialftc.mercurialftc.scheduler.commands;
 
 import org.mercurialftc.mercurialftc.scheduler.OpModeEX;
+import org.mercurialftc.mercurialftc.scheduler.Scheduler;
 import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
 
 import java.util.HashSet;
@@ -45,5 +46,9 @@ public interface CommandSignature {
 
 	default boolean interruptable() {
 		return true;
+	}
+
+	default void queue() {
+		Scheduler.getSchedulerInstance().scheduleCommand(this);
 	}
 }

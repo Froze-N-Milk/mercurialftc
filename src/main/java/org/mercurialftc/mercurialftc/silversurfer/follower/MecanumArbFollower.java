@@ -9,22 +9,24 @@ import org.mercurialftc.mercurialftc.silversurfer.geometry.Vector2D;
 import org.mercurialftc.mercurialftc.silversurfer.tracker.Tracker;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.matrix.SimpleMatrix;
 
-public class MecanumArbFollower extends ArbFollower {
+@SuppressWarnings("unused")
+public class MecanumArbFollower extends AbstractWaveFollower implements ArbFollower {
 	private final DcMotorEx fl, bl, br, fr;
 	private final SimpleMatrix transformMatrix;
 	private final Tracker tracker;
+	private final MecanumMotionConstants mecanumMotionConstants;
 
 	/**
 	 * an arbitrary feed forward output follower
 	 *
-	 * @param motionConstants motion constants to be used for scaling to power outputs
-	 * @param fl              front left motor
-	 * @param bl              back left motor
-	 * @param br              back right motor
-	 * @param fr              front right motor
+	 * @param mecanumMotionConstants motion constants to be used for scaling to power outputs
+	 * @param fl                     front left motor
+	 * @param bl                     back left motor
+	 * @param br                     back right motor
+	 * @param fr                     front right motor
 	 */
-	public MecanumArbFollower(@NotNull MecanumMotionConstants motionConstants, @NotNull Tracker tracker, @NotNull DcMotorEx fl, @NotNull DcMotorEx bl, @NotNull DcMotorEx br, @NotNull DcMotorEx fr) {
-		super(motionConstants);
+	public MecanumArbFollower(@NotNull MecanumMotionConstants mecanumMotionConstants, @NotNull Tracker tracker, @NotNull DcMotorEx fl, @NotNull DcMotorEx bl, @NotNull DcMotorEx br, @NotNull DcMotorEx fr) {
+		this.mecanumMotionConstants = mecanumMotionConstants;
 		this.tracker = tracker;
 		this.fl = fl;
 		this.bl = bl;
@@ -48,11 +50,11 @@ public class MecanumArbFollower extends ArbFollower {
 	 * @param loopTime current loop time, to ensure performance
 	 */
 	@Override
-	protected void followOutput(@NotNull Followable.Output output, double loopTime) {
-		MecanumMotionConstants.DirectionOfTravelLimiter directionOfTravelLimiter = getMotionConstants().makeDirectionOfTravelLimiter(output.getTranslationVector().getHeading());
+	public void followOutput(@NotNull Followable.Output output, double loopTime) {
+		MecanumMotionConstants.DirectionOfTravelLimiter directionOfTravelLimiter = mecanumMotionConstants.makeDirectionOfTravelLimiter(output.getTranslationVector().getHeading());
 
 		Vector2D translationVector = output.getTranslationVector().scalarMultiply(1 / directionOfTravelLimiter.getVelocity());
-		double rotationalVelocity = output.getRotationalVelocity() / getMotionConstants().getMaxRotationalVelocity();
+		double rotationalVelocity = output.getRotationalVelocity() / mecanumMotionConstants.getMaxRotationalVelocity();
 
 		follow(translationVector, rotationalVelocity, loopTime);
 	}

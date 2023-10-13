@@ -8,28 +8,31 @@ import org.mercurialftc.mercurialftc.silversurfer.geometry.obstaclemap.ObstacleM
 import org.mercurialftc.mercurialftc.silversurfer.tracker.Tracker;
 
 @SuppressWarnings("unused")
-public class ObstacleAvoidantArbFollower extends ArbFollower {
+public class ObstacleAvoidantArbFollower extends AbstractWaveFollower implements ArbFollower {
 	private final ArbFollower arbFollower;
+	private final WaveFollower waveFollower;
 	private final Tracker tracker;
 	private final ObstacleMap obstacleMap;
+	private final MecanumMotionConstants mecanumMotionConstants;
 	private MecanumMotionConstants.DirectionOfTravelLimiter obstacleAvoidanceDirectionOfTravelLimiter;
 	private double previousObstacleAvoidanceVectorMagnitude;
 
-	public ObstacleAvoidantArbFollower(@NotNull ArbFollower arbFollower, Tracker tracker, ObstacleMap obstacleMap) {
-		super(arbFollower.getMotionConstants());
+	public ObstacleAvoidantArbFollower(@NotNull ArbFollower arbFollower, @NotNull WaveFollower waveFollower, MecanumMotionConstants mecanumMotionConstants, Tracker tracker, ObstacleMap obstacleMap) {
+		this.mecanumMotionConstants = mecanumMotionConstants;
+		this.waveFollower = waveFollower;
 		this.arbFollower = arbFollower;
 		this.tracker = tracker;
 		this.obstacleMap = obstacleMap;
 	}
 
 	@Override
-	protected void followOutput(@NotNull Followable.Output output, double loopTime) {
+	public void followOutput(@NotNull Followable.Output output, double loopTime) {
 		Vector2D obstacleDistanceVector = obstacleMap.closestObstacleVector(tracker.getPose2D());
 
 		Vector2D transformedTranslationVector = output.getTranslationVector();
 
 		if (obstacleDistanceVector != null) {
-			obstacleAvoidanceDirectionOfTravelLimiter = arbFollower.getMotionConstants().makeDirectionOfTravelLimiter(obstacleDistanceVector.getHeading());
+			obstacleAvoidanceDirectionOfTravelLimiter = mecanumMotionConstants.makeDirectionOfTravelLimiter(obstacleDistanceVector.getHeading());
 
 			double obstacleDistanceVectorMagnitude = obstacleDistanceVector.getMagnitude();
 
@@ -37,13 +40,13 @@ public class ObstacleAvoidantArbFollower extends ArbFollower {
 
 			transformedTranslationVector = transformedTranslationVector.add(obstacleFeedback);
 
-			MecanumMotionConstants.DirectionOfTravelLimiter directionOfTravelLimiter = arbFollower.getMotionConstants().makeDirectionOfTravelLimiter(transformedTranslationVector.getHeading());
+			MecanumMotionConstants.DirectionOfTravelLimiter directionOfTravelLimiter = mecanumMotionConstants.makeDirectionOfTravelLimiter(transformedTranslationVector.getHeading());
 			transformedTranslationVector = Vector2D.fromPolar(Math.min(directionOfTravelLimiter.getVelocity(), transformedTranslationVector.getMagnitude()), transformedTranslationVector.getHeading());
 
 			previousObstacleAvoidanceVectorMagnitude = obstacleDistanceVectorMagnitude;
 		}
 
-		arbFollower.followOutput(
+		waveFollower.followOutput(
 				new Followable.Output(
 						transformedTranslationVector,
 						output.getRotationalVelocity(),
@@ -67,7 +70,7 @@ public class ObstacleAvoidantArbFollower extends ArbFollower {
 		Vector2D obstacleDistanceVector = obstacleMap.closestObstacleVector(tracker.getPose2D());
 
 		if (obstacleDistanceVector != null) {
-			obstacleAvoidanceDirectionOfTravelLimiter = arbFollower.getMotionConstants().makeDirectionOfTravelLimiter(obstacleDistanceVector.getHeading());
+			obstacleAvoidanceDirectionOfTravelLimiter = mecanumMotionConstants.makeDirectionOfTravelLimiter(obstacleDistanceVector.getHeading());
 
 			double obstacleDistanceVectorMagnitude = obstacleDistanceVector.getMagnitude();
 
@@ -75,7 +78,7 @@ public class ObstacleAvoidantArbFollower extends ArbFollower {
 
 			translationVector = translationVector.add(obstacleFeedback);
 
-			MecanumMotionConstants.DirectionOfTravelLimiter directionOfTravelLimiter = arbFollower.getMotionConstants().makeDirectionOfTravelLimiter(translationVector.getHeading());
+			MecanumMotionConstants.DirectionOfTravelLimiter directionOfTravelLimiter = mecanumMotionConstants.makeDirectionOfTravelLimiter(translationVector.getHeading());
 			translationVector = Vector2D.fromPolar(Math.min(directionOfTravelLimiter.getVelocity(), translationVector.getMagnitude()), translationVector.getHeading());
 
 			previousObstacleAvoidanceVectorMagnitude = obstacleDistanceVectorMagnitude;

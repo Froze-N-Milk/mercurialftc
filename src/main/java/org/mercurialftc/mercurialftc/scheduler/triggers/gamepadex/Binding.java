@@ -36,11 +36,11 @@ public class Binding<B extends Binding<B>> {
 		if (processedInput != previousState) {
 			lastCheck = System.nanoTime();
 		}
-		if (internalInput.getAsBoolean() && (System.nanoTime() - lastCheck + 1 >= leadingEdgeDebounce)) {
+		if (internalInput.getAsBoolean() && (System.nanoTime() - lastCheck >= leadingEdgeDebounce)) {
 			toggledOn = !toggledOn;
 			processedInput = true;
 			lastCheck = System.nanoTime();
-		} else if (!internalInput.getAsBoolean() && (System.nanoTime() - lastCheck + 1 >= trailingEdgeDebounce)) {
+		} else if (!internalInput.getAsBoolean() && (System.nanoTime() - lastCheck >= trailingEdgeDebounce)) {
 			processedInput = false;
 			lastCheck = System.nanoTime();
 		}

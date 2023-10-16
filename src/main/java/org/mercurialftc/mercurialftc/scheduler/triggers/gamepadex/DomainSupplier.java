@@ -9,18 +9,18 @@ import java.util.function.DoubleSupplier;
  * used through {@link GamepadEX} to enhance the power of the sticks and triggers
  */
 @SuppressWarnings("unused")
-public class ContinuousInput implements DoubleSupplier {
+public class DomainSupplier implements DoubleSupplier {
 	private final DoubleSupplier input;
 	private double deadZone;
 	private CurveSupplier curveSupplier;
 
-	public ContinuousInput(DoubleSupplier input) {
+	public DomainSupplier(DoubleSupplier input) {
 		this.input = input;
 		this.deadZone = 0;
 		this.curveSupplier = (i) -> i; // default
 	}
 
-	public ContinuousInput(DoubleSupplier input, double deadZone, CurveSupplier curveSupplier) {
+	public DomainSupplier(DoubleSupplier input, double deadZone, CurveSupplier curveSupplier) {
 		this(input);
 		this.deadZone = deadZone;
 		this.curveSupplier = curveSupplier;
@@ -75,9 +75,9 @@ public class ContinuousInput implements DoubleSupplier {
 	/**
 	 * begin the domain binding process to bind a command to this
 	 *
-	 * @return
+	 * @return a domain binding builder to start building a complex domain binding
 	 */
-	public DomainBindingBuilder<ContinuousInput> buildBinding() {
+	public DomainBindingBuilder<DomainSupplier> buildBinding() {
 		return new DomainBindingBuilder<>(this);
 	}
 
@@ -87,8 +87,8 @@ public class ContinuousInput implements DoubleSupplier {
 	 *
 	 * @return a new continuous input, with the input values inverted, carries all the features applied to the original
 	 */
-	public ContinuousInput invert() {
-		return new ContinuousInput(() -> -input.getAsDouble(), deadZone, curveSupplier);
+	public DomainSupplier invert() {
+		return new DomainSupplier(() -> -input.getAsDouble(), deadZone, curveSupplier);
 	}
 
 

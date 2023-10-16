@@ -29,7 +29,7 @@ public class GamepadEX {
 			ps,
 			touchpad_finger_1,
 			touchpad_finger_2;
-	private final ContinuousInput
+	private final DomainSupplier
 			leftX,
 			leftY,
 			rightX,
@@ -69,13 +69,13 @@ public class GamepadEX {
 		touchpad_finger_1 = new Binding(() -> gamepad.touchpad_finger_1);
 		touchpad_finger_2 = new Binding(() -> gamepad.touchpad_finger_2);
 
-		leftX = new ContinuousInput(() -> gamepad.left_stick_x);
-		leftY = new ContinuousInput(() -> -gamepad.left_stick_y);
-		rightX = new ContinuousInput(() -> gamepad.right_stick_x);
-		rightY = new ContinuousInput(() -> -gamepad.right_stick_y);
+		leftX = new DomainSupplier(() -> gamepad.left_stick_x);
+		leftY = new DomainSupplier(() -> -gamepad.left_stick_y);
+		rightX = new DomainSupplier(() -> gamepad.right_stick_x);
+		rightY = new DomainSupplier(() -> -gamepad.right_stick_y);
 
-		left_trigger = new ContinuousInput(() -> gamepad.left_trigger);
-		right_trigger = new ContinuousInput(() -> gamepad.right_trigger);
+		left_trigger = new DomainSupplier(() -> gamepad.left_trigger);
+		right_trigger = new DomainSupplier(() -> gamepad.right_trigger);
 	}
 
 	public Binding circle() {
@@ -174,35 +174,35 @@ public class GamepadEX {
 		return back;
 	}
 
-	public ContinuousInput leftX() {
+	public DomainSupplier leftX() {
 		return leftX;
 	}
 
 	/**
 	 * the left stick y has been inverted to make a vertical increase also result in a positive increase in value
-	 * <p>see {@link ContinuousInput#invert()} if you wish to use the default configuration instead</p>
+	 * <p>see {@link DomainSupplier#invert()} if you wish to use the default configuration instead</p>
 	 */
-	public ContinuousInput leftY() {
+	public DomainSupplier leftY() {
 		return leftY;
 	}
 
-	public ContinuousInput rightX() {
+	public DomainSupplier rightX() {
 		return rightX;
 	}
 
 	/**
 	 * the right stick y has been inverted to make a vertical increase also result in a positive increase in value
-	 * <p>see {@link ContinuousInput#invert()} if you wish to use the default configuration instead</p>
+	 * <p>see {@link DomainSupplier#invert()} if you wish to use the default configuration instead</p>
 	 */
-	public ContinuousInput rightY() {
+	public DomainSupplier rightY() {
 		return rightY;
 	}
 
-	public ContinuousInput left_trigger() {
+	public DomainSupplier left_trigger() {
 		return left_trigger;
 	}
 
-	public ContinuousInput right_trigger() {
+	public DomainSupplier right_trigger() {
 		return right_trigger;
 	}
 

@@ -74,8 +74,8 @@ public abstract class WheeledTracker implements Tracker {
 		);
 
 		double dt = findDeltaTheta();
-		double dc = findDeltaXc();
-		double dp = findDeltaXp();
+		double dc = findDeltaY();
+		double dp = findDeltaX();
 
 		double term0 = (Math.sin(dt) / dt); // approaches 1 as dt approaches 0
 		double term1 = (1 - Math.cos(dt)) / dt; // approaches 0 as dt approaches 0
@@ -134,14 +134,14 @@ public abstract class WheeledTracker implements Tracker {
 	protected abstract void updateValues();
 
 	/**
-	 * @return the change in center displacement in millimeters
+	 * @return the change in robot centric displacement along the y-axis in millimeters
 	 */
-	protected abstract double findDeltaXc();
+	protected abstract double findDeltaY();
 
 	/**
-	 * @return the change in horizontal displacement with correction for forward offset in millimeters
+	 * @return the change in robot centric displacement along the x-axis in millimeters
 	 */
-	protected abstract double findDeltaXp();
+	protected abstract double findDeltaX();
 
 	/**
 	 * @return the change in heading in radians

@@ -49,16 +49,16 @@ public class TwoWheelTracker extends WheeledTracker {
 	 * @return the change in center displacement in millimeters
 	 */
 	@Override
-	protected double findDeltaXc() {
-		return deltaLeft + (getTrackerConstants().getLateralDistance() * findDeltaTheta());
+	protected double findDeltaY() {
+		return deltaLeft + (getTrackerConstants().getCenterOfRotationOffset().getY() * findDeltaTheta());
 	}
 
 	/**
 	 * @return the change in horizontal displacement with correction for forward offset in millimeters
 	 */
 	@Override
-	protected double findDeltaXp() {
-		return deltaMiddle + (getTrackerConstants().getForwardOffset() * findDeltaTheta());
+	protected double findDeltaX() {
+		return deltaMiddle + (getTrackerConstants().getCenterOfRotationOffset().getX() * findDeltaTheta());
 	}
 
 	@Override

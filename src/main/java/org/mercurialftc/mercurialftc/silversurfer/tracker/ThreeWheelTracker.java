@@ -35,7 +35,7 @@ public class ThreeWheelTracker extends WheeledTracker {
 	 * @return the change in center displacement in millimeters
 	 */
 	@Override
-	protected double findDeltaXc() {
+	protected double findDeltaY() {
 		return (deltaLeft + deltaRight) / 2;
 	}
 
@@ -43,8 +43,8 @@ public class ThreeWheelTracker extends WheeledTracker {
 	 * @return the change in horizontal displacement with correction for forward offset in millimeters
 	 */
 	@Override
-	protected double findDeltaXp() {
-		return deltaMiddle - (getTrackerConstants().getForwardOffset() * findDeltaTheta());
+	protected double findDeltaX() {
+		return deltaMiddle + (getTrackerConstants().getCenterOfRotationOffset().getX() * findDeltaTheta());
 	}
 
 	/**
@@ -52,7 +52,7 @@ public class ThreeWheelTracker extends WheeledTracker {
 	 */
 	@Override
 	protected double findDeltaTheta() {
-		return (deltaRight - deltaLeft) / getTrackerConstants().getLateralDistance();
+		return (deltaRight - deltaLeft) / ((WheeledTrackerConstants.ThreeWheeledTrackerConstants) getTrackerConstants()).getTrackWidth();
 	}
 
 	@Override

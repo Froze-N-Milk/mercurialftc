@@ -1,49 +1,34 @@
 package org.mercurialftc.mercurialftc.silversurfer.tracker;
 
-import org.jetbrains.annotations.NotNull;
 import org.mercurialftc.mercurialftc.silversurfer.encoderticksconverter.EncoderTicksConverter;
 import org.mercurialftc.mercurialftc.silversurfer.encoderticksconverter.Units;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.Vector2D;
 
 public abstract class WheeledTrackerConstants {
-	private final double lateralDistance;
-	private final double forwardOffset;
-
+	private final Vector2D centerOfRotationOffset;
 	private final double xMult, yMult;
 	private final EncoderTicksConverter leftTicksConverter, rightTicksConverter, middleTicksConverter;
 
 	/**
-	 * @param units                the units used for {@link #lateralDistance} and {@link #forwardOffset}
-	 * @param lateralDistance      the distance between the two parallel sensors
-	 * @param forwardOffset        the distance from the perpendicular sensor to the parallel line that passes through the robot's center of rotation
-	 * @param xMult                the multiplier applied to measuring changes in the x-axis
-	 * @param yMult                the multiplier applied to measuring changes in the y-axis
-	 * @param leftTicksConverter   the encoder ticks converter for the left sensor
-	 * @param rightTicksConverter  the encoder ticks converter for the right sensor
-	 * @param middleTicksConverter the encoder ticks converter for the perpendicular sensor
+	 * @param centerOfRotationOffset the vector to move the center of rotation
+	 * @param xMult                  the multiplier applied to measuring changes in the x-axis
+	 * @param yMult                  the multiplier applied to measuring changes in the y-axis
+	 * @param leftTicksConverter     the encoder ticks converter for the left sensor
+	 * @param rightTicksConverter    the encoder ticks converter for the right sensor
+	 * @param middleTicksConverter   the encoder ticks converter for the perpendicular sensor
 	 */
 	private WheeledTrackerConstants(
-			@NotNull Units units,
-			double lateralDistance,
-			double forwardOffset,
+			Vector2D centerOfRotationOffset,
 			double xMult, double yMult, EncoderTicksConverter leftTicksConverter,
 			EncoderTicksConverter rightTicksConverter,
 			EncoderTicksConverter middleTicksConverter
 	) {
 		this.xMult = xMult;
 		this.yMult = yMult;
-		this.lateralDistance = units.toMillimeters(lateralDistance);
-		this.forwardOffset = units.toMillimeters(forwardOffset);
+		this.centerOfRotationOffset = centerOfRotationOffset;
 		this.leftTicksConverter = leftTicksConverter;
 		this.rightTicksConverter = rightTicksConverter;
 		this.middleTicksConverter = middleTicksConverter;
-	}
-
-	public double getLateralDistance() {
-		return lateralDistance;
-	}
-
-	public double getForwardOffset() {
-		return forwardOffset;
 	}
 
 	public double getYMult() {
@@ -66,31 +51,37 @@ public abstract class WheeledTrackerConstants {
 		return middleTicksConverter;
 	}
 
+	public Vector2D getCenterOfRotationOffset() {
+		return centerOfRotationOffset;
+	}
+
 	public static class ThreeWheeledTrackerConstants extends WheeledTrackerConstants {
+		private final double trackWidth;
 
 		/**
-		 * @param units                the units used for {@link #lateralDistance} and {@link #forwardOffset}
-		 * @param lateralDistance      the distance between the two parallel sensors
-		 * @param forwardOffset        the distance from the perpendicular sensor to the center of rotation
 		 * @param leftTicksConverter   the encoder ticks converter for the left sensor
 		 * @param rightTicksConverter  the encoder ticks converter for the right sensor
 		 * @param middleTicksConverter the encoder ticks converter for the perpendicular sensor
+		 * @param trackWidth
 		 */
-		public ThreeWheeledTrackerConstants(Units units, double lateralDistance, double forwardOffset, double xMult, double yMult, EncoderTicksConverter leftTicksConverter, EncoderTicksConverter rightTicksConverter, EncoderTicksConverter middleTicksConverter) {
-			super(units, lateralDistance, forwardOffset, xMult, yMult, leftTicksConverter, rightTicksConverter, middleTicksConverter);
+		public ThreeWheeledTrackerConstants(Vector2D centerOfRotationOffset, double xMult, double yMult, EncoderTicksConverter leftTicksConverter, EncoderTicksConverter rightTicksConverter, EncoderTicksConverter middleTicksConverter, double trackWidth) {
+			super(centerOfRotationOffset, xMult, yMult, leftTicksConverter, rightTicksConverter, middleTicksConverter);
+			this.trackWidth = trackWidth;
+		}
+
+		public double getTrackWidth() {
+			return trackWidth;
 		}
 	}
 
 	public static class TwoWheeledTrackerConstants extends WheeledTrackerConstants {
 
 		/**
-		 * @param units                the units used for {@link #forwardOffset}
-		 * @param forwardOffset        the distance from the perpendicular sensor to the center of rotation
 		 * @param leftTicksConverter   the encoder ticks converter for the left sensor
 		 * @param middleTicksConverter the encoder ticks converter for the perpendicular sensor
 		 */
-		public TwoWheeledTrackerConstants(Units units, double forwardOffset, double lateralOffset, double xMult, double yMult, EncoderTicksConverter leftTicksConverter, EncoderTicksConverter middleTicksConverter) {
-			super(units, lateralOffset, forwardOffset, xMult, yMult, leftTicksConverter, new EncoderTicksConverter(0, Units.MILLIMETER), middleTicksConverter);
+		public TwoWheeledTrackerConstants(Vector2D centerOfRotationOffset, double xMult, double yMult, EncoderTicksConverter leftTicksConverter, EncoderTicksConverter middleTicksConverter) {
+			super(centerOfRotationOffset, xMult, yMult, leftTicksConverter, new EncoderTicksConverter(0, Units.MILLIMETER), middleTicksConverter);
 		}
 	}
 }

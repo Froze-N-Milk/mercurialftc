@@ -10,7 +10,7 @@ import org.mercurialftc.mercurialftc.silversurfer.tracker.Tracker;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.matrix.SimpleMatrix;
 
 @SuppressWarnings("unused")
-public class MecanumArbFollower extends AbstractWaveFollower implements ArbFollower {
+public class MecanumFollower extends AbstractWaveFollower implements ArbFollower {
 	private final DcMotorEx fl, bl, br, fr;
 	private final SimpleMatrix transformMatrix;
 	private final Tracker tracker;
@@ -25,7 +25,7 @@ public class MecanumArbFollower extends AbstractWaveFollower implements ArbFollo
 	 * @param br                     back right motor
 	 * @param fr                     front right motor
 	 */
-	public MecanumArbFollower(@NotNull MecanumMotionConstants mecanumMotionConstants, @NotNull Tracker tracker, @NotNull DcMotorEx fl, @NotNull DcMotorEx bl, @NotNull DcMotorEx br, @NotNull DcMotorEx fr) {
+	public MecanumFollower(@NotNull MecanumMotionConstants mecanumMotionConstants, @NotNull Tracker tracker, @NotNull DcMotorEx fl, @NotNull DcMotorEx bl, @NotNull DcMotorEx br, @NotNull DcMotorEx fr) {
 		this.mecanumMotionConstants = mecanumMotionConstants;
 		this.tracker = tracker;
 		this.fl = fl;

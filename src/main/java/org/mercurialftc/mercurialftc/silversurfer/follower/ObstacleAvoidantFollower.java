@@ -8,7 +8,7 @@ import org.mercurialftc.mercurialftc.silversurfer.geometry.obstaclemap.ObstacleM
 import org.mercurialftc.mercurialftc.silversurfer.tracker.Tracker;
 
 @SuppressWarnings("unused")
-public class ObstacleAvoidantArbFollower extends AbstractWaveFollower implements ArbFollower {
+public class ObstacleAvoidantFollower extends AbstractWaveFollower implements ArbFollower {
 	private final ArbFollower arbFollower;
 	private final WaveFollower waveFollower;
 	private final Tracker tracker;
@@ -17,7 +17,7 @@ public class ObstacleAvoidantArbFollower extends AbstractWaveFollower implements
 	private MecanumMotionConstants.DirectionOfTravelLimiter obstacleAvoidanceDirectionOfTravelLimiter;
 	private double previousObstacleAvoidanceVectorMagnitude;
 
-	public ObstacleAvoidantArbFollower(@NotNull ArbFollower arbFollower, @NotNull WaveFollower waveFollower, MecanumMotionConstants mecanumMotionConstants, Tracker tracker, ObstacleMap obstacleMap) {
+	public ObstacleAvoidantFollower(@NotNull ArbFollower arbFollower, @NotNull WaveFollower waveFollower, MecanumMotionConstants mecanumMotionConstants, Tracker tracker, ObstacleMap obstacleMap) {
 		this.mecanumMotionConstants = mecanumMotionConstants;
 		this.waveFollower = waveFollower;
 		this.arbFollower = arbFollower;

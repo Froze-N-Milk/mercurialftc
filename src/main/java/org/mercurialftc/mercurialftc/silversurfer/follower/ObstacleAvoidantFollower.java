@@ -29,6 +29,7 @@ public class ObstacleAvoidantFollower extends AbstractWaveFollower implements Ar
 	@Override
 	public void followOutput(@NotNull Followable.Output output, double loopTime) {
 		Vector2D obstacleDistanceVector = obstacleMap.closestObstacleVector(tracker.getPose2D());
+		Vector2D obstacleAvoidanceVector = obstacleMap.obstacleAvoidanceVector(tracker.getPose2D());
 
 		Vector2D transformedTranslationVector = output.getTranslationVector();
 
@@ -37,7 +38,9 @@ public class ObstacleAvoidantFollower extends AbstractWaveFollower implements Ar
 
 			double obstacleDistanceVectorMagnitude = obstacleDistanceVector.getMagnitude();
 
-			Vector2D obstacleFeedback = Vector2D.fromPolar(modifyObstacleAvoidance(obstacleDistanceVectorMagnitude, obstacleDistanceVectorMagnitude - previousObstacleAvoidanceVectorMagnitude, loopTime) * obstacleAvoidanceDirectionOfTravelLimiter.getVelocity(), obstacleDistanceVector.getHeading());
+			double obstacleAvoidanceMultiplier = Math.min(1, obstacleAvoidanceVector.getMagnitude() / MAX_OUTPUT_DISTANCE);
+
+			Vector2D obstacleFeedback = Vector2D.fromPolar(obstacleAvoidanceMultiplier * modifyObstacleAvoidance(obstacleDistanceVectorMagnitude, obstacleDistanceVectorMagnitude - previousObstacleAvoidanceVectorMagnitude, loopTime) * obstacleAvoidanceDirectionOfTravelLimiter.getVelocity(), obstacleDistanceVector.getHeading());
 
 			transformedTranslationVector = transformedTranslationVector.add(obstacleFeedback);
 

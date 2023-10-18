@@ -74,7 +74,7 @@ public class GVFWaveFollower extends AbstractWaveFollower {
 
 	private double modifyTranslationError(double error, double deltaError, double loopTime) {
 		double output = Math.sqrt(error / errorDirectionOfTravelLimiter.getVelocity());
-		output += ((deltaError * -deltaError) / loopTime) / errorDirectionOfTravelLimiter.getVelocity();
+		output += (deltaError / loopTime) / errorDirectionOfTravelLimiter.getVelocity();
 		return Math.max(0, Math.min(output, 1));
 	}
 

@@ -38,7 +38,7 @@ public class ObstacleAvoidantFollower extends AbstractWaveFollower implements Ar
 
 			double obstacleDistanceVectorMagnitude = obstacleDistanceVector.getMagnitude();
 
-			double obstacleAvoidanceMultiplier = Math.min(1, obstacleAvoidanceVector.getMagnitude() / MAX_OUTPUT_DISTANCE);
+			double obstacleAvoidanceMultiplier = Math.min(1, obstacleAvoidanceVector.getMagnitude() / (MAX_OUTPUT_DISTANCE * MAX_OUTPUT_DISTANCE));
 
 			Vector2D obstacleFeedback = Vector2D.fromPolar(obstacleAvoidanceMultiplier * modifyObstacleAvoidance(obstacleDistanceVectorMagnitude, obstacleDistanceVectorMagnitude - previousObstacleAvoidanceVectorMagnitude, loopTime) * obstacleAvoidanceDirectionOfTravelLimiter.getVelocity(), obstacleDistanceVector.getHeading());
 

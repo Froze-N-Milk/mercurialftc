@@ -272,7 +272,7 @@ public class WaveBuilder {
 	 * @return self, for method chaining
 	 */
 	public WaveBuilder addOffsetActionMarker(double offset, Runnable markerReached) {
-		builder.addOffsetCommandMarker(offset, Marker.MarkerType.LAMBDA, new LambdaCommand().init(markerReached));
+		builder.addOffsetCommandMarker(offset, Marker.MarkerType.LAMBDA, new LambdaCommand().setInit(markerReached));
 		return this;
 	}
 

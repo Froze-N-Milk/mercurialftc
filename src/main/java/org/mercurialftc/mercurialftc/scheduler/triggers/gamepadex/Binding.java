@@ -52,10 +52,10 @@ public class Binding<B extends Binding<B>> {
 		new Trigger(() -> (state() && state() != previousState),
 				new LambdaCommand()
 						.setRequirements(toRun.getRequiredSubsystems())
-						.init(toRun::initialise)
-						.execute(toRun::execute)
-						.end(toRun::end)
-						.finish(() -> !state() || toRun.finished())
+						.setInit(toRun::initialise)
+						.setExecute(toRun::execute)
+						.setEnd(toRun::end)
+						.setFinish(() -> !state() || toRun.finished())
 						.setInterruptable(toRun.interruptable())
 		);
 		return thisAsB;
@@ -66,10 +66,10 @@ public class Binding<B extends Binding<B>> {
 				new LambdaCommand()
 						.setRequirements(toRun.getRequiredSubsystems())
 						.setRunStates(toRun.getRunStates())
-						.init(toRun::initialise)
-						.execute(toRun::execute)
-						.end(toRun::end)
-						.finish(() -> state() || toRun.finished())
+						.setInit(toRun::initialise)
+						.setExecute(toRun::execute)
+						.setEnd(toRun::end)
+						.setFinish(() -> state() || toRun.finished())
 						.setInterruptable(toRun.interruptable())
 		);
 		return thisAsB;
@@ -88,10 +88,10 @@ public class Binding<B extends Binding<B>> {
 				new LambdaCommand()
 						.setRequirements(toRun.getRequiredSubsystems())
 						.setRunStates(toRun.getRunStates())
-						.init(toRun::initialise)
-						.execute(toRun::execute)
-						.end(toRun::end)
-						.finish(() -> !toggledOn || toRun.finished())
+						.setInit(toRun::initialise)
+						.setExecute(toRun::execute)
+						.setEnd(toRun::end)
+						.setFinish(() -> !toggledOn || toRun.finished())
 						.setInterruptable(toRun.interruptable())
 		);
 		return thisAsB;

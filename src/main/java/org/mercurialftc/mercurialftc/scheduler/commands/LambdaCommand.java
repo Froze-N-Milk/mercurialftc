@@ -1,5 +1,6 @@
 package org.mercurialftc.mercurialftc.scheduler.commands;
 
+import org.jetbrains.annotations.NotNull;
 import org.mercurialftc.mercurialftc.scheduler.OpModeEX;
 import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
 
@@ -18,7 +19,15 @@ public class LambdaCommand implements Command {
 	private final Set<SubsystemInterface> requiredSubsystems;
 
 	/**
-	 * constructs a default lambda command
+	 * constructs a default lambda command with the following default behaviours:
+	 * <p>no requirements</p>
+	 * <p>an empty init method</p>
+	 * <p>an empty execute method</p>
+	 * <p>instantly finishes</p>
+	 * <p>an empty end method</p>
+	 * <p>is interruptable</p>
+	 * <p>allowed to run in LOOP only</p>
+	 * <p>these are sensible defaults for a command that is meant to run in LOOP</p>
 	 */
 	public LambdaCommand() {
 		this(
@@ -53,8 +62,8 @@ public class LambdaCommand implements Command {
 		this.runStates = runStates;
 	}
 
-	public LambdaCommand setRequirements(SubsystemInterface... requiredSubsystems) {
-		Set<SubsystemInterface> requirements = this.getRequiredSubsystems();
+	public LambdaCommand setRequirements(@NotNull SubsystemInterface... requiredSubsystems) {
+		Set<SubsystemInterface> requirements = new HashSet<>(requiredSubsystems.length);
 		Collections.addAll(requirements, requiredSubsystems);
 
 		return new LambdaCommand(
@@ -68,7 +77,7 @@ public class LambdaCommand implements Command {
 		);
 	}
 
-	public LambdaCommand setRequirements(Set<SubsystemInterface> requiredSubsystems) {
+	public LambdaCommand setRequirements(@NotNull Set<SubsystemInterface> requiredSubsystems) {
 		return new LambdaCommand(
 				requiredSubsystems,
 				this.commandInit,
@@ -80,7 +89,7 @@ public class LambdaCommand implements Command {
 		);
 	}
 
-	public LambdaCommand init(Runnable initialise) {
+	public LambdaCommand setInit(Runnable initialise) {
 		return new LambdaCommand(
 				this.requiredSubsystems,
 				initialise,
@@ -92,7 +101,7 @@ public class LambdaCommand implements Command {
 		);
 	}
 
-	public LambdaCommand execute(Runnable execute) {
+	public LambdaCommand setExecute(Runnable execute) {
 		return new LambdaCommand(
 				this.requiredSubsystems,
 				this.commandInit,
@@ -104,7 +113,7 @@ public class LambdaCommand implements Command {
 		);
 	}
 
-	public LambdaCommand finish(BooleanSupplier finish) {
+	public LambdaCommand setFinish(BooleanSupplier finish) {
 		return new LambdaCommand(
 				this.requiredSubsystems,
 				this.commandInit,
@@ -116,7 +125,7 @@ public class LambdaCommand implements Command {
 		);
 	}
 
-	public LambdaCommand end(Consumer<Boolean> end) {
+	public LambdaCommand setEnd(Consumer<Boolean> end) {
 		return new LambdaCommand(
 				this.requiredSubsystems,
 				this.commandInit,
@@ -136,6 +145,91 @@ public class LambdaCommand implements Command {
 				this.commandFinish,
 				this.commandEnd,
 				interruptable,
+				this.runStates
+		);
+	}
+
+	public LambdaCommand addRequirements(SubsystemInterface... requiredSubsystems) {
+		Set<SubsystemInterface> requirements = this.getRequiredSubsystems();
+		Collections.addAll(requirements, requiredSubsystems);
+
+		return new LambdaCommand(
+				requirements,
+				this.commandInit,
+				this.commandMethod,
+				this.commandFinish,
+				this.commandEnd,
+				this.interruptable,
+				this.runStates
+		);
+	}
+
+	public LambdaCommand addRequirements(@NotNull Set<SubsystemInterface> requiredSubsystems) {
+		requiredSubsystems.addAll(this.requiredSubsystems);
+		return new LambdaCommand(
+				requiredSubsystems,
+				this.commandInit,
+				this.commandMethod,
+				this.commandFinish,
+				this.commandEnd,
+				this.interruptable,
+				this.runStates
+		);
+	}
+
+	public LambdaCommand addInit(Runnable initialise) {
+		return new LambdaCommand(
+				this.requiredSubsystems,
+				() -> {
+					this.commandInit.run();
+					initialise.run();
+				},
+				this.commandMethod,
+				this.commandFinish,
+				this.commandEnd,
+				this.interruptable,
+				this.runStates
+		);
+	}
+
+	public LambdaCommand addExecute(Runnable execute) {
+		return new LambdaCommand(
+				this.requiredSubsystems,
+				this.commandInit,
+				() -> {
+					this.commandMethod.run();
+					execute.run();
+				},
+				this.commandFinish,
+				this.commandEnd,
+				this.interruptable,
+				this.runStates
+		);
+	}
+
+	public LambdaCommand addFinish(BooleanSupplier finish) {
+		return new LambdaCommand(
+				this.requiredSubsystems,
+				this.commandInit,
+				this.commandMethod,
+				() -> this.commandFinish.getAsBoolean() || finish.getAsBoolean(),
+				this.commandEnd,
+				this.interruptable,
+				this.runStates
+		);
+	}
+
+	public LambdaCommand addEnd(Consumer<Boolean> end) {
+		return new LambdaCommand(
+				this.requiredSubsystems,
+				this.commandInit,
+				this.commandMethod,
+				this.commandFinish,
+				(interrupted) -> {
+					this.commandEnd.accept(interrupted);
+					end.accept(interrupted);
+				},
+				this.interruptable,
 				this.runStates
 		);
 	}

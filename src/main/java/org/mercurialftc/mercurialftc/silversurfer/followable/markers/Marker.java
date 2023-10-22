@@ -7,6 +7,7 @@ public class Marker {
 	private final double callbackTime;
 	private final MarkerType markerType;
 	private double accumulatedTime;
+
 	public Marker(CommandSignature command, MarkerType markerType, double callbackTime) {
 		this.markerReached = command;
 		this.callbackTime = callbackTime;

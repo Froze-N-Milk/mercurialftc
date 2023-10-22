@@ -50,7 +50,7 @@ public class Wave {
 			this.currentOutput = new Followable.Output(
 					new Vector2D(0, 0),
 					0, currentTime,
-					outputs.get(outputs.size() - 1).getPosition(),
+					outputs.get(outputs.size() - 1).getDestination(),
 					outputs.get(outputs.size() - 1).getDestination()
 			);
 		}

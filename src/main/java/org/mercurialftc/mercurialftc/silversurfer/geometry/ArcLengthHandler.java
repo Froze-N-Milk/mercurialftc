@@ -67,10 +67,6 @@ public class ArcLengthHandler {
 	public ArcLengthRelationship findCurveFromArcLength(double arcLength) {
 		QuinticBezierCurve[] curves = followableCurve.getCurves();
 
-//		if (arcLength < breakpoints[0]) {
-//			return new ArcLengthRelationship(curves[0], (arcLength / arcLengths[0]), 0);
-//		}
-
 		for (int i = 0; i < breakpoints.length - 2; i++) {
 			if (arcLength >= breakpoints[i] && arcLength < breakpoints[i + 1]) {
 				return new ArcLengthRelationship(curves[i], ((arcLength - breakpoints[i]) / arcLengths[i]), i);

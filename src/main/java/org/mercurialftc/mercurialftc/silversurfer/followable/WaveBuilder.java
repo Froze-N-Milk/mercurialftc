@@ -24,7 +24,7 @@ public class WaveBuilder {
 	private final ArrayList<Followable> followables;
 	private final MecanumMotionConstants mecanumMotionConstants;
 	private final ObstacleMap obstacleMap;
-	private Pose2D previousPose;
+	private Pose2D previousPose, previousTargetPose;
 	private FollowableBuilder builder;
 	private BuildState buildState;
 	private MecanumMotionConstants buildingMotionConstants;
@@ -51,7 +51,7 @@ public class WaveBuilder {
 	 * @param obstacleMap     the obstacle map to use for obstacle avoidance
 	 */
 	public WaveBuilder(Pose2D startPose, Units units, MecanumMotionConstants motionConstants, ObstacleMap obstacleMap) {
-		this.previousPose = startPose;
+		this.previousPose = this.previousTargetPose = startPose;
 		this.units = units;
 		this.buildingMotionConstants = this.mecanumMotionConstants = motionConstants;
 		this.obstacleMap = obstacleMap;
@@ -206,7 +206,7 @@ public class WaveBuilder {
 	public WaveBuilder waitFor(double seconds) {
 		handleState(BuildState.STOP);
 		StopBuilder stopBuilder = (StopBuilder) builder;
-		stopBuilder.addWait(previousPose, seconds);
+		stopBuilder.addWait(previousTargetPose, seconds);
 		return this;
 	}
 
@@ -249,7 +249,7 @@ public class WaveBuilder {
 	private void addSegment(double x, double y, Angle theta) {
 		Pose2D destination = new Pose2D(x, y, theta, units);
 		builder.addFollowableSegment(previousPose, destination);
-		previousPose = destination;
+		previousPose = previousTargetPose = destination;
 	}
 
 	/**
@@ -298,7 +298,7 @@ public class WaveBuilder {
 				builder = new CurveBuilder(buildingMotionConstants, mecanumMotionConstants, obstacleMap);
 				break;
 			case LINE:
-				builder = new LineBuilder(buildingMotionConstants);
+				builder = new LineBuilder(buildingMotionConstants, mecanumMotionConstants);
 				break;
 			case STOP:
 				builder = new StopBuilder();

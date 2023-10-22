@@ -15,6 +15,10 @@ public class Marker {
 		this.markerType = markerType;
 	}
 
+	public double getAccumulatedTime() {
+		return accumulatedTime;
+	}
+
 	public void setAccumulatedTime(double accumulatedTime) {
 		this.accumulatedTime = accumulatedTime;
 	}

@@ -8,23 +8,38 @@ public abstract class Followable {
 	private Output[] outputs;
 	private Marker[] markers;
 
-	protected final void setOutputs(Output[] outputs) {
-		this.outputs = outputs;
-	}
-
 	public final Output[] getOutputs() {
 		return outputs;
 	}
 
-	protected final void setMarkers(Marker[] markers) {
-		this.markers = markers;
+	protected final void setOutputs(Output[] outputs) {
+		this.outputs = outputs;
 	}
 
 	public final Marker[] getMarkers() {
 		return markers;
 	}
 
+	protected final void setMarkers(Marker[] markers) {
+		this.markers = markers;
+	}
+
 	public static class Output {
+		private final Vector2D translationVector; // controls x and y
+		private final double callbackTime;
+		private final Pose2D position, destination;
+		private final double rotationalVelocity; // controls heading
+		private double accumulatedTime;
+
+		public Output(Vector2D translationVector, double rotationalVelocity, double callbackTime, Pose2D position, Pose2D destination) {
+			this.translationVector = translationVector;
+			this.rotationalVelocity = rotationalVelocity;
+			this.callbackTime = callbackTime;
+			this.accumulatedTime = 0;
+			this.position = position;
+			this.destination = destination;
+		}
+
 		public Vector2D getTranslationVector() {
 			return translationVector;
 		}
@@ -45,24 +60,12 @@ public abstract class Followable {
 			return destination;
 		}
 
-		private final Vector2D translationVector; // controls x and y
-		private final double callbackTime;
-		private double accumulatedTime;
-		private final Pose2D position, destination;
+		public double getAccumulatedTime() {
+			return accumulatedTime;
+		}
 
 		public void setAccumulatedTime(double accumulatedTime) {
 			this.accumulatedTime = accumulatedTime;
-		}
-
-		private final double rotationalVelocity; // controls heading
-
-		public Output(Vector2D translationVector, double rotationalVelocity, double callbackTime, Pose2D position, Pose2D destination) {
-			this.translationVector = translationVector;
-			this.rotationalVelocity = rotationalVelocity;
-			this.callbackTime = callbackTime;
-			this.accumulatedTime = 0;
-			this.position = position;
-			this.destination = destination;
 		}
 	}
 }

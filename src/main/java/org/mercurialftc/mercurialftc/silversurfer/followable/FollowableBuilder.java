@@ -1,6 +1,6 @@
 package org.mercurialftc.mercurialftc.silversurfer.followable;
 
-import org.mercurialftc.mercurialftc.scheduler.commands.CommandSignature;
+import org.mercurialftc.mercurialftc.scheduler.commands.Command;
 import org.mercurialftc.mercurialftc.silversurfer.followable.markers.Marker;
 import org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants.MecanumMotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
@@ -65,5 +65,5 @@ public abstract class FollowableBuilder {
 	 * @param offset        a relative offset, in seconds
 	 * @param markerReached the command to run
 	 */
-	protected abstract void addOffsetCommandMarker(double offset, Marker.MarkerType markerType, CommandSignature markerReached);
+	protected abstract void addOffsetCommandMarker(double offset, Marker.MarkerType markerType, Command markerReached);
 }

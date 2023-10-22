@@ -1,14 +1,14 @@
 package org.mercurialftc.mercurialftc.silversurfer.followable.markers;
 
-import org.mercurialftc.mercurialftc.scheduler.commands.CommandSignature;
+import org.mercurialftc.mercurialftc.scheduler.commands.Command;
 
 public class Marker {
-	private final CommandSignature markerReached;
+	private final Command markerReached;
 	private final double callbackTime;
 	private final MarkerType markerType;
 	private double accumulatedTime;
 
-	public Marker(CommandSignature command, MarkerType markerType, double callbackTime) {
+	public Marker(Command command, MarkerType markerType, double callbackTime) {
 		this.markerReached = command;
 		this.callbackTime = callbackTime;
 		this.accumulatedTime = 0;
@@ -19,7 +19,7 @@ public class Marker {
 		this.accumulatedTime = accumulatedTime;
 	}
 
-	public CommandSignature getMarkerReached() {
+	public Command getMarkerReached() {
 		return markerReached;
 	}
 

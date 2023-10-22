@@ -1,6 +1,6 @@
 package org.mercurialftc.mercurialftc.silversurfer.followable;
 
-import org.mercurialftc.mercurialftc.scheduler.commands.CommandSignature;
+import org.mercurialftc.mercurialftc.scheduler.commands.Command;
 import org.mercurialftc.mercurialftc.scheduler.commands.LambdaCommand;
 import org.mercurialftc.mercurialftc.silversurfer.encoderticksconverter.Units;
 import org.mercurialftc.mercurialftc.silversurfer.followable.curvebuilder.CurveBuilder;
@@ -259,7 +259,7 @@ public class WaveBuilder {
 	 * @param markerReached the command to run
 	 * @return self, for method chaining
 	 */
-	public WaveBuilder addOffsetActionMarker(double offset, CommandSignature markerReached) {
+	public WaveBuilder addOffsetActionMarker(double offset, Command markerReached) {
 		builder.addOffsetCommandMarker(offset, Marker.MarkerType.COMMAND, markerReached);
 		return this;
 	}

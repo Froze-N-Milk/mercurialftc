@@ -7,13 +7,13 @@ import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
 import java.util.*;
 
 @SuppressWarnings("unused")
-public class SequentialCommandGroup implements CommandSignature {
-	private final ArrayList<CommandSignature> commands;
+public class SequentialCommandGroup implements Command {
+	private final ArrayList<Command> commands;
 	private final boolean interruptable;
 	private final Set<SubsystemInterface> requiredSubsystems;
 	private final Set<OpModeEX.OpModeEXRunStates> runStates;
 	private int commandIndex;
-	private CommandSignature currentCommand;
+	private Command currentCommand;
 
 	public SequentialCommandGroup() {
 		this.requiredSubsystems = new HashSet<>();
@@ -23,7 +23,7 @@ public class SequentialCommandGroup implements CommandSignature {
 		commandIndex = -1;
 	}
 
-	private SequentialCommandGroup(ArrayList<CommandSignature> commands, Set<SubsystemInterface> requirements, Set<OpModeEX.OpModeEXRunStates> runStates, boolean interruptable) {
+	private SequentialCommandGroup(ArrayList<Command> commands, Set<SubsystemInterface> requirements, Set<OpModeEX.OpModeEXRunStates> runStates, boolean interruptable) {
 		this.requiredSubsystems = requirements;
 		this.runStates = runStates;
 		this.commands = commands;
@@ -34,7 +34,7 @@ public class SequentialCommandGroup implements CommandSignature {
 
 	@Override
 	public void queue() {
-		CommandSignature.super.queue();
+		Command.super.queue();
 	}
 
 	/**
@@ -43,7 +43,7 @@ public class SequentialCommandGroup implements CommandSignature {
 	 * @param commands new commands to add
 	 * @return a new SequentialCommandGroup, with the added commands
 	 */
-	public SequentialCommandGroup addCommands(CommandSignature... commands) {
+	public SequentialCommandGroup addCommands(Command... commands) {
 		return addCommands(Arrays.asList(commands));
 	}
 
@@ -53,13 +53,13 @@ public class SequentialCommandGroup implements CommandSignature {
 	 * @param commands new commands to add
 	 * @return a new SequentialCommandGroup, with the added commands
 	 */
-	public SequentialCommandGroup addCommands(List<CommandSignature> commands) {
+	public SequentialCommandGroup addCommands(List<Command> commands) {
 		if (commandIndex != -1) {
 			throw new IllegalStateException(
 					"Commands cannot be added to a composition while it is running");
 		}
 
-		ArrayList<CommandSignature> newCommandList = new ArrayList<>(this.commands);
+		ArrayList<Command> newCommandList = new ArrayList<>(this.commands);
 		newCommandList.addAll(commands);
 
 		Set<SubsystemInterface> newRequirementSet = new HashSet<>(this.getRequiredSubsystems());
@@ -67,7 +67,7 @@ public class SequentialCommandGroup implements CommandSignature {
 
 		HashSet<OpModeEX.OpModeEXRunStates> newRunStates = new HashSet<>(2);
 
-		for (CommandSignature command : commands) {
+		for (Command command : commands) {
 			newRequirementSet.addAll(command.getRequiredSubsystems());
 			newInterruptable &= command.interruptable();
 			newRunStates.addAll(command.getRunStates());

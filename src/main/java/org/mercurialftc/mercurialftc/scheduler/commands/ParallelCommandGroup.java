@@ -8,12 +8,12 @@ import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
 import java.util.*;
 
 @SuppressWarnings("unused")
-public class ParallelCommandGroup implements CommandSignature {
-	private final Map<CommandSignature, Boolean> commands;
+public class ParallelCommandGroup implements Command {
+	private final Map<Command, Boolean> commands;
 	private final boolean interruptable;
 	private final Set<SubsystemInterface> requiredSubsystems;
 	private final Set<OpModeEX.OpModeEXRunStates> runStates;
-	private CommandSignature currentCommand;
+	private Command currentCommand;
 
 
 	public ParallelCommandGroup() {
@@ -23,7 +23,7 @@ public class ParallelCommandGroup implements CommandSignature {
 		this.commands = new HashMap<>();
 	}
 
-	private ParallelCommandGroup(@NotNull HashMap<CommandSignature, Boolean> commands, Set<SubsystemInterface> requirements, Set<OpModeEX.OpModeEXRunStates> runStates, boolean interruptable) {
+	private ParallelCommandGroup(@NotNull HashMap<Command, Boolean> commands, Set<SubsystemInterface> requirements, Set<OpModeEX.OpModeEXRunStates> runStates, boolean interruptable) {
 		this.requiredSubsystems = requirements;
 		this.runStates = runStates;
 		this.interruptable = interruptable;
@@ -34,7 +34,7 @@ public class ParallelCommandGroup implements CommandSignature {
 
 	@Override
 	public void queue() {
-		CommandSignature.super.queue();
+		Command.super.queue();
 	}
 
 	/**
@@ -43,7 +43,7 @@ public class ParallelCommandGroup implements CommandSignature {
 	 * @param commands new commands to add
 	 * @return a new ParallelCommandGroup, with the added commands
 	 */
-	public ParallelCommandGroup addCommands(CommandSignature... commands) {
+	public ParallelCommandGroup addCommands(Command... commands) {
 		return addCommands(Arrays.asList(commands));
 	}
 
@@ -53,20 +53,20 @@ public class ParallelCommandGroup implements CommandSignature {
 	 * @param commands new commands to add
 	 * @return a new ParallelCommandGroup, with the added commands
 	 */
-	public ParallelCommandGroup addCommands(List<CommandSignature> commands) {
+	public ParallelCommandGroup addCommands(List<Command> commands) {
 		if (this.commands.containsValue(true)) {
 			throw new IllegalStateException(
 					"Commands cannot be added to a composition while it's running");
 		}
 
-		HashMap<CommandSignature, Boolean> newCommandMap = new HashMap<>(this.commands);
+		HashMap<Command, Boolean> newCommandMap = new HashMap<>(this.commands);
 
 		Set<SubsystemInterface> newRequirementSet = new HashSet<>(this.getRequiredSubsystems());
 		boolean newInterruptable = interruptable();
 		HashSet<OpModeEX.OpModeEXRunStates> newRunStates = new HashSet<>(2);
 
 
-		for (CommandSignature command : commands) {
+		for (Command command : commands) {
 			if (!Collections.disjoint(command.getRequiredSubsystems(), getRequiredSubsystems())) {
 				throw new IllegalArgumentException(
 						"Multiple commands in a parallel composition cannot require the same subsystems");
@@ -95,7 +95,7 @@ public class ParallelCommandGroup implements CommandSignature {
 		if (commands.isEmpty()) {
 			throw new RuntimeException("Attempted to run empty SequentialCommandGroup, SequentialCommandGroupRequires a minimum of 1 Command to be run");
 		}
-		for (Map.Entry<CommandSignature, Boolean> commandRunning : commands.entrySet()) {
+		for (Map.Entry<Command, Boolean> commandRunning : commands.entrySet()) {
 			commandRunning.getKey().initialise();
 			commandRunning.setValue(true);
 		}
@@ -103,7 +103,7 @@ public class ParallelCommandGroup implements CommandSignature {
 
 	@Override
 	public void execute() {
-		for (Map.Entry<CommandSignature, Boolean> commandRunning : commands.entrySet()) {
+		for (Map.Entry<Command, Boolean> commandRunning : commands.entrySet()) {
 			if (!commandRunning.getValue()) {
 				continue;
 			}
@@ -118,7 +118,7 @@ public class ParallelCommandGroup implements CommandSignature {
 	@Override
 	public void end(boolean interrupted) {
 		if (interrupted) {
-			for (Map.Entry<CommandSignature, Boolean> commandRunning : commands.entrySet()) {
+			for (Map.Entry<Command, Boolean> commandRunning : commands.entrySet()) {
 				if (commandRunning.getValue()) {
 					commandRunning.getKey().end(true);
 				}

@@ -8,7 +8,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 @SuppressWarnings("unused")
-public class LambdaCommand implements CommandSignature {
+public class LambdaCommand implements Command {
 	private final Runnable commandInit;
 	private final Runnable commandMethod;
 	private final BooleanSupplier commandFinish;

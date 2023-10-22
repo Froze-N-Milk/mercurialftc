@@ -1,7 +1,7 @@
 package org.mercurialftc.mercurialftc.scheduler.triggers.gamepadex;
 
 import org.jetbrains.annotations.NotNull;
-import org.mercurialftc.mercurialftc.scheduler.commands.CommandSignature;
+import org.mercurialftc.mercurialftc.scheduler.commands.Command;
 import org.mercurialftc.mercurialftc.scheduler.commands.LambdaCommand;
 import org.mercurialftc.mercurialftc.scheduler.triggers.Trigger;
 
@@ -48,7 +48,7 @@ public class Binding<B extends Binding<B>> {
 		return processedInput;
 	}
 
-	public B whileTrue(@NotNull CommandSignature toRun) {
+	public B whileTrue(@NotNull Command toRun) {
 		new Trigger(() -> (state() && state() != previousState),
 				new LambdaCommand()
 						.setRequirements(toRun.getRequiredSubsystems())
@@ -61,7 +61,7 @@ public class Binding<B extends Binding<B>> {
 		return thisAsB;
 	}
 
-	public B whileFalse(@NotNull CommandSignature toRun) {
+	public B whileFalse(@NotNull Command toRun) {
 		new Trigger(() -> (state() && state() != previousState),
 				new LambdaCommand()
 						.setRequirements(toRun.getRequiredSubsystems())
@@ -75,12 +75,12 @@ public class Binding<B extends Binding<B>> {
 		return thisAsB;
 	}
 
-	public B onTrue(@NotNull CommandSignature toRun) {
+	public B onTrue(@NotNull Command toRun) {
 		new Trigger(() -> (state() && state() != previousState), toRun);
 		return thisAsB;
 	}
 
-	public B toggle(@NotNull CommandSignature toRun) {
+	public B toggle(@NotNull Command toRun) {
 		new Trigger(() -> {
 			state();
 			return toggledOn && !previousToggleState;
@@ -97,7 +97,7 @@ public class Binding<B extends Binding<B>> {
 		return thisAsB;
 	}
 
-	public B onFalse(@NotNull CommandSignature toRun) {
+	public B onFalse(@NotNull Command toRun) {
 		new Trigger(() -> (!state() && state() != previousState), toRun);
 		return thisAsB;
 	}

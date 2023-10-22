@@ -7,7 +7,7 @@ import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
 import java.util.HashSet;
 import java.util.Set;
 
-public interface CommandSignature {
+public interface Command {
 	/**
 	 * Gets run once when a command is first scheduled
 	 */

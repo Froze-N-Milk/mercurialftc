@@ -62,6 +62,12 @@ public class LambdaCommand implements Command {
 		this.runStates = runStates;
 	}
 
+	/**
+	 * non-mutating, sets the requirements, overriding the previous contents
+	 *
+	 * @param requiredSubsystems subsystem requirements of this command
+	 * @return a new LambdaCommand
+	 */
 	public LambdaCommand setRequirements(@NotNull SubsystemInterface... requiredSubsystems) {
 		Set<SubsystemInterface> requirements = new HashSet<>(requiredSubsystems.length);
 		Collections.addAll(requirements, requiredSubsystems);
@@ -77,6 +83,12 @@ public class LambdaCommand implements Command {
 		);
 	}
 
+	/**
+	 * non-mutating, sets the requirements, overriding the previous contents
+	 *
+	 * @param requiredSubsystems subsystem requirements of this command
+	 * @return a new LambdaCommand
+	 */
 	public LambdaCommand setRequirements(@NotNull Set<SubsystemInterface> requiredSubsystems) {
 		return new LambdaCommand(
 				requiredSubsystems,
@@ -89,6 +101,12 @@ public class LambdaCommand implements Command {
 		);
 	}
 
+	/**
+	 * non-mutating, sets the init method, overriding the previous contents
+	 *
+	 * @param initialise the new initialise method of the command
+	 * @return a new LambdaCommand
+	 */
 	public LambdaCommand setInit(Runnable initialise) {
 		return new LambdaCommand(
 				this.requiredSubsystems,
@@ -101,6 +119,12 @@ public class LambdaCommand implements Command {
 		);
 	}
 
+	/**
+	 * non-mutating, sets the execute method, overriding the previous contents
+	 *
+	 * @param execute the new execute method of the command
+	 * @return a new LambdaCommand
+	 */
 	public LambdaCommand setExecute(Runnable execute) {
 		return new LambdaCommand(
 				this.requiredSubsystems,
@@ -113,6 +137,12 @@ public class LambdaCommand implements Command {
 		);
 	}
 
+	/**
+	 * non-mutating, sets the finish method, overriding the previous contents
+	 *
+	 * @param finish the new finish method of the command
+	 * @return a new LambdaCommand
+	 */
 	public LambdaCommand setFinish(BooleanSupplier finish) {
 		return new LambdaCommand(
 				this.requiredSubsystems,
@@ -125,6 +155,12 @@ public class LambdaCommand implements Command {
 		);
 	}
 
+	/**
+	 * non-mutating, sets the end method, overriding the previous contents
+	 *
+	 * @param end the new end method of the command
+	 * @return a new LambdaCommand
+	 */
 	public LambdaCommand setEnd(Consumer<Boolean> end) {
 		return new LambdaCommand(
 				this.requiredSubsystems,
@@ -137,6 +173,12 @@ public class LambdaCommand implements Command {
 		);
 	}
 
+	/**
+	 * non-mutating, sets if interruption is allowed
+	 *
+	 * @param interruptable if interruption is allowed
+	 * @return a new LambdaCommand
+	 */
 	public LambdaCommand setInterruptable(boolean interruptable) {
 		return new LambdaCommand(
 				this.requiredSubsystems,
@@ -149,6 +191,12 @@ public class LambdaCommand implements Command {
 		);
 	}
 
+	/**
+	 * non-mutating, adds to the current requirements
+	 *
+	 * @param requiredSubsystems the additional required subsystems
+	 * @return a new LambdaCommand
+	 */
 	public LambdaCommand addRequirements(SubsystemInterface... requiredSubsystems) {
 		Set<SubsystemInterface> requirements = this.getRequiredSubsystems();
 		Collections.addAll(requirements, requiredSubsystems);
@@ -164,6 +212,12 @@ public class LambdaCommand implements Command {
 		);
 	}
 
+	/**
+	 * non-mutating, adds to the current requirements
+	 *
+	 * @param requiredSubsystems the additional required subsystems
+	 * @return a new LambdaCommand
+	 */
 	public LambdaCommand addRequirements(@NotNull Set<SubsystemInterface> requiredSubsystems) {
 		requiredSubsystems.addAll(this.requiredSubsystems);
 		return new LambdaCommand(
@@ -177,6 +231,12 @@ public class LambdaCommand implements Command {
 		);
 	}
 
+	/**
+	 * non-mutating, adds to the current init method
+	 *
+	 * @param initialise the additional method to run after the preexisting init
+	 * @return a new LambdaCommand
+	 */
 	public LambdaCommand addInit(Runnable initialise) {
 		return new LambdaCommand(
 				this.requiredSubsystems,
@@ -192,6 +252,12 @@ public class LambdaCommand implements Command {
 		);
 	}
 
+	/**
+	 * non-mutating, adds to the current execute method
+	 *
+	 * @param execute the additional method to run after the preexisting execute
+	 * @return a new LambdaCommand
+	 */
 	public LambdaCommand addExecute(Runnable execute) {
 		return new LambdaCommand(
 				this.requiredSubsystems,
@@ -207,6 +273,12 @@ public class LambdaCommand implements Command {
 		);
 	}
 
+	/**
+	 * non-mutating, adds to the current finish method, either the preexisting method OR the new one will end the command
+	 *
+	 * @param finish the additional condition to consider after the preexisting finish
+	 * @return a new LambdaCommand
+	 */
 	public LambdaCommand addFinish(BooleanSupplier finish) {
 		return new LambdaCommand(
 				this.requiredSubsystems,
@@ -219,6 +291,12 @@ public class LambdaCommand implements Command {
 		);
 	}
 
+	/**
+	 * non-mutating, adds to the current end method
+	 *
+	 * @param end the additional method to run after the preexisting end
+	 * @return a new LambdaCommand
+	 */
 	public LambdaCommand addEnd(Consumer<Boolean> end) {
 		return new LambdaCommand(
 				this.requiredSubsystems,
@@ -271,6 +349,12 @@ public class LambdaCommand implements Command {
 		return runStates;
 	}
 
+	/**
+	 * non-mutating, sets the RunStates, overriding the previous contents
+	 *
+	 * @param runStates allowed RunStates of the command
+	 * @return a new LambdaCommand
+	 */
 	public LambdaCommand setRunStates(OpModeEX.OpModeEXRunStates... runStates) {
 		return new LambdaCommand(
 				this.requiredSubsystems,
@@ -283,6 +367,12 @@ public class LambdaCommand implements Command {
 		);
 	}
 
+	/**
+	 * non-mutating, sets the RunStates, overriding the previous contents
+	 *
+	 * @param runStates allowed RunStates of the command
+	 * @return a new LambdaCommand
+	 */
 	public LambdaCommand setRunStates(Set<OpModeEX.OpModeEXRunStates> runStates) {
 		return new LambdaCommand(
 				this.requiredSubsystems,

@@ -93,8 +93,8 @@ public class Wave {
 		newMarkers.addAll(other.markers);
 
 		double additionalAccumulatedTime = this.outputs.get(this.outputs.size() - 1).getCallbackTime();
-		IntStream.range(this.outputs.size(), newOutputs.size()).mapToObj(newOutputs::get).forEach(output -> output.setAccumulatedTime(output.getAccumulatedTime() + additionalAccumulatedTime));
-		IntStream.range(this.markers.size(), newMarkers.size()).mapToObj(newMarkers::get).forEach(marker -> marker.setAccumulatedTime(marker.getAccumulatedTime() + additionalAccumulatedTime));
+		IntStream.range(this.outputs.size(), newOutputs.size()).mapToObj(newOutputs::get).forEach(output -> output.compoundAccumulatedTime(additionalAccumulatedTime));
+		IntStream.range(this.markers.size(), newMarkers.size()).mapToObj(newMarkers::get).forEach(marker -> marker.compoundAccumulatedTime(additionalAccumulatedTime));
 
 		return new Wave(
 				newOutputs,

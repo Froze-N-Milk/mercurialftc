@@ -210,7 +210,9 @@ public class DomainBindingTests {
 	void testBindings() {
 		for (Map.Entry<DomainBinding<DomainSupplier>, HashMap<Double, Boolean>> testMap : testMappings.entrySet()) {
 			for (Map.Entry<Double, Boolean> test : testMap.getValue().entrySet()) {
+				testMap.getKey().postLoopUpdate();
 				internalValue = test.getKey();
+				testMap.getKey().preLoopUpdate();
 				Assertions.assertEquals(test.getValue(), testMap.getKey().state(), String.format("expected %b, but got %b for a value of %f", test.getValue(), testMap.getKey().state(), internalValue));
 			}
 		}

@@ -1,4 +1,4 @@
-package org.mercurialftc.mercurialftc.scheduler.triggers.gamepadex.domainbindingbuilder;
+package org.mercurialftc.mercurialftc.scheduler.bindings.gamepadex.domainbindingbuilder;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;

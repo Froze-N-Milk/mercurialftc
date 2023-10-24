@@ -1,6 +1,6 @@
-package org.mercurialftc.mercurialftc.scheduler.triggers.gamepadex.domainbindingbuilder;
+package org.mercurialftc.mercurialftc.scheduler.bindings.gamepadex.domainbindingbuilder;
 
-import org.mercurialftc.mercurialftc.scheduler.triggers.gamepadex.Binding;
+import org.mercurialftc.mercurialftc.scheduler.bindings.Binding;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;

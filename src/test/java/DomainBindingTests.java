@@ -1,8 +1,8 @@
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mercurialftc.mercurialftc.scheduler.triggers.gamepadex.DomainSupplier;
-import org.mercurialftc.mercurialftc.scheduler.triggers.gamepadex.domainbindingbuilder.DomainBinding;
+import org.mercurialftc.mercurialftc.scheduler.bindings.gamepadex.DomainSupplier;
+import org.mercurialftc.mercurialftc.scheduler.bindings.gamepadex.domainbindingbuilder.DomainBinding;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,10 +1,11 @@
-package org.mercurialftc.mercurialftc.scheduler.triggers;
+package org.mercurialftc.mercurialftc.scheduler.bindings;
 
 import org.mercurialftc.mercurialftc.scheduler.Scheduler;
 import org.mercurialftc.mercurialftc.scheduler.commands.Command;
 
 import java.util.function.BooleanSupplier;
 
+@SuppressWarnings("unused")
 public class Trigger {
 	private final BooleanSupplier triggerCondition;
 	private Command toRun;

@@ -25,7 +25,7 @@ public class ChangeSchedulerConfig extends OpModeEX {
 	}
 
 	@Override
-	public void registerTriggers() {
+	public void registerBindings() {
 		gamepadEX1().dpad_up().onTrue(
 				new LambdaCommand().setInit(() -> {
 					selection++;

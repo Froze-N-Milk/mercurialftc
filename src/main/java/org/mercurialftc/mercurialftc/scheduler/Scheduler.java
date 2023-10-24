@@ -2,14 +2,16 @@ package org.mercurialftc.mercurialftc.scheduler;
 
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.jetbrains.annotations.NotNull;
+import org.mercurialftc.mercurialftc.scheduler.bindings.Binding;
 import org.mercurialftc.mercurialftc.scheduler.commands.Command;
 import org.mercurialftc.mercurialftc.scheduler.configoptions.ConfigOptionsManager;
 import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
-import org.mercurialftc.mercurialftc.scheduler.triggers.Trigger;
+import org.mercurialftc.mercurialftc.scheduler.bindings.Trigger;
 
 import java.io.*;
 import java.util.*;
 
+@SuppressWarnings("unused")
 public class Scheduler {
 	public static Scheduler scheduler;
 
@@ -17,6 +19,7 @@ public class Scheduler {
 	private static ConfigOptionsManager configOptionsManager;
 	private final LinkedHashSet<SubsystemInterface> subsystems; // currently registered Subsystems
 	private final LinkedHashSet<Trigger> triggers;
+	private final LinkedHashSet<Binding> bindings;
 	private final Set<Command> composedCommands = Collections.newSetFromMap(new WeakHashMap<>());
 	private final LinkedHashSet<Command> commands; // currently scheduled Commands
 	private final ArrayList<Command> commandsToCancel; // commands to be cancelled this loop
@@ -31,6 +34,7 @@ public class Scheduler {
 		this.commandsToCancel = new ArrayList<>();
 		this.commandsToSchedule = new LinkedHashSet<>();
 		this.requirements = new LinkedHashMap<>();
+		this.bindings = new LinkedHashSet<>();
 		this.triggers = new LinkedHashSet<>();
 		this.storedSubsystems = new HashMap<>();
 	}
@@ -189,7 +193,6 @@ public class Scheduler {
 			}
 		}
 
-
 		// initialises all the commands that are due to be scheduled
 		for (Command command : commandsToSchedule) {
 			initialiseCommand(command);
@@ -226,6 +229,14 @@ public class Scheduler {
 		}
 	}
 
+	public void registerBinding(Binding binding) {
+		bindings.add(binding);
+	}
+
+	public void deregisterBinding(Binding binding) {
+		bindings.remove(binding);
+	}
+
 	public void registerTrigger(Trigger trigger) {
 		triggers.add(trigger);
 	}
@@ -237,6 +248,18 @@ public class Scheduler {
 	public void pollTriggers() {
 		for (Trigger trigger : triggers) {
 			trigger.poll();
+		}
+	}
+
+	public void preLoopUpdateBindings() {
+		for (Binding binding : bindings) {
+			binding.preLoopUpdate();
+		}
+	}
+
+	public void postLoopUpdateBindings() {
+		for (Binding binding : bindings) {
+			binding.postLoopUpdate();
 		}
 	}
 

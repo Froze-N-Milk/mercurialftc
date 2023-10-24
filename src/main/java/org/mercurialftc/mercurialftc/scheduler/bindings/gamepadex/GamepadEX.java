@@ -1,6 +1,7 @@
-package org.mercurialftc.mercurialftc.scheduler.triggers.gamepadex;
+package org.mercurialftc.mercurialftc.scheduler.bindings.gamepadex;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
+import org.mercurialftc.mercurialftc.scheduler.bindings.Binding;
 
 @SuppressWarnings("unused rawtypes")
 public class GamepadEX {
@@ -204,19 +205,6 @@ public class GamepadEX {
 
 	public DomainSupplier right_trigger() {
 		return right_trigger;
-	}
-
-	public void endLoopUpdate() {
-		a.endLoopUpdate();
-		b.endLoopUpdate();
-		x.endLoopUpdate();
-		y.endLoopUpdate();
-		dpad_up.endLoopUpdate();
-		dpad_down.endLoopUpdate();
-		dpad_left.endLoopUpdate();
-		dpad_right.endLoopUpdate();
-		left_bumper.endLoopUpdate();
-		right_bumper.endLoopUpdate();
 	}
 }
 

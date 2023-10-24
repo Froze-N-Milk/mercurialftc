@@ -1,9 +1,9 @@
-package org.mercurialftc.mercurialftc.scheduler.triggers.gamepadex;
+package org.mercurialftc.mercurialftc.scheduler.bindings;
 
 import org.jetbrains.annotations.NotNull;
+import org.mercurialftc.mercurialftc.scheduler.Scheduler;
 import org.mercurialftc.mercurialftc.scheduler.commands.Command;
 import org.mercurialftc.mercurialftc.scheduler.commands.LambdaCommand;
-import org.mercurialftc.mercurialftc.scheduler.triggers.Trigger;
 
 import java.util.function.BooleanSupplier;
 
@@ -24,15 +24,11 @@ public class Binding<B extends Binding<B>> {
 	private boolean processedInput = false;
 
 	public Binding(BooleanSupplier internalInput) {
+		Scheduler.getSchedulerInstance().registerBinding(this);
 		this.internalInput = internalInput;
 	}
 
-	public void endLoopUpdate() {
-		previousToggleState = toggledOn;
-		previousState = state();
-	}
-
-	public boolean state() {
+	public void preLoopUpdate() {
 		if (processedInput != previousState) {
 			lastCheck = System.nanoTime();
 		}
@@ -44,7 +40,14 @@ public class Binding<B extends Binding<B>> {
 			processedInput = false;
 			lastCheck = System.nanoTime();
 		}
+	}
 
+	public void postLoopUpdate() {
+		previousToggleState = toggledOn;
+		previousState = state();
+	}
+
+	public boolean state() {
 		return processedInput;
 	}
 

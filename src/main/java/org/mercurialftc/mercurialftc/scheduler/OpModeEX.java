@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
-import org.mercurialftc.mercurialftc.scheduler.triggers.gamepadex.GamepadEX;
+import org.mercurialftc.mercurialftc.scheduler.bindings.gamepadex.GamepadEX;
 
 import java.util.List;
 
@@ -56,10 +56,10 @@ public abstract class OpModeEX extends OpMode {
 	public abstract void initEX();
 
 	/**
-	 * registers triggers after the subsystem and regular init code,
+	 * registers bindings after the subsystem and regular init code,
 	 * useful for organisation of your OpModeEX, but functionally no different to initialising them at the end of {@link #initEX()}
 	 */
-	public abstract void registerTriggers();
+	public abstract void registerBindings();
 
 	/**
 	 * should not be called, for internal use only, ensures that the current version of the scheduler is correct
@@ -105,7 +105,7 @@ public abstract class OpModeEX extends OpMode {
 		}
 
 		initEX();
-		registerTriggers();
+		registerBindings();
 
 		initialisationSequencer.append("\nRobot");
 		initialisedSubsystems.setValue(initialisationSequencer);
@@ -125,12 +125,12 @@ public abstract class OpModeEX extends OpMode {
 		for (LynxModule module : allHubs) {
 			module.clearBulkCache();
 		}
+		scheduler.preLoopUpdateBindings();
 		scheduler.pollSubsystemsPeriodic();
 		scheduler.pollTriggers();
 		init_loopEX();
 		scheduler.pollCommands(OpModeEXRunStates.INIT_LOOP);
-		gamepadEX1.endLoopUpdate();
-		gamepadEX2.endLoopUpdate();
+		scheduler.postLoopUpdateBindings();
 		telemetry.update();
 	}
 
@@ -141,7 +141,7 @@ public abstract class OpModeEX extends OpMode {
 	 */
 	@Override
 	public final void start() {
-		telemetry.clear(); // todo remove when telemetry update is done
+		telemetry.clear();
 		elapsedTime.reset();
 		startEX();
 	}
@@ -156,12 +156,12 @@ public abstract class OpModeEX extends OpMode {
 		for (LynxModule module : allHubs) {
 			module.clearBulkCache();
 		}
+		scheduler.preLoopUpdateBindings();
 		scheduler.pollSubsystemsPeriodic();
 		scheduler.pollTriggers();
 		loopEX();
 		scheduler.pollCommands(OpModeEXRunStates.LOOP);
-		gamepadEX1.endLoopUpdate();
-		gamepadEX2.endLoopUpdate();
+		scheduler.postLoopUpdateBindings();
 		telemetry.update();
 	}
 

@@ -4,7 +4,7 @@ import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.Angle;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.AngleDegrees;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.AngleRadians;
 
-public class AngleTests { // todo, build out unit tests for the project
+public class AngleTests {
 	@Test
 	void zeroAngle() {
 		Angle angle1 = new AngleRadians(0);

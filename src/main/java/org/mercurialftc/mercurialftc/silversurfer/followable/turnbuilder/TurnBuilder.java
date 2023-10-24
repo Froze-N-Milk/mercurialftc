@@ -105,7 +105,7 @@ public class TurnBuilder extends FollowableBuilder {
 			if (segmentIndex > 0) previousBreakPoint = segmentBreakpoints[segmentIndex - 1];
 			int numberOfSubdivisions = i - previousBreakPoint;
 
-			Pose2D position = segment.getPreviousPose().add(0, 0, new AngleRadians(segmentOutputSizes[i] * numberOfSubdivisions));
+			Pose2D position = segment.getPreviousPose().add(0, 0, new AngleRadians(segmentOutputSizes[segmentIndex] * numberOfSubdivisions));
 
 			outputs[i] = new Followable.Output(
 					Vector2D.fromPolar(0, 0), // the velocity output

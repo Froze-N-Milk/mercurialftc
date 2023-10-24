@@ -109,7 +109,7 @@ public class LineBuilder extends FollowableBuilder {
 			int previousBreakPoint = 0;
 			if (segmentIndex > 0) previousBreakPoint = segmentBreakpoints[segmentIndex - 1];
 			int numberOfSubdivisions = i - previousBreakPoint;
-			Vector2D positionVector = Vector2D.fromPolar(segmentOutputSizes[i] * numberOfSubdivisions, segment.getVector().getHeading()).add(segment.getPreviousPose().toVector2D());
+			Vector2D positionVector = Vector2D.fromPolar(segmentOutputSizes[segmentIndex] * numberOfSubdivisions, segment.getVector().getHeading()).add(segment.getPreviousPose().toVector2D());
 
 			outputs[i] = new Followable.Output(
 					Vector2D.fromPolar(finalVelocityConstraint, segment.getVector().getHeading()), // the velocity output

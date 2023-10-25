@@ -14,7 +14,7 @@ public class LambdaCommand implements Command {
 	private final Runnable commandMethod;
 	private final BooleanSupplier commandFinish;
 	private final Consumer<Boolean> commandEnd;
-	private final boolean interruptable;
+	private final boolean interruptible;
 	private final Set<OpModeEX.OpModeEXRunStates> runStates;
 	private final Set<SubsystemInterface> requiredSubsystems;
 
@@ -25,7 +25,7 @@ public class LambdaCommand implements Command {
 	 * <p>an empty execute method</p>
 	 * <p>instantly finishes</p>
 	 * <p>an empty end method</p>
-	 * <p>is interruptable</p>
+	 * <p>is interruptible</p>
 	 * <p>allowed to run in LOOP only</p>
 	 * <p>these are sensible defaults for a command that is meant to run in LOOP</p>
 	 */
@@ -50,7 +50,7 @@ public class LambdaCommand implements Command {
 			Runnable commandMethod,
 			BooleanSupplier commandFinish,
 			Consumer<Boolean> commandEnd,
-			boolean interruptable,
+			boolean interruptible,
 			Set<OpModeEX.OpModeEXRunStates> runStates
 	) {
 		this.requiredSubsystems = requiredSubsystems;
@@ -58,7 +58,7 @@ public class LambdaCommand implements Command {
 		this.commandMethod = commandMethod;
 		this.commandFinish = commandFinish;
 		this.commandEnd = commandEnd;
-		this.interruptable = interruptable;
+		this.interruptible = interruptible;
 		this.runStates = runStates;
 	}
 
@@ -78,7 +78,7 @@ public class LambdaCommand implements Command {
 				this.commandMethod,
 				this.commandFinish,
 				this.commandEnd,
-				this.interruptable,
+				this.interruptible,
 				this.runStates
 		);
 	}
@@ -96,7 +96,7 @@ public class LambdaCommand implements Command {
 				this.commandMethod,
 				this.commandFinish,
 				this.commandEnd,
-				this.interruptable,
+				this.interruptible,
 				this.runStates
 		);
 	}
@@ -114,7 +114,7 @@ public class LambdaCommand implements Command {
 				this.commandMethod,
 				this.commandFinish,
 				this.commandEnd,
-				this.interruptable,
+				this.interruptible,
 				this.runStates
 		);
 	}
@@ -132,7 +132,7 @@ public class LambdaCommand implements Command {
 				execute,
 				this.commandFinish,
 				this.commandEnd,
-				this.interruptable,
+				this.interruptible,
 				this.runStates
 		);
 	}
@@ -150,7 +150,7 @@ public class LambdaCommand implements Command {
 				this.commandMethod,
 				finish,
 				this.commandEnd,
-				this.interruptable,
+				this.interruptible,
 				this.runStates
 		);
 	}
@@ -168,7 +168,7 @@ public class LambdaCommand implements Command {
 				this.commandMethod,
 				this.commandFinish,
 				end,
-				this.interruptable,
+				this.interruptible,
 				this.runStates
 		);
 	}
@@ -176,17 +176,17 @@ public class LambdaCommand implements Command {
 	/**
 	 * non-mutating, sets if interruption is allowed
 	 *
-	 * @param interruptable if interruption is allowed
+	 * @param interruptible if interruption is allowed
 	 * @return a new LambdaCommand
 	 */
-	public LambdaCommand setInterruptable(boolean interruptable) {
+	public LambdaCommand setInterruptible(boolean interruptible) {
 		return new LambdaCommand(
 				this.requiredSubsystems,
 				this.commandInit,
 				this.commandMethod,
 				this.commandFinish,
 				this.commandEnd,
-				interruptable,
+				interruptible,
 				this.runStates
 		);
 	}
@@ -207,7 +207,7 @@ public class LambdaCommand implements Command {
 				this.commandMethod,
 				this.commandFinish,
 				this.commandEnd,
-				this.interruptable,
+				this.interruptible,
 				this.runStates
 		);
 	}
@@ -226,7 +226,7 @@ public class LambdaCommand implements Command {
 				this.commandMethod,
 				this.commandFinish,
 				this.commandEnd,
-				this.interruptable,
+				this.interruptible,
 				this.runStates
 		);
 	}
@@ -247,7 +247,7 @@ public class LambdaCommand implements Command {
 				this.commandMethod,
 				this.commandFinish,
 				this.commandEnd,
-				this.interruptable,
+				this.interruptible,
 				this.runStates
 		);
 	}
@@ -268,7 +268,7 @@ public class LambdaCommand implements Command {
 				},
 				this.commandFinish,
 				this.commandEnd,
-				this.interruptable,
+				this.interruptible,
 				this.runStates
 		);
 	}
@@ -286,7 +286,7 @@ public class LambdaCommand implements Command {
 				this.commandMethod,
 				() -> this.commandFinish.getAsBoolean() || finish.getAsBoolean(),
 				this.commandEnd,
-				this.interruptable,
+				this.interruptible,
 				this.runStates
 		);
 	}
@@ -307,7 +307,7 @@ public class LambdaCommand implements Command {
 					this.commandEnd.accept(interrupted);
 					end.accept(interrupted);
 				},
-				this.interruptable,
+				this.interruptible,
 				this.runStates
 		);
 	}
@@ -340,7 +340,7 @@ public class LambdaCommand implements Command {
 
 	@Override
 	public final boolean interruptable() {
-		return interruptable;
+		return interruptible;
 	}
 
 	@Override
@@ -362,7 +362,7 @@ public class LambdaCommand implements Command {
 				this.commandMethod,
 				this.commandFinish,
 				this.commandEnd,
-				this.interruptable,
+				this.interruptible,
 				new HashSet<>(Arrays.asList(runStates))
 		);
 	}
@@ -380,7 +380,7 @@ public class LambdaCommand implements Command {
 				this.commandMethod,
 				this.commandFinish,
 				this.commandEnd,
-				this.interruptable,
+				this.interruptible,
 				runStates
 		);
 	}

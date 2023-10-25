@@ -59,7 +59,7 @@ public class Binding<B extends Binding<B>> {
 						.setExecute(toRun::execute)
 						.setEnd(toRun::end)
 						.addFinish(() -> !state())
-						.setInterruptable(toRun.interruptable())
+						.setInterruptible(toRun.interruptable())
 		);
 		return thisAsB;
 	}
@@ -73,7 +73,7 @@ public class Binding<B extends Binding<B>> {
 						.setExecute(toRun::execute)
 						.setEnd(toRun::end)
 						.addFinish(this::state)
-						.setInterruptable(toRun.interruptable())
+						.setInterruptible(toRun.interruptable())
 		);
 		return thisAsB;
 	}
@@ -95,7 +95,7 @@ public class Binding<B extends Binding<B>> {
 						.setExecute(toRun::execute)
 						.setEnd(toRun::end)
 						.addFinish(() -> !toggledOn)
-						.setInterruptable(toRun.interruptable())
+						.setInterruptible(toRun.interruptable())
 		);
 		return thisAsB;
 	}

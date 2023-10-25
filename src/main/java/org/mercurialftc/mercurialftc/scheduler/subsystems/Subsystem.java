@@ -11,7 +11,7 @@ public abstract class Subsystem implements SubsystemInterface {
 	private final Command defaultCommand;
 
 	public Subsystem(@NotNull OpModeEX opModeEX) {
-		this.defaultCommand = new LambdaCommand().setRequirements(this).setInterruptable(true).setExecute(this::defaultCommandExecute).setFinish(() -> false);
+		this.defaultCommand = new LambdaCommand().setRequirements(this).setInterruptible(true).setExecute(this::defaultCommandExecute).setFinish(() -> false);
 		this.opModeEX = opModeEX;
 		opModeEX.getScheduler().registerSubsystem(this);
 		this.defaultCommand.queue();

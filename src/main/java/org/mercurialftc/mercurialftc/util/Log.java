@@ -53,7 +53,7 @@ public class Log {
 	/**
 	 * removes oldest log and shifts all the others down one
 	 *
-	 * @param system     name of the logFIle
+	 * @param system     name of the logFile
 	 * @param storedLogs number of logs to be stored
 	 * @return the path to the log folder
 	 */

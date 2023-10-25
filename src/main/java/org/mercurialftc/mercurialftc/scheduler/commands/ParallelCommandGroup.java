@@ -14,8 +14,7 @@ public class ParallelCommandGroup implements Command {
 	private final Set<SubsystemInterface> requiredSubsystems;
 	private final Set<OpModeEX.OpModeEXRunStates> runStates;
 	private Command currentCommand;
-
-
+	
 	public ParallelCommandGroup() {
 		this.requiredSubsystems = new HashSet<>();
 		this.runStates = new HashSet<>(2);

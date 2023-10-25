@@ -11,7 +11,7 @@ import java.util.function.BooleanSupplier;
  * allows for the powerful binding of commands to boolean conditions, especially those supplied by gamepad inputs and sensors
  */
 @SuppressWarnings("unused")
-public class Binding<B extends Binding<B>> {
+public class Binding<B extends Binding<B>> implements BooleanSupplier {
 	@SuppressWarnings("unchecked")
 	private final B thisAsB = (B) this;
 	private final BooleanSupplier internalInput;
@@ -44,48 +44,49 @@ public class Binding<B extends Binding<B>> {
 
 	public void postLoopUpdate() {
 		previousToggleState = toggledOn;
-		previousState = state();
+		previousState = getAsBoolean();
 	}
 
-	public boolean state() {
+	@Override
+	public boolean getAsBoolean() {
 		return processedInput;
 	}
 
 	public B whileTrue(@NotNull Command toRun) {
-		new Trigger(() -> (state() && state() != previousState),
+		new Trigger(() -> (getAsBoolean() && getAsBoolean() != previousState),
 				new LambdaCommand()
 						.setRequirements(toRun.getRequiredSubsystems())
 						.setInit(toRun::initialise)
 						.setExecute(toRun::execute)
 						.setEnd(toRun::end)
-						.addFinish(() -> !state())
+						.addFinish(() -> !getAsBoolean())
 						.setInterruptible(toRun.interruptable())
 		);
 		return thisAsB;
 	}
 
 	public B whileFalse(@NotNull Command toRun) {
-		new Trigger(() -> (state() && state() != previousState),
+		new Trigger(() -> (getAsBoolean() && getAsBoolean() != previousState),
 				new LambdaCommand()
 						.setRequirements(toRun.getRequiredSubsystems())
 						.setRunStates(toRun.getRunStates())
 						.setInit(toRun::initialise)
 						.setExecute(toRun::execute)
 						.setEnd(toRun::end)
-						.addFinish(this::state)
+						.addFinish(this::getAsBoolean)
 						.setInterruptible(toRun.interruptable())
 		);
 		return thisAsB;
 	}
 
 	public B onTrue(@NotNull Command toRun) {
-		new Trigger(() -> (state() && state() != previousState), toRun);
+		new Trigger(() -> (getAsBoolean() && getAsBoolean() != previousState), toRun);
 		return thisAsB;
 	}
 
 	public B toggle(@NotNull Command toRun) {
 		new Trigger(() -> {
-			state();
+			getAsBoolean();
 			return toggledOn && !previousToggleState;
 		},
 				new LambdaCommand()
@@ -101,10 +102,15 @@ public class Binding<B extends Binding<B>> {
 	}
 
 	public B onFalse(@NotNull Command toRun) {
-		new Trigger(() -> (!state() && state() != previousState), toRun);
+		new Trigger(() -> (!getAsBoolean() && getAsBoolean() != previousState), toRun);
 		return thisAsB;
 	}
 
+	/**
+	 * @param type     the target of this debouncing operation
+	 * @param duration number of seconds
+	 * @return mutated self
+	 */
 	public B debounce(@NotNull DebouncingType type, double duration) {
 		switch (type) {
 			case LEADING_EDGE:

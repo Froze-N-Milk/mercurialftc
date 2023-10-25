@@ -213,7 +213,7 @@ public class DomainBindingTests {
 				testMap.getKey().postLoopUpdate();
 				internalValue = test.getKey();
 				testMap.getKey().preLoopUpdate();
-				Assertions.assertEquals(test.getValue(), testMap.getKey().state(), String.format("expected %b, but got %b for a value of %f", test.getValue(), testMap.getKey().state(), internalValue));
+				Assertions.assertEquals(test.getValue(), testMap.getKey().getAsBoolean(), String.format("expected %b, but got %b for a value of %f", test.getValue(), testMap.getKey().getAsBoolean(), internalValue));
 			}
 		}
 

@@ -15,7 +15,7 @@ plugins {
 apply plugin: 'com.android.library'
 
 group 'org.mercurialftc.mercurialftc'
-version 'v0.04-SNAPSHOT'
+version 'v0.0.0'
 
 android {
     namespace 'org.mercurialftc.mercurialftc'
@@ -32,7 +32,7 @@ android {
         //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 28
         versionCode 1
-        versionName 'v0.04'
+        versionName 'v0.0.0'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.debug
@@ -91,7 +91,7 @@ afterEvaluate {
             release(MavenPublication) {
                 groupId = 'org.mercurialftc'
                 artifactId = 'mercurialftc'
-                version = 'v0.01'
+                version = 'v0.0.0'
 
                 afterEvaluate {
                     from components.release

@@ -74,7 +74,7 @@ public abstract class OpModeEX extends OpMode {
 
 		Telemetry.Item initialising = telemetry.addData("", "");
 		initialising.setCaption("Initialising");
-		initialising.setValue("Robot");
+		initialising.setValue("Preregistration");
 		telemetry.update();
 
 		gamepadEX1 = new GamepadEX(gamepad1);
@@ -103,6 +103,8 @@ public abstract class OpModeEX extends OpMode {
 			initialisedSubsystems.setValue(initialisationSequencer);
 			telemetry.update();
 		}
+		initialising.setValue("Robot");
+		telemetry.update();
 
 		initEX();
 		registerBindings();

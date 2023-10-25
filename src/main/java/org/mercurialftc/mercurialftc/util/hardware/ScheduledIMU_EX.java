@@ -5,10 +5,10 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.mercurialftc.mercurialftc.scheduler.OpModeEX;
 import org.mercurialftc.mercurialftc.scheduler.subsystems.Subsystem;
-import org.mercurialftc.mercurialftc.silversurfer.geometry.Angle;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.Angle;
 import org.mercurialftc.mercurialftc.silversurfer.tracker.HeadingSupplier;
 import org.mercurialftc.mercurialftc.scheduler.Scheduler;
-import org.mercurialftc.mercurialftc.silversurfer.geometry.AngleRadians;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.AngleRadians;
 
 /**
  * <h3>A {@link Subsystem} implementation of {@link IMU_EX}</h3>
@@ -21,6 +21,7 @@ public class ScheduledIMU_EX extends Subsystem implements HeadingSupplier {
 	private final AngleUnit angleUnit;
 	private final String imuName;
 	private IMU_EX imuEX;
+
 	public ScheduledIMU_EX(OpModeEX opModeEX, String imuName, IMU.Parameters parameters, AngleUnit angleUnit) {
 		super(opModeEX);
 		this.parameters = parameters;

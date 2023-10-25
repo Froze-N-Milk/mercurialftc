@@ -1,8 +1,9 @@
 package org.mercurialftc.mercurialftc.util.hardware;
 
-import org.mercurialftc.mercurialftc.silversurfer.geometry.Angle;
-import org.mercurialftc.mercurialftc.silversurfer.geometry.AngleDegrees;
-import org.mercurialftc.mercurialftc.silversurfer.geometry.AngleRadians;
+import org.jetbrains.annotations.NotNull;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.Angle;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.AngleDegrees;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.AngleRadians;
 import org.mercurialftc.mercurialftc.silversurfer.tracker.HeadingSupplier;
 import com.qualcomm.robotcore.hardware.IMU;
 
@@ -25,11 +26,12 @@ public class IMU_EX implements IMU, HeadingSupplier {
 	private final Angle offsetRoll;
 	private final Angle offsetYaw;
 	private final AngleUnit angleUnit;
-	private IMU imu;
-	private Angle pitch;
-	private Angle roll;
-	private Angle yaw;
+	private final IMU imu;
+	private final Angle pitch;
+	private final Angle roll;
+	private final Angle yaw;
 	private long acquisitionTime;
+
 	/**
 	 * @param angleUnit the angle unit that this class should return all values in by default
 	 */
@@ -226,7 +228,7 @@ public class IMU_EX implements IMU, HeadingSupplier {
 
 	/**
 	 * Resets the device's configuration to that which is expected at the beginning of an OpMode.
-	 * For example, motors will reset the their direction to 'forward'.
+	 * For example, motors will reset the direction to 'forward'.
 	 */
 	@Override
 	public void resetDeviceConfigurationForOpMode() {
@@ -266,8 +268,8 @@ public class IMU_EX implements IMU, HeadingSupplier {
 	}
 
 	@Override
-	public void resetHeading(Angle heading) {
+	public void resetHeading(@NotNull Angle heading) {
 		resetHeading();
-		offsetYaw.setTheta(offsetYaw.getTheta() + heading.getRadians());
+		offsetYaw.setTheta(offsetYaw.getTheta() - heading.getRadians());
 	}
 }

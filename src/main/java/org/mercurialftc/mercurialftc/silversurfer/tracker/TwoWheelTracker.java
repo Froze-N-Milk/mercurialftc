@@ -1,22 +1,28 @@
 package org.mercurialftc.mercurialftc.silversurfer.tracker;
 
+import org.jetbrains.annotations.NotNull;
 import org.mercurialftc.mercurialftc.silversurfer.encoderticksconverter.Units;
-import org.mercurialftc.mercurialftc.silversurfer.geometry.Angle;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.Angle;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 import org.mercurialftc.mercurialftc.util.hardware.Encoder;
 
-public class TwoWheelTracker extends Tracker {
+@SuppressWarnings("unused")
+public class TwoWheelTracker extends WheeledTracker {
 	private final Encoder left, middle;
 	private final HeadingSupplier headingSupplier;
-	private Angle currentTheta;
-	private double deltaLeft, deltaMiddle, deltaTheta, previousTheta;
+	private Angle currentTheta, previousTheta;
+	private double deltaLeft, deltaMiddle, deltaTheta;
 
-	public TwoWheelTracker(Pose2D initialPose, TrackerConstants.TwoWheelTrackerConstants trackerConstants, Encoder left, Encoder middle, HeadingSupplier headingSupplier) {
+	public TwoWheelTracker(Pose2D initialPose, WheeledTrackerConstants.TwoWheeledTrackerConstants trackerConstants, Encoder left, Encoder middle, @NotNull HeadingSupplier headingSupplier) {
 		super(initialPose, trackerConstants);
 		this.left = left;
 		this.middle = middle;
 		this.headingSupplier = headingSupplier;
-		previousTheta = headingSupplier.getHeading().getRadians();
+		this.currentTheta = initialPose.getTheta();
+		this.previousTheta = initialPose.getTheta();
+		setInsistFrequency(1);
+		// sets the imu heading to the initial pose heading
+		resetHeading(initialPose.getTheta());
 	}
 
 	/**
@@ -28,31 +34,31 @@ public class TwoWheelTracker extends Tracker {
 		middle.updateVelocity();
 		headingSupplier.updateHeading();
 
-		TrackerConstants trackerConstants = getTrackerConstants();
+		WheeledTrackerConstants trackerConstants = getTrackerConstants();
 
 		currentTheta = headingSupplier.getHeading();
 
 		deltaLeft = trackerConstants.getLeftTicksConverter().toUnits(left.getVelocityDataPacket().getDeltaPosition(), Units.MILLIMETER);
 		deltaMiddle = trackerConstants.getMiddleTicksConverter().toUnits(middle.getVelocityDataPacket().getDeltaPosition(), Units.MILLIMETER);
-		deltaTheta = currentTheta.getRadians() - previousTheta;
+		deltaTheta = previousTheta.findShortestDistance(currentTheta);
 
-		previousTheta = headingSupplier.getHeading().getRadians();
+		previousTheta = headingSupplier.getHeading();
 	}
 
 	/**
 	 * @return the change in center displacement in millimeters
 	 */
 	@Override
-	protected double findDeltaXc() {
-		return deltaLeft;
+	protected double findDeltaY() {
+		return deltaLeft + (getTrackerConstants().getCenterOfRotationOffset().getY() * findDeltaTheta());
 	}
 
 	/**
 	 * @return the change in horizontal displacement with correction for forward offset in millimeters
 	 */
 	@Override
-	protected double findDeltaXp() {
-		return deltaMiddle - (getTrackerConstants().getForwardOffset() * findDeltaTheta());
+	protected double findDeltaX() {
+		return deltaMiddle + (getTrackerConstants().getCenterOfRotationOffset().getX() * findDeltaTheta());
 	}
 
 	@Override
@@ -60,6 +66,7 @@ public class TwoWheelTracker extends Tracker {
 		super.reset();
 		left.reset();
 		middle.reset();
+		resetHeading(super.getInitialPose2D().getTheta());
 	}
 
 	/**

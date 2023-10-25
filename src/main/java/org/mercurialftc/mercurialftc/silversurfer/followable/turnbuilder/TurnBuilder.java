@@ -1,14 +1,15 @@
 package org.mercurialftc.mercurialftc.silversurfer.followable.turnbuilder;
 
+import org.jetbrains.annotations.NotNull;
 import org.mercurialftc.mercurialftc.scheduler.commands.Command;
 import org.mercurialftc.mercurialftc.silversurfer.followable.Followable;
 import org.mercurialftc.mercurialftc.silversurfer.followable.FollowableBuilder;
-import org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants.MecanumMotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.followable.markers.Marker;
 import org.mercurialftc.mercurialftc.silversurfer.followable.markers.MarkerBuilder;
-import org.mercurialftc.mercurialftc.silversurfer.geometry.AngleRadians;
+import org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants.MecanumMotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Vector2D;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.AngleRadians;
 
 import java.util.ArrayList;
 
@@ -72,47 +73,113 @@ public class TurnBuilder extends FollowableBuilder {
 		return result;
 	}
 
+	@NotNull
 	private Followable.Output[] profile() {
 		Followable.Output[] outputs = new Followable.Output[segmentBreakpoints[segmentBreakpoints.length - 1]];
-		AngleRadians previousEstimatedRotationalPosition = segments.get(0).getPreviousPose().getTheta();
-		double previousRotationalVelocity = 0;
-		double previousDeltaT = 0;
-		double time = 0;
 
-		for (int i = 0; i < segmentBreakpoints[segmentBreakpoints.length - 1]; i++) {
+		TurnSegment previousSegment = segments.get(0);
+
+		outputs[0] = new Followable.Output(
+				Vector2D.fromPolar(0, 0), // the velocity output
+				0,
+				0,
+				previousSegment.getPreviousPose(),
+				previousSegment.getDestinationPose()
+		);
+
+		double previousVelocity = 0;
+
+		for (int i = 1; i < segmentBreakpoints[segmentBreakpoints.length - 1]; i++) {
 			int segmentIndex = getSegmentIndexFromOutputIndex(i);
 			TurnSegment segment = segments.get(segmentIndex);
 
 			MecanumMotionConstants motionConstants = getMotionConstantsArray().get(segmentIndex);
 
-			AngleRadians targetRotationalPosition = segment.getDestinationPose().getTheta();
-			AngleRadians estimatedRotationalPosition = previousEstimatedRotationalPosition.add(previousRotationalVelocity * previousDeltaT).toAngleRadians();
+			double vMax = motionConstants.getMaxRotationalVelocity();
 
-			double rotationalError = estimatedRotationalPosition.findShortestDistance(targetRotationalPosition); //shortest distance from estimated current position to target position
+			double vAccelerationLimited = Math.sqrt(previousVelocity * previousVelocity + 2 * motionConstants.getMaxRotationalAcceleration() * segmentOutputSizes[segmentIndex]);
 
-			double rotationalBreakDistance = (previousRotationalVelocity * previousRotationalVelocity) / (2 * motionConstants.getMaxRotationalAcceleration());
+			double finalVelocityConstraint = Math.min(vAccelerationLimited, vMax);
 
-			int rotationalBreakControl = (int) Math.signum(Math.abs(rotationalError) - rotationalBreakDistance);
+			int previousBreakPoint = 0;
+			if (segmentIndex > 0) previousBreakPoint = segmentBreakpoints[segmentIndex - 1];
+			int numberOfSubdivisions = i - previousBreakPoint;
 
-			// todo should do for now, possibly need to implement some scaling for the acceleration to dampen or smth
-			double rotationalVelocity = Math.sqrt((previousRotationalVelocity * previousRotationalVelocity) + 2 * motionConstants.getMaxRotationalAcceleration() * Math.signum(rotationalError) * rotationalBreakControl * segmentOutputSizes[segmentIndex]); // todo should do for now, possibly need to implement some scaling for the acceleration to dampen or smth
-			rotationalVelocity = Math.min(rotationalVelocity, motionConstants.getMaxRotationalVelocity());
+			Pose2D position = segment.getPreviousPose().add(0, 0, new AngleRadians(segmentOutputSizes[segmentIndex] * numberOfSubdivisions));
+
+			outputs[i] = new Followable.Output(
+					Vector2D.fromPolar(0, 0), // the velocity output
+					finalVelocityConstraint,
+					0,
+					position,
+					segment.getDestinationPose()
+			);
+
+			previousVelocity = finalVelocityConstraint;
+		}
+
+//		do a backward pass for accelerational constraints
+
+//		set the final output to be back at 0
+		outputs[outputs.length - 1] = new Followable.Output(
+				new Vector2D(), // the velocity output
+				0,
+				0,
+				segments.get(segments.size() - 1).getDestinationPose(),
+				segments.get(segments.size() - 1).getDestinationPose()
+		);
+
+		previousVelocity = 0;
+
+		for (int i = segmentBreakpoints[segmentBreakpoints.length - 1] - 2; i >= 0; i--) {
+			int segmentIndex = getSegmentIndexFromOutputIndex(i);
+			TurnSegment segment = segments.get(segmentIndex);
+
+			MecanumMotionConstants motionConstants = getMotionConstantsArray().get(segmentIndex);
+
+			double rotationalVelocity = outputs[i].getRotationalVelocity();
+
+			double vMaxAccelerationLimited = Math.sqrt(previousVelocity * previousVelocity + 2 * motionConstants.getMaxRotationalVelocity() * segmentOutputSizes[segmentIndex]);
+
+			double finalVelocityConstraint = Math.min(rotationalVelocity, vMaxAccelerationLimited);
+
+			double errorSignum = Math.signum(segment.getPreviousPose().getTheta().findShortestDistance(segment.getDestinationPose().getTheta()));
+
+			outputs[i] = new Followable.Output(
+					outputs[i].getTranslationVector(),
+					finalVelocityConstraint * errorSignum,
+					outputs[i].getCallbackTime(),
+					outputs[i].getPosition(),
+					outputs[i].getDestination()
+			);
+
+			previousVelocity = finalVelocityConstraint;
+		}
+
+		// forward pass to calculate times
+
+		previousVelocity = outputs[0].getRotationalVelocity();
+		double time = 0;
+
+		for (int i = 1; i < segmentBreakpoints[segmentBreakpoints.length - 1]; i++) {
+			int segmentIndex = getSegmentIndexFromOutputIndex(i);
+
+			double velocity = outputs[i].getRotationalVelocity();
 
 			// ∆t = 2∆s / (v_i + v_{i−1})
-			double deltaT = (2 * segmentOutputSizes[segmentIndex]) / (previousRotationalVelocity + rotationalVelocity);
+			double deltaT = (2 * segmentOutputSizes[segmentIndex]) / (Math.abs(velocity) + Math.abs(previousVelocity));
 
 			time += deltaT;
 
 			outputs[i] = new Followable.Output(
-					new Vector2D(0, 0),
-					rotationalVelocity,
+					outputs[i].getTranslationVector(),
+					outputs[i].getRotationalVelocity(),
 					time,
-					new Pose2D(segment.getDestinationPose().getX(), segment.getDestinationPose().getY(), estimatedRotationalPosition),
-					segment.getDestinationPose()
+					outputs[i].getPosition(),
+					outputs[i].getDestination()
 			);
 
-			previousRotationalVelocity = rotationalVelocity;
-			previousDeltaT = deltaT;
+			previousVelocity = velocity;
 		}
 
 		return outputs;

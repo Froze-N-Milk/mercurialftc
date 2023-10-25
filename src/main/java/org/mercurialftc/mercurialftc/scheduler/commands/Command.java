@@ -1,42 +1,50 @@
 package org.mercurialftc.mercurialftc.scheduler.commands;
 
+import org.mercurialftc.mercurialftc.scheduler.OpModeEX;
 import org.mercurialftc.mercurialftc.scheduler.Scheduler;
 import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * The low-level command interface to use
- */
-public abstract class Command implements CommandSignature {
-	private final Set<SubsystemInterface> requiredSubsystems;
+public interface Command {
+	/**
+	 * Gets run once when a command is first scheduled
+	 */
+	void initialise();
 
 	/**
-	 * constructs a new command with the subsystems required
-	 *
-	 * @param requiredSubsystems requirements for this command
+	 * Gets run once per loop until {@link #finished()}
 	 */
-	protected Command(Set<SubsystemInterface> requiredSubsystems) {
-		this.requiredSubsystems = requiredSubsystems;
-	}
+	void execute();
 
 	/**
-	 * constructs a new command with the subsystems required
-	 *
-	 * @param requiredSubsystems requirements for this command
+	 * Gets run once when {@link #finished()} or when interrupted
 	 */
-	public Command(SubsystemInterface... requiredSubsystems) {
-		this.requiredSubsystems = new HashSet<>(Arrays.asList(requiredSubsystems));
+	void end(boolean interrupted);
+
+	/**
+	 * the supplier for the natural end condition of the command
+	 *
+	 * @return true when the command should finish
+	 */
+	boolean finished();
+
+	/**
+	 * @return the set of subsystems required by this command
+	 */
+	Set<SubsystemInterface> getRequiredSubsystems();
+
+	/**
+	 * @return the set of OpMode run states during which this command is allowed to run
+	 */
+	Set<OpModeEX.OpModeEXRunStates> getRunStates();
+
+	default boolean interruptable() {
+		return true;
 	}
 
-	public void queue() {
+	default void queue() {
 		Scheduler.getSchedulerInstance().scheduleCommand(this);
-	}
-
-	@Override
-	public final Set<SubsystemInterface> getRequiredSubsystems() {
-		return requiredSubsystems;
 	}
 }

@@ -1,15 +1,17 @@
 package org.mercurialftc.mercurialftc.scheduler;
 
-import android.os.Environment;
+import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.jetbrains.annotations.NotNull;
-import org.mercurialftc.mercurialftc.scheduler.commands.CommandSignature;
+import org.mercurialftc.mercurialftc.scheduler.bindings.Binding;
+import org.mercurialftc.mercurialftc.scheduler.commands.Command;
 import org.mercurialftc.mercurialftc.scheduler.configoptions.ConfigOptionsManager;
 import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
-import org.mercurialftc.mercurialftc.scheduler.triggers.Trigger;
+import org.mercurialftc.mercurialftc.scheduler.bindings.Trigger;
 
 import java.io.*;
 import java.util.*;
 
+@SuppressWarnings("unused")
 public class Scheduler {
 	public static Scheduler scheduler;
 
@@ -17,11 +19,12 @@ public class Scheduler {
 	private static ConfigOptionsManager configOptionsManager;
 	private final LinkedHashSet<SubsystemInterface> subsystems; // currently registered Subsystems
 	private final LinkedHashSet<Trigger> triggers;
-	private final Set<CommandSignature> composedCommands = Collections.newSetFromMap(new WeakHashMap<>());
-	private final LinkedHashSet<CommandSignature> commands; // currently scheduled Commands
-	private final ArrayList<CommandSignature> commandsToCancel; // commands to be cancelled this loop
-	private final LinkedHashSet<CommandSignature> commandsToSchedule; // commands to be scheduled this loop;
-	private final LinkedHashMap<SubsystemInterface, CommandSignature> requirements; // the mapping of required Subsystems to commands
+	private final LinkedHashSet<Binding> bindings;
+	private final Set<Command> composedCommands = Collections.newSetFromMap(new WeakHashMap<>());
+	private final LinkedHashSet<Command> commands; // currently scheduled Commands
+	private final ArrayList<Command> commandsToCancel; // commands to be cancelled this loop
+	private final LinkedHashSet<Command> commandsToSchedule; // commands to be scheduled this loop;
+	private final LinkedHashMap<SubsystemInterface, Command> requirements; // the mapping of required Subsystems to commands
 	private final HashMap<String, SubsystemInterface> storedSubsystems;
 	private OpModeEX.OpModeEXRunStates runState;
 
@@ -31,6 +34,7 @@ public class Scheduler {
 		this.commandsToCancel = new ArrayList<>();
 		this.commandsToSchedule = new LinkedHashSet<>();
 		this.requirements = new LinkedHashMap<>();
+		this.bindings = new LinkedHashSet<>();
 		this.triggers = new LinkedHashSet<>();
 		this.storedSubsystems = new HashMap<>();
 	}
@@ -63,8 +67,7 @@ public class Scheduler {
 			return;
 		}
 
-		String directoryPath = Environment.getExternalStorageDirectory().getPath() + "/FIRST/mercurialftc/";
-		File configOptionsFile = new File(directoryPath, "configOptions.toml");
+		File configOptionsFile = new File(AppUtil.FIRST_FOLDER, "mercurialftc/configOptions.toml");
 
 		try {
 			/*
@@ -109,7 +112,7 @@ public class Scheduler {
 		return triggers;
 	}
 
-	public LinkedHashSet<CommandSignature> getCommands() {
+	public LinkedHashSet<Command> getCommands() {
 		return commands;
 	}
 
@@ -123,11 +126,11 @@ public class Scheduler {
 		}
 	}
 
-	public void scheduleCommand(CommandSignature command) {
+	public void scheduleCommand(Command command) {
 		commandsToSchedule.add(command);
 	}
 
-	private void cancelCommand(CommandSignature command, boolean interrupted) {
+	private void cancelCommand(Command command, boolean interrupted) {
 		if (command == null) return;
 		if (!isScheduled(command)) return;
 		command.end(interrupted);
@@ -137,7 +140,11 @@ public class Scheduler {
 		commands.remove(command);
 	}
 
-	private void initialiseCommand(CommandSignature command) {
+	private void initialiseCommand(Command command) {
+		if (command == null) return;
+		if (isScheduled(command)) return;
+		if (!command.getRunStates().contains(runState)) return;
+
 		Set<SubsystemInterface> commandRequirements = command.getRequiredSubsystems();
 
 		// if the subsystems required by the command are not required, register it
@@ -147,7 +154,7 @@ public class Scheduler {
 		} else {
 			// for each subsystem required, check the command currently requiring it, and make sure that they can all be overwritten
 			for (SubsystemInterface subsystem : commandRequirements) {
-				CommandSignature requirer = requirements.get(subsystem);
+				Command requirer = requirements.get(subsystem);
 				if (requirer != null && !requirer.interruptable()) {
 					return;
 				}
@@ -156,7 +163,7 @@ public class Scheduler {
 
 		// cancel all required commands
 		for (SubsystemInterface subsystem : commandRequirements) {
-			CommandSignature requirer = requirements.get(subsystem);
+			Command requirer = requirements.get(subsystem);
 			if (requirer != null) {
 				commandsToCancel.add(requirer);
 			}
@@ -165,10 +172,7 @@ public class Scheduler {
 		initialiseCommand(command, commandRequirements);
 	}
 
-	private void initialiseCommand(CommandSignature command, @NotNull Set<SubsystemInterface> commandRequirements) {
-		if (command == null) return;
-		if (isScheduled(command)) return;
-		if (!command.getRunStates().contains(runState)) return;
+	private void initialiseCommand(Command command, @NotNull Set<SubsystemInterface> commandRequirements) {
 		commands.add(command);
 		for (SubsystemInterface requirement : commandRequirements) {
 			requirements.put(requirement, command);
@@ -176,18 +180,29 @@ public class Scheduler {
 		command.initialise();
 	}
 
-	public void pollCommands(OpModeEX.OpModeEXRunStates runState) {
+	public void setRunState(OpModeEX.OpModeEXRunStates runState) {
 		this.runState = runState;
-		// checks to see if any commands are finished, if so, queues them to be canceled
-		for (CommandSignature command : commands) {
+	}
+
+	public void pollCommands() {
+		// checks to see if any commands are finished, if so, cancels them
+		for (Command command : commands) {
 			if (command.finished()) {
 				cancelCommand(command, false);
 			}
 			// checks to see if we have exited the valid run states for this command, if so, cancels and interrupts the command.
-			if (!command.getRunStates().contains(runState)) {
+			else if (!command.getRunStates().contains(runState)) {
 				cancelCommand(command, true);
 			}
 		}
+
+		// initialises all the commands that are due to be scheduled
+		for (Command command : commandsToSchedule) {
+			initialiseCommand(command);
+		}
+
+		// empties the queue
+		commandsToSchedule.clear();
 
 		// checks if any subsystems are not being used by any commands, if so, schedules the default command for that subsystem
 		for (SubsystemInterface subsystem : subsystems) {
@@ -197,23 +212,32 @@ public class Scheduler {
 		}
 
 		// initialises all the commands that are due to be scheduled
-		for (CommandSignature command : commandsToSchedule) {
+		for (Command command : commandsToSchedule) {
 			initialiseCommand(command);
 		}
+
 		// empties the queue
 		commandsToSchedule.clear();
 
 		// cancels all cancel queued commands
-		for (CommandSignature command : commandsToCancel) {
+		for (Command command : commandsToCancel) {
 			cancelCommand(command, true);
 		}
 		// empties the queue
 		commandsToCancel.clear();
 
 		// runs the commands
-		for (CommandSignature command : commands) {
+		for (Command command : commands) {
 			command.execute();
 		}
+	}
+
+	public void registerBinding(Binding binding) {
+		bindings.add(binding);
+	}
+
+	public void deregisterBinding(Binding binding) {
+		bindings.remove(binding);
 	}
 
 	public void registerTrigger(Trigger trigger) {
@@ -227,6 +251,18 @@ public class Scheduler {
 	public void pollTriggers() {
 		for (Trigger trigger : triggers) {
 			trigger.poll();
+		}
+	}
+
+	public void preLoopUpdateBindings() {
+		for (Binding binding : bindings) {
+			binding.preLoopUpdate();
+		}
+	}
+
+	public void postLoopUpdateBindings() {
+		for (Binding binding : bindings) {
+			binding.postLoopUpdate();
 		}
 	}
 
@@ -257,10 +293,9 @@ public class Scheduler {
 	 * @param commands the commands to register
 	 * @throws IllegalArgumentException if the given commands have already been composed.
 	 */
-	public void registerComposedCommands(CommandSignature... commands) {
-		Set<CommandSignature> commandSet = new HashSet<>(Arrays.asList(commands));
-		requireNotComposed(commandSet);
-		composedCommands.addAll(commandSet);
+	public void registerComposedCommands(Command... commands) {
+		Set<Command> commandSet = new HashSet<>(Arrays.asList(commands));
+		registerComposedCommands(commandSet);
 	}
 
 	/**
@@ -270,8 +305,20 @@ public class Scheduler {
 	 * @param commands the commands to register
 	 * @throws IllegalArgumentException if the given commands have already been composed.
 	 */
-	public void registerComposedCommands(ArrayList<CommandSignature> commands) {
-		Set<CommandSignature> commandSet = new HashSet<>(commands);
+	public void registerComposedCommands(Set<Command> commands) {
+		requireNotComposed(commands);
+		composedCommands.addAll(commands);
+	}
+
+	/**
+	 * Register commands as composed. An exception will be thrown if these commands are scheduled
+	 * directly or added to a composition.
+	 *
+	 * @param commands the commands to register
+	 * @throws IllegalArgumentException if the given commands have already been composed.
+	 */
+	public void registerComposedCommands(List<Command> commands) {
+		Set<Command> commandSet = new HashSet<>(commands);
 		requireNotComposed(commandSet);
 		composedCommands.addAll(commandSet);
 	}
@@ -282,7 +329,7 @@ public class Scheduler {
 	 * @param command the command to check
 	 * @return true if it is scheduled
 	 */
-	public boolean isScheduled(CommandSignature command) {
+	public boolean isScheduled(Command command) {
 		return commands.contains(command);
 	}
 
@@ -292,7 +339,7 @@ public class Scheduler {
 	 * @param command The command to check
 	 * @throws IllegalArgumentException if the given commands have already been composed.
 	 */
-	public void requireNotComposed(CommandSignature command) {
+	public void requireNotComposed(Command command) {
 		if (composedCommands.contains(command)) {
 			throw new IllegalArgumentException(
 					"Commands that have been composed may not be added to another composition or scheduled "
@@ -306,7 +353,7 @@ public class Scheduler {
 	 * @param commands The commands to check
 	 * @throws IllegalArgumentException if the given commands have already been composed.
 	 */
-	public void requireNotComposed(Collection<CommandSignature> commands) {
+	public void requireNotComposed(Collection<Command> commands) {
 		if (!Collections.disjoint(commands, getComposedCommands())) {
 			throw new IllegalArgumentException(
 					"Commands that have been composed may not be added to another composition or scheduled "
@@ -320,11 +367,11 @@ public class Scheduler {
 	 * @param command The command to check
 	 * @return true if composed
 	 */
-	public boolean isComposed(CommandSignature command) {
+	public boolean isComposed(Command command) {
 		return getComposedCommands().contains(command);
 	}
 
-	public Set<CommandSignature> getComposedCommands() {
+	public Set<Command> getComposedCommands() {
 		return composedCommands;
 	}
 

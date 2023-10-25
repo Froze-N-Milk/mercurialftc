@@ -7,6 +7,7 @@ import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 
 import java.util.ArrayList;
 
+@SuppressWarnings("unused")
 public abstract class FollowableBuilder {
 	private final ArrayList<MecanumMotionConstants> motionConstantsArray;
 	private MecanumMotionConstants motionConstants; // the motion constants used to build all current segments
@@ -59,10 +60,10 @@ public abstract class FollowableBuilder {
 	}
 
 	/**
-	 * todo fill in
+	 * sets a callback command to occur with a timed offset reference to the end of the instruction before it.
 	 *
-	 * @param offset
-	 * @param markerReached
+	 * @param offset        a relative offset, in seconds
+	 * @param markerReached the command to run
 	 */
 	protected abstract void addOffsetCommandMarker(double offset, Marker.MarkerType markerType, Command markerReached);
 }

@@ -1,5 +1,6 @@
 package org.mercurialftc.mercurialftc.silversurfer.followable.linebuilder;
 
+import org.jetbrains.annotations.NotNull;
 import org.mercurialftc.mercurialftc.silversurfer.followable.Followable;
 import org.mercurialftc.mercurialftc.silversurfer.followable.markers.Marker;
 import org.mercurialftc.mercurialftc.silversurfer.followable.markers.MarkerBuilder;
@@ -9,7 +10,7 @@ import java.util.ArrayList;
 public class FollowableLine extends Followable {
 	private final LineBuilder lineBuilder;
 
-	protected FollowableLine(Output[] outputs, ArrayList<MarkerBuilder> unfinishedMarkers, LineBuilder lineBuilder) {
+	protected FollowableLine(Output[] outputs, @NotNull ArrayList<MarkerBuilder> unfinishedMarkers, LineBuilder lineBuilder) {
 		setOutputs(outputs);
 
 		Marker[] markers = new Marker[unfinishedMarkers.size()];

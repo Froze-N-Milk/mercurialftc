@@ -8,24 +8,28 @@ import org.mercurialftc.mercurialftc.silversurfer.followable.curvebuilder.curve.
 import org.mercurialftc.mercurialftc.silversurfer.followable.markers.Marker;
 import org.mercurialftc.mercurialftc.silversurfer.followable.markers.MarkerBuilder;
 import org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants.MecanumMotionConstants;
-import org.mercurialftc.mercurialftc.silversurfer.geometry.AngleRadians;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.AngleRadians;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Vector2D;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.obstaclemap.ObstacleMap;
 
 import java.util.ArrayList;
 
 public class CurveBuilder extends FollowableBuilder {
-	private ArrayList<CurveSegment> segments;
-	private ArrayList<MarkerBuilder> unfinishedMarkers;
-
+	private final ArrayList<CurveSegment> segments;
+	private final ArrayList<MarkerBuilder> unfinishedMarkers;
+	private final MecanumMotionConstants absoluteMotionConstants;
+	private final ObstacleMap obstacleMap;
 	private Vector2D[] tangents;
 	private Vector2D[] outputTangents;
 	private Vector2D[] secondDerivatives;
 
-	public CurveBuilder(MecanumMotionConstants motionConstants) {
+	public CurveBuilder(MecanumMotionConstants motionConstants, MecanumMotionConstants absoluteMotionConstants, ObstacleMap obstacleMap) {
 		super(motionConstants);
+		this.obstacleMap = obstacleMap;
 		this.segments = new ArrayList<>();
 		this.unfinishedMarkers = new ArrayList<>();
+		this.absoluteMotionConstants = absoluteMotionConstants;
 	}
 
 	public void addSegment(Pose2D previousPose, Pose2D destinationPose) {
@@ -45,7 +49,7 @@ public class CurveBuilder extends FollowableBuilder {
 	private void firstHeuristic() {
 		tangents = new Vector2D[segments.size() + 1]; // there needs to be a tangent for each point, there are 1 more points than there are segments
 		Vector2D tempVector = segments.get(0).getTranslationalVector();
-		tangents[0] = Vector2D.fromPolar(0.5 * tempVector.getMagnitude(), tempVector.getHeading().getRadians());
+		tangents[0] = Vector2D.fromPolar(tempVector.getMagnitude(), tempVector.getHeading().getRadians());
 
 		for (int i = 1; i < tangents.length - 1; i++) {
 			Vector2D BA = segments.get(i - 1).getInverseTranslationalVector();
@@ -56,13 +60,13 @@ public class CurveBuilder extends FollowableBuilder {
 			theta = theta.add(BA.getHeading()).toAngleRadians();
 			theta = theta.add((Math.PI / 2)).toAngleRadians();
 
-			double magnitude = 0.5 * Math.min(BA.getMagnitude(), BC.getMagnitude());
+			double magnitude = Math.min(BA.getMagnitude(), BC.getMagnitude());
 
 			tangents[i] = Vector2D.fromPolar(magnitude, theta);
 		}
 
 		tempVector = segments.get(segments.size() - 1).getTranslationalVector();
-		tangents[tangents.length - 1] = Vector2D.fromPolar(0.5 * tempVector.getMagnitude(), tempVector.getHeading().getRadians());
+		tangents[tangents.length - 1] = Vector2D.fromPolar(tempVector.getMagnitude(), tempVector.getHeading().getRadians());
 	}
 
 	private void secondHeuristic() {
@@ -108,7 +112,7 @@ public class CurveBuilder extends FollowableBuilder {
 		// do the last one
 		// 6A + 2tA + 4tB − 6B
 
-		tempA = segments.get(segments.size() - 2).getStartPose();
+		tempA = segments.get(segments.size() - 1).getStartPose();
 		tempB = segments.get(segments.size() - 1).getEndPose();
 
 		temp_tA = outputTangents[tangents.length - 2];
@@ -121,21 +125,25 @@ public class CurveBuilder extends FollowableBuilder {
 	}
 
 	public Followable build() {
-		outputTangents = new Vector2D[tangents.length];
+		firstHeuristic();
 
+		outputTangents = new Vector2D[tangents.length];
 		for (int i = 0; i < tangents.length; i++) {
-			elongateTangents(0.5, i);
+			elongateTangents(0.25, i);
 		}
+		secondHeuristic();
 
 		return new FollowableCurve(
 				this,
 				getMotionConstantsArray(),
-				unfinishedMarkers
+				unfinishedMarkers,
+				absoluteMotionConstants,
+				obstacleMap
 		);
 	}
 
 	public QuinticBezierCurve[] getResult() {
-		firstHeuristic();
+//		firstHeuristic(); does not need to be re-run
 		secondHeuristic();
 
 		QuinticBezierCurve[] result = new QuinticBezierCurve[segments.size()];

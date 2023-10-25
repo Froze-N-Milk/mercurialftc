@@ -5,10 +5,11 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
-import org.mercurialftc.mercurialftc.scheduler.triggers.gamepadex.GamepadEX;
+import org.mercurialftc.mercurialftc.scheduler.bindings.gamepadex.GamepadEX;
 
 import java.util.List;
 
+@SuppressWarnings("unused")
 public abstract class OpModeEX extends OpMode {
 	private GamepadEX
 			gamepadEX1,
@@ -55,10 +56,10 @@ public abstract class OpModeEX extends OpMode {
 	public abstract void initEX();
 
 	/**
-	 * registers triggers after the subsystem and regular init code,
+	 * registers bindings after the subsystem and regular init code,
 	 * useful for organisation of your OpModeEX, but functionally no different to initialising them at the end of {@link #initEX()}
 	 */
-	public abstract void registerTriggers();
+	public abstract void registerBindings();
 
 	/**
 	 * should not be called, for internal use only, ensures that the current version of the scheduler is correct
@@ -73,7 +74,7 @@ public abstract class OpModeEX extends OpMode {
 
 		Telemetry.Item initialising = telemetry.addData("", "");
 		initialising.setCaption("Initialising");
-		initialising.setValue("Robot");
+		initialising.setValue("Preregistration");
 		telemetry.update();
 
 		gamepadEX1 = new GamepadEX(gamepad1);
@@ -102,16 +103,18 @@ public abstract class OpModeEX extends OpMode {
 			initialisedSubsystems.setValue(initialisationSequencer);
 			telemetry.update();
 		}
+		initialising.setValue("Robot");
+		telemetry.update();
 
 		initEX();
-		registerTriggers();
+		registerBindings();
 
 		initialisationSequencer.append("\nRobot");
 		initialisedSubsystems.setValue(initialisationSequencer);
 		telemetry.update();
 
 		initialising.setValue("");
-
+		scheduler.setRunState(OpModeEXRunStates.INIT_LOOP);
 	}
 
 	public abstract void init_loopEX();
@@ -124,12 +127,12 @@ public abstract class OpModeEX extends OpMode {
 		for (LynxModule module : allHubs) {
 			module.clearBulkCache();
 		}
+		scheduler.preLoopUpdateBindings();
 		scheduler.pollSubsystemsPeriodic();
 		scheduler.pollTriggers();
 		init_loopEX();
-		scheduler.pollCommands(OpModeEXRunStates.INIT_LOOP);
-		gamepadEX1.endLoopUpdate();
-		gamepadEX2.endLoopUpdate();
+		scheduler.pollCommands();
+		scheduler.postLoopUpdateBindings();
 		telemetry.update();
 	}
 
@@ -142,6 +145,7 @@ public abstract class OpModeEX extends OpMode {
 	public final void start() {
 		telemetry.clear();
 		elapsedTime.reset();
+		scheduler.setRunState(OpModeEXRunStates.LOOP);
 		startEX();
 	}
 
@@ -155,12 +159,12 @@ public abstract class OpModeEX extends OpMode {
 		for (LynxModule module : allHubs) {
 			module.clearBulkCache();
 		}
+		scheduler.preLoopUpdateBindings();
 		scheduler.pollSubsystemsPeriodic();
 		scheduler.pollTriggers();
 		loopEX();
-		scheduler.pollCommands(OpModeEXRunStates.LOOP);
-		gamepadEX1.endLoopUpdate();
-		gamepadEX2.endLoopUpdate();
+		scheduler.pollCommands();
+		scheduler.postLoopUpdateBindings();
 		telemetry.update();
 	}
 

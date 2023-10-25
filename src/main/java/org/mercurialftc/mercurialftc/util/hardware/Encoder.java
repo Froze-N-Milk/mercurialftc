@@ -2,6 +2,7 @@ package org.mercurialftc.mercurialftc.util.hardware;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import org.jetbrains.annotations.NotNull;
 
 public class Encoder {
 	private final DcMotor motor;
@@ -16,12 +17,14 @@ public class Encoder {
 	 *
 	 * @param motor the motor that the encoder is plugged into,
 	 */
-	public Encoder(DcMotor motor) {
+	public Encoder(@NotNull DcMotor motor) {
 		this.motor = motor;
 		this.direction = Direction.FORWARD;
 
 		previousTime = System.nanoTime() / 1e9;
 		previousPosition = motor.getCurrentPosition();
+
+		output = new VelocityDataPacket(0, 1);
 	}
 
 	/**
@@ -75,8 +78,6 @@ public class Encoder {
 	/**
 	 * <p>needs to be called once per loop to be accurate</p>
 	 * <p>if using this in a {@link org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface} subclass, chuck it in the periodic loop, and never think about it again</p>
-	 *
-	 * @return measured velocity
 	 */
 	public void updateVelocity() {
 		int currentPosition = getCurrentPosition();

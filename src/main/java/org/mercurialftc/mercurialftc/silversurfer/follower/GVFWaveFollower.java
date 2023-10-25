@@ -1,64 +1,91 @@
 package org.mercurialftc.mercurialftc.silversurfer.follower;
 
+import org.jetbrains.annotations.NotNull;
 import org.mercurialftc.mercurialftc.silversurfer.followable.Followable;
-import org.mercurialftc.mercurialftc.silversurfer.geometry.Angle;
-import org.mercurialftc.mercurialftc.silversurfer.geometry.AngleRadians;
-import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
+import org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants.MecanumMotionConstants;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Vector2D;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.obstaclemap.EmptyObstacleMap;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.obstaclemap.ObstacleMap;
 import org.mercurialftc.mercurialftc.silversurfer.tracker.Tracker;
 
-/**
- * Consumes {@link org.mercurialftc.mercurialftc.silversurfer.followable.Followable.Output}s from the wave and then modifies them for use in an {@link  ArbFollower} such as {@link MecanumArbFollower}
- */
-public class GVFWaveFollower extends WaveFollower {
+@SuppressWarnings("unused")
+public class GVFWaveFollower extends AbstractWaveFollower {
+	private final WaveFollower waveFollower;
 	private final Tracker tracker;
-	private final ArbFollower arbFollower;
+	private final double rotationLimiter;
+	private final MecanumMotionConstants mecanumMotionConstants;
+	private boolean inPosition;
+	private MecanumMotionConstants.DirectionOfTravelLimiter errorDirectionOfTravelLimiter;
+	private double previousTranslationError, previousRotationError;
 
-	public GVFWaveFollower(Tracker tracker, ArbFollower arbFollower) {
-		super(arbFollower.getMotionConstants());
+	public GVFWaveFollower(@NotNull WaveFollower waveFollower, @NotNull MecanumMotionConstants mecanumMotionConstants, @NotNull Tracker tracker, @NotNull ObstacleMap obstacleMap) {
+		this.waveFollower = waveFollower;
+		this.mecanumMotionConstants = mecanumMotionConstants;
 		this.tracker = tracker;
-		this.arbFollower = arbFollower;
+
+		rotationLimiter = Math.sqrt(mecanumMotionConstants.getMaxRotationalVelocity());
 	}
 
-	public ArbFollower getArbFollower() {
-		return arbFollower;
+	public GVFWaveFollower(@NotNull WaveFollower waveFollower, @NotNull MecanumMotionConstants mecanumMotionConstants, @NotNull Tracker tracker) {
+		this(waveFollower, mecanumMotionConstants, tracker, new EmptyObstacleMap());
 	}
 
 	@Override
-	protected void followOutput(Followable.Output output, double loopTime) {
-		Pose2D currentPose = tracker.getPose2D();
-		Pose2D previousPose = tracker.getPreviousPose2D();
+	public void followOutput(@NotNull Followable.Output output, double loopTime) {
+		Vector2D errorVector = output.getPosition().subtract(tracker.getPose2D()).toVector2D();
 
-		Pose2D targetPose = output.getPosition();
+		Vector2D transformedTranslationVector = output.getTranslationVector();
 
-		Vector2D translationalDifference = new Vector2D(targetPose.getX() - currentPose.getX(), targetPose.getY() - currentPose.getY());
-		Angle modifiedTranslationVectorAngle = translationalDifference.add(output.getTranslationVector()).getHeading();
+		double errorVectorMagnitude = errorVector.getMagnitude();
 
-		Vector2D currentVelocity = new Vector2D(currentPose.getX() - previousPose.getX(), currentPose.getY() - previousPose.getY());
+		if (errorVectorMagnitude > 2) {
+			errorDirectionOfTravelLimiter = mecanumMotionConstants.makeDirectionOfTravelLimiter(errorVector.getHeading());
 
-		double translationalError = new Vector2D(targetPose.getX() - currentPose.getX(), targetPose.getY() - currentPose.getY()).getMagnitude();
+			Vector2D errorFeedback = Vector2D.fromPolar(modifyTranslationError(errorVectorMagnitude, errorVectorMagnitude - previousTranslationError, loopTime) * errorDirectionOfTravelLimiter.getVelocity(), errorVector.getHeading());
 
-		double translationalBreakDistance = (currentVelocity.getMagnitude() * currentVelocity.getMagnitude()) / (2 * getMotionConstants().getMaxTranslationalVelocity());
+			transformedTranslationVector = transformedTranslationVector.add(errorFeedback);
 
-		int translationalBreakControl = (int) Math.signum(Math.abs(translationalError) - translationalBreakDistance);
+			MecanumMotionConstants.DirectionOfTravelLimiter directionOfTravelLimiter = mecanumMotionConstants.makeDirectionOfTravelLimiter(transformedTranslationVector.getHeading());
+			transformedTranslationVector = Vector2D.fromPolar(Math.min(directionOfTravelLimiter.getVelocity(), transformedTranslationVector.getMagnitude()), transformedTranslationVector.getHeading());
+		}
+		double transformedRotationalVelocity = output.getRotationalVelocity();
+		double rotationalError = tracker.getPose2D().getTheta().findShortestDistance(output.getPosition().getTheta());
 
-		double modifiedTranslationVectorMagnitude = currentVelocity.getMagnitude() + translationalBreakControl * getMotionConstants().getMaxTranslationalAcceleration() * loopTime;
-		modifiedTranslationVectorMagnitude = Math.max(modifiedTranslationVectorMagnitude, getMotionConstants().getMaxTranslationalVelocity());
+		if (Math.abs(rotationalError) > 0.035) {
+			transformedRotationalVelocity += modifyRotationError(rotationalError, rotationalError - previousRotationError, loopTime) * mecanumMotionConstants.getMaxRotationalVelocity();
 
-		Vector2D modifiedTranslationalVector = Vector2D.fromPolar(modifiedTranslationVectorMagnitude, modifiedTranslationVectorAngle);
-		modifiedTranslationalVector = modifiedTranslationalVector.rotate(new AngleRadians(-currentPose.getTheta().getRadians()));
+			transformedRotationalVelocity = Math.min(mecanumMotionConstants.getMaxRotationalVelocity(), Math.max(-mecanumMotionConstants.getMaxRotationalVelocity(), transformedRotationalVelocity));
+		}
 
-		double rotationalError = currentPose.getTheta().findShortestDistance(targetPose.getTheta()); //shortest distance from estimated current position to target position
+		inPosition = errorVectorMagnitude < 5 && rotationalError < 0.035;
 
-		double rotationalVelocity = previousPose.getTheta().findShortestDistance(currentPose.getTheta());
+		Followable.Output tranformedOutput = new Followable.Output(
+				transformedTranslationVector,
+				transformedRotationalVelocity,
+				output.getCallbackTime(),
+				output.getPosition(),
+				output.getDestination()
+		);
+		waveFollower.followOutput(tranformedOutput, loopTime);
 
-		double rotationalBreakDistance = (rotationalVelocity * rotationalVelocity) / (2 * getMotionConstants().getMaxRotationalAcceleration());
+		previousRotationError = rotationalError;
+		previousTranslationError = errorVectorMagnitude;
+	}
 
-		int rotationalBreakControl = (int) Math.signum(Math.abs(rotationalError) - rotationalBreakDistance);
+	private double modifyTranslationError(double error, double deltaError, double loopTime) {
+		double output = Math.sqrt(error / errorDirectionOfTravelLimiter.getVelocity());
+		output += (deltaError / loopTime) / errorDirectionOfTravelLimiter.getVelocity();
+		return Math.max(0, Math.min(output, 1));
+	}
 
-		double modifiedRotationalVelocity = rotationalVelocity + getMotionConstants().getMaxRotationalAcceleration() * Math.signum(rotationalError) * rotationalBreakControl * loopTime;
-		modifiedRotationalVelocity = Math.min(modifiedRotationalVelocity, getMotionConstants().getMaxRotationalVelocity());
+	private double modifyRotationError(double error, double deltaError, double loopTime) {
+		double output = (Math.sqrt(Math.abs(error)) / rotationLimiter) * Math.signum(error);
+		output += (deltaError / loopTime) / mecanumMotionConstants.getMaxRotationalVelocity();
+		return Math.max(-1, Math.min(output, 1));
+	}
 
-		arbFollower.follow(modifiedTranslationalVector, modifiedRotationalVelocity);
+	@Override
+	public boolean isFinished() {
+		return super.isFinished() && inPosition;
 	}
 }

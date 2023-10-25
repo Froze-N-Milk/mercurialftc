@@ -1,12 +1,12 @@
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mercurialftc.mercurialftc.silversurfer.geometry.AngleDegrees;
-import org.mercurialftc.mercurialftc.silversurfer.geometry.AngleRadians;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.AngleDegrees;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.AngleRadians;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Vector2D;
 
 public class VectorTests {
 	@Test
-	public void zeroRotation() {
+	void zeroRotation() {
 		int iterations = 10 * 4; //must be a multiple of 4
 		for (int i = 0; i < iterations; i++) {
 			Vector2D input = Vector2D.fromPolar(1, new AngleDegrees(i * (360.0 / iterations)));
@@ -19,12 +19,25 @@ public class VectorTests {
 	}
 
 	@Test
-	public void halfRotation() {
+	void halfRotation() {
 		int iterations = 10 * 4; //must be a multiple of 4
 		for (int i = 0; i < iterations; i++) {
 			Vector2D input = Vector2D.fromPolar(1, new AngleDegrees(i * (360.0 / iterations)));
 			Vector2D output = input.rotate(new AngleDegrees(180));
 			Assertions.assertEquals(input.getHeading().add(new AngleDegrees(180)).getDegrees(), output.getHeading().getDegrees(), 0.001);
+			Assertions.assertEquals(input.getMagnitude(), output.getMagnitude(), 0.001);
+		}
+	}
+
+	@Test
+	void negativePolar() {
+		int iterations = 10 * 4; //must be a multiple of 4
+		for (int i = 0; i < iterations; i++) {
+			Vector2D input = Vector2D.fromPolar(-1, new AngleDegrees(i * (360.0 / iterations)));
+			Vector2D output = Vector2D.fromPolar(1, new AngleDegrees(i * (360.0 / iterations) + 180));
+			Assertions.assertEquals(input.getHeading().getRadians(), output.getHeading().getRadians(), 0.001);
+			Assertions.assertEquals(input.getX(), output.getX(), 0.001);
+			Assertions.assertEquals(input.getY(), output.getY(), 0.001);
 			Assertions.assertEquals(input.getMagnitude(), output.getMagnitude(), 0.001);
 		}
 	}

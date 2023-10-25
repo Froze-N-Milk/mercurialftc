@@ -1,12 +1,14 @@
 package org.mercurialftc.mercurialftc.silversurfer.followable.curvebuilder.motionprofile;
 
+import org.jetbrains.annotations.NotNull;
 import org.mercurialftc.mercurialftc.silversurfer.followable.Followable;
 import org.mercurialftc.mercurialftc.silversurfer.followable.curvebuilder.FollowableCurve;
 import org.mercurialftc.mercurialftc.silversurfer.followable.motionconstants.MecanumMotionConstants;
-import org.mercurialftc.mercurialftc.silversurfer.geometry.AngleRadians;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.AngleRadians;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.ArcLengthHandler;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Pose2D;
 import org.mercurialftc.mercurialftc.silversurfer.geometry.Vector2D;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.obstaclemap.ObstacleMap;
 
 import java.util.Arrays;
 
@@ -14,12 +16,14 @@ import java.util.Arrays;
  * motion profile for splines
  */
 public class MotionProfile {
+	private final FollowableCurve spline;
+	private final ObstacleMap obstacleMap;
 	private double arcSegmentLength;
-	private FollowableCurve spline;
-	private int plannedPoints;
+	private ArcLengthHandler arcLengthHandler;
 
-	public MotionProfile(FollowableCurve spline) {
+	public MotionProfile(FollowableCurve spline, ObstacleMap obstacleMap) {
 		this.spline = spline;
+		this.obstacleMap = obstacleMap;
 	}
 
 	public double getArcSegmentLength() {
@@ -32,14 +36,16 @@ public class MotionProfile {
 
 	private Followable.Output[] optimise() {
 		double startTime = System.nanoTime() / 1E9; //current relative time in seconds
-		double allowableOptimisationTime = 0.2 + (spline.getCurves().length + 1) * 0.1; //seconds
+		double allowableOptimisationTime = 0.3 + (spline.getCurves().length + 1) * 0.1; //seconds
 
-		double optimisationThreshold = 0.01; // todo find value, in seconds, this should be fine
+		double optimisationThreshold = 0.01;
 
 		double[] deltaSteps = new double[spline.getCurves().length + 1];
 		Arrays.fill(deltaSteps, 2);
 		double[] elongationFactors = new double[spline.getCurves().length + 1];
 		Arrays.fill(elongationFactors, 2.5);
+
+		this.arcLengthHandler = new ArcLengthHandler(spline);
 
 		Followable.Output[] bestTrajectory = finaliseProfile();
 		while ((System.nanoTime() / 1E9) <= (startTime + allowableOptimisationTime)) {
@@ -50,6 +56,9 @@ public class MotionProfile {
 
 				while (error > optimisationThreshold) {
 					spline.elongateTangents(elongationFactors[i], i);
+
+					this.arcLengthHandler = new ArcLengthHandler(spline);
+
 					currentTrajectory = finaliseProfile();
 
 					double currentTime = currentTrajectory[currentTrajectory.length - 1].getCallbackTime();
@@ -64,7 +73,6 @@ public class MotionProfile {
 
 					int errorSignum = (int) Math.signum(error);
 
-					// todo idk if this will work or not lmao, prolly super inefficient too (should work now ig??)
 					if (errorSignum < 0) {
 						elongationFactors[i] -= deltaSteps[i];
 						deltaSteps[i] *= 0.5;
@@ -75,80 +83,174 @@ public class MotionProfile {
 			}
 
 		}
+
 		return bestTrajectory;
 	}
 
+	@NotNull
 	private Followable.Output[] finaliseProfile() {
-		plannedPoints = divideArcLength();
-
-//		double[] intersects = findIntersects();
+		int plannedPoints = divideArcLength() + 1;
 
 		Followable.Output[] outputs = new Followable.Output[plannedPoints];
 
-		ArcLengthHandler arcLengthHandler = spline.getArcLengthHandler();
-		double time = 0;
-		double previousVelocity = 0;
-		double previousRotationalVelocity = 0;
-		double previousDeltaT = 0;
-		AngleRadians previousEstimatedRotationalPosition = arcLengthHandler.findCurveFromArcLength(0).getCurve().getStartPose().getTheta();
+		// forwards pass for initial velocity and forwards acceleration
+
+		ArcLengthHandler.ArcLengthRelationship previousCurveFromArcLength = arcLengthHandler.findCurveFromArcLength(0);
 
 		// handles first case
 		outputs[0] = new Followable.Output(
-				Vector2D.fromPolar(0, arcLengthHandler.findCurveFromArcLength(0).getResult().getHeading()), // the velocity output
+				Vector2D.fromPolar(0, previousCurveFromArcLength.getFirstDerivative().getHeading()), // the velocity output
 				0,
 				0,
-				arcLengthHandler.findCurveFromArcLength(0).getCurve().getStartPose(),
-				arcLengthHandler.findCurveFromArcLength(0).getCurve().getStartPose()
+				previousCurveFromArcLength.getCurve().getStartPose(),
+				previousCurveFromArcLength.getCurve().getStartPose()
 		);
 
-		for (int i = 1; i < plannedPoints; i++) {
+		double previousVelocity = 0;
 
-			MecanumMotionConstants motionConstants = spline.getMotionConstantsArray().get(i);
+		for (int i = 1; i < plannedPoints; i++) {
 			ArcLengthHandler.ArcLengthRelationship curveFromArcLength = arcLengthHandler.findCurveFromArcLength(i * arcSegmentLength);
 
-			AngleRadians targetRotationalPosition = curveFromArcLength.getCurve().getEndPose().getTheta();
-			AngleRadians estimatedRotationalPosition = previousEstimatedRotationalPosition.add(previousRotationalVelocity * previousDeltaT).toAngleRadians();
+			MecanumMotionConstants motionConstants = spline.getMotionConstantsArray().get(curveFromArcLength.getCurveIndex());
 
-			double rotationalError = estimatedRotationalPosition.findShortestDistance(targetRotationalPosition); //shortest distance from estimated current position to target position
+			MecanumMotionConstants.DirectionOfTravelLimiter directionOfTravelLimiter = motionConstants.makeDirectionOfTravelLimiter(curveFromArcLength.getFirstDerivative().getHeading());
 
-			double rotationalBreakDistance = (previousRotationalVelocity * previousRotationalVelocity) / (2 * motionConstants.getMaxRotationalAcceleration());
+			double vMax = directionOfTravelLimiter.getVelocity();
 
-			int rotationalBreakControl = (int) Math.signum(Math.abs(rotationalError) - rotationalBreakDistance);
+			double changeInAngle = previousCurveFromArcLength.getFirstDerivative().getHeading().findShortestDistance(curveFromArcLength.getFirstDerivative().getHeading());
 
-			double rotationDistance = previousEstimatedRotationalPosition.findShortestDistance(estimatedRotationalPosition); // out of date by one planning point
+			changeInAngle = Math.max(-Math.PI / 2, Math.min(changeInAngle, Math.PI / 2));
 
-			// todo should do for now, possibly need to implement some scaling for the acceleration to dampen or smth
-			double rotationalVelocity = Math.sqrt((previousRotationalVelocity * previousRotationalVelocity) + 2 * motionConstants.getMaxRotationalAcceleration() * Math.signum(rotationalError) * rotationalBreakControl * rotationDistance); // todo should do for now, possibly need to implement some scaling for the acceleration to dampen or smth
-			rotationalVelocity = Math.min(rotationalVelocity, motionConstants.getMaxRotationalVelocity());
+			double vChangeInAngleLimiter = Math.cos(changeInAngle);
+			vChangeInAngleLimiter *= vChangeInAngleLimiter;
 
-			double estimatedTangentialReduction = 1 + (Math.sqrt(2) - 1) / 2 + Math.cos(2 * estimatedRotationalPosition.findShortestDistance(curveFromArcLength.getResult().getHeading())) * ((Math.sqrt(2) - 1) / 2);
+			vMax *= vChangeInAngleLimiter;
 
-			double vMax = motionConstants.getMaxTranslationalVelocity() / estimatedTangentialReduction;
+			double vAccelerationLimited = Math.sqrt(previousVelocity * previousVelocity + 2 * directionOfTravelLimiter.getAcceleration() * arcSegmentLength);
 
-			double vMaxRotation = motionConstants.getMaxRotationalVelocity() / rotationalVelocity;
-			// todo make these optional
-			// todo add distance to nearest object
+			double vObstacleLimited = Double.POSITIVE_INFINITY;
+			Vector2D closestObstacle = obstacleMap.closestObstacleVector(curveFromArcLength.getResult());
+			if(closestObstacle != null) {
+				vObstacleLimited = Math.sqrt(2 * directionOfTravelLimiter.getAcceleration() * closestObstacle.getMagnitude());
+			}
 
-			double finalVelocityConstraint = Math.min(vMax, vMaxRotation);
+			double finalVelocityConstraint = Math.min(Math.min(vAccelerationLimited, vMax), vObstacleLimited);
+
+			outputs[i] = new Followable.Output(
+					Vector2D.fromPolar(finalVelocityConstraint, curveFromArcLength.getFirstDerivative().getHeading()), // the velocity output
+					0,
+					0,
+					new Pose2D(curveFromArcLength.getResult().getX(), curveFromArcLength.getResult().getY(), 0),
+					curveFromArcLength.getCurve().getEndPose()
+			);
+
+			previousVelocity = finalVelocityConstraint;
+			previousCurveFromArcLength = curveFromArcLength;
+		}
+
+//		do a backward pass for accelerational constraints
+
+//		set the final output to be back at 0
+		outputs[outputs.length - 1] = new Followable.Output(
+				Vector2D.fromPolar(0, arcLengthHandler.findCurveFromArcLength(arcLengthHandler.getArcLength()).getFirstDerivative().getHeading()),
+				0,
+				0,
+				arcLengthHandler.findCurveFromArcLength(arcLengthHandler.getArcLength()).getCurve().getEndPose(),
+				arcLengthHandler.findCurveFromArcLength(arcLengthHandler.getArcLength()).getCurve().getEndPose()
+		);
+
+		previousVelocity = 0;
+
+		for (int i = plannedPoints - 2; i >= 0; i--) {
+			ArcLengthHandler.ArcLengthRelationship curveFromArcLength = arcLengthHandler.findCurveFromArcLength(i * arcSegmentLength);
+
+			MecanumMotionConstants motionConstants = spline.getMotionConstantsArray().get(curveFromArcLength.getCurveIndex());
+
+			Vector2D translationVector = outputs[i].getTranslationVector();
+			double translationalVelocity = translationVector.getMagnitude();
+
+			MecanumMotionConstants.DirectionOfTravelLimiter directionOfTravelLimiter = motionConstants.makeDirectionOfTravelLimiter(curveFromArcLength.getFirstDerivative().getHeading());
+
+			double vMaxAccelerationLimited = Math.sqrt(previousVelocity * previousVelocity + 2 * directionOfTravelLimiter.getAcceleration() * arcSegmentLength);
+
+			double finalVelocityConstraint = Math.min(translationalVelocity, vMaxAccelerationLimited);
+
+			outputs[i] = new Followable.Output(
+					Vector2D.fromPolar(finalVelocityConstraint, translationVector.getHeading()),
+					outputs[i].getRotationalVelocity(),
+					outputs[i].getCallbackTime(),
+					outputs[i].getPosition(),
+					outputs[i].getDestination()
+			);
+
+			previousVelocity = finalVelocityConstraint;
+		}
+
+		// forward pass to calculate times
+
+		previousVelocity = outputs[0].getTranslationVector().getMagnitude();
+		double time = 0;
+
+		for (int i = 1; i < plannedPoints; i++) {
+			double velocity = outputs[i].getTranslationVector().getMagnitude();
 
 			// ∆t = 2∆s / (v_i + v_{i−1})
-			double deltaT = (2 * arcSegmentLength) / (finalVelocityConstraint + previousVelocity);
+			double deltaT = (2 * arcSegmentLength) / (velocity + previousVelocity);
 
 			time += deltaT;
 
 			outputs[i] = new Followable.Output(
-					Vector2D.fromPolar(finalVelocityConstraint, curveFromArcLength.getResult().getHeading()), // the velocity output
-					rotationalVelocity,
+					outputs[i].getTranslationVector(),
+					outputs[i].getRotationalVelocity(),
 					time,
-					new Pose2D(curveFromArcLength.getResult().getX(), curveFromArcLength.getResult().getY(), estimatedRotationalPosition),
-					curveFromArcLength.getCurve().getEndPose()
+					outputs[i].getPosition(),
+					outputs[i].getDestination()
 			);
 
-//			c1 = c;
-			previousEstimatedRotationalPosition = estimatedRotationalPosition;
-			previousVelocity = finalVelocityConstraint;
-			previousRotationalVelocity = rotationalVelocity;
-			previousDeltaT = deltaT;
+			previousVelocity = velocity;
+		}
+
+		// forward pass rotation
+
+		double previousRotationalVelocity = 0;
+		AngleRadians previousEstimatedRotationalPosition = arcLengthHandler.findCurveFromArcLength(0).getCurve().getStartPose().getTheta().toAngleRadians();
+
+		for (int i = 1; i < plannedPoints; i++) {
+			ArcLengthHandler.ArcLengthRelationship curveFromArcLength = arcLengthHandler.findCurveFromArcLength(i * arcSegmentLength);
+			MecanumMotionConstants motionConstants = spline.getMotionConstantsArray().get(curveFromArcLength.getCurveIndex());
+
+			double deltaT = (outputs[i].getCallbackTime() - outputs[i - 1].getCallbackTime());
+
+			AngleRadians targetRotationalPosition = curveFromArcLength.getCurve().getEndPose().getTheta().toAngleRadians();
+
+			double rotationalError = previousEstimatedRotationalPosition.findShortestDistance(targetRotationalPosition); //shortest distance from estimated current position to target position
+
+			double rotationalBreakDistance = deltaT * Math.abs(previousRotationalVelocity) + (previousRotationalVelocity * previousRotationalVelocity) / (2 * motionConstants.getMaxRotationalAcceleration());
+
+			int rotationalBreakControl = (int) (Math.signum(Math.abs(rotationalError) - rotationalBreakDistance)); // if negative, we should be slowing down
+
+			double rotationalVelocity = previousRotationalVelocity + (deltaT * motionConstants.getMaxRotationalAcceleration() * Math.signum(rotationalError));
+
+			int velocitySignum = (int) Math.signum(rotationalVelocity);
+
+			double maxRotationalVelocityBreakLimited = Math.abs(Math.abs(previousRotationalVelocity) + (deltaT * motionConstants.getMaxRotationalAcceleration() * rotationalBreakControl));
+
+			MecanumMotionConstants.DirectionOfTravelLimiter absoluteDirectionOfTravelLimiter = spline.getAbsoluteMotionConstants().makeDirectionOfTravelLimiter(outputs[i].getTranslationVector().getHeading());
+
+			double maxRotationalVelocityTranslationLimited = motionConstants.getMaxRotationalVelocity() * (outputs[i].getTranslationVector().getMagnitude() / absoluteDirectionOfTravelLimiter.getVelocity());
+			double finalRotationalVelocityConstraint = Math.min(maxRotationalVelocityTranslationLimited, maxRotationalVelocityBreakLimited);
+			finalRotationalVelocityConstraint = Math.min(finalRotationalVelocityConstraint, Math.abs(rotationalVelocity)) * velocitySignum;
+
+			previousRotationalVelocity = finalRotationalVelocityConstraint;
+			previousEstimatedRotationalPosition = previousEstimatedRotationalPosition.add(finalRotationalVelocityConstraint * deltaT + 0.5 * (previousRotationalVelocity - finalRotationalVelocityConstraint) * deltaT * 2).toAngleRadians();
+
+			outputs[i] = new Followable.Output(
+					outputs[i].getTranslationVector(),
+					finalRotationalVelocityConstraint,
+					outputs[i].getCallbackTime(),
+					new Pose2D(outputs[i].getPosition().getX(), outputs[i].getPosition().getY(), previousEstimatedRotationalPosition),
+					outputs[i].getDestination()
+			);
 		}
 
 		return outputs;
@@ -186,7 +288,7 @@ public class MotionProfile {
 	 * @return whole number of segments when the arcLength is divided into approximately 2.5mm lengths.
 	 */
 	private int divideArcLength() {
-		double arcLength = spline.getArcLengthHandler().getBreakpoints()[spline.getArcLengthHandler().getBreakpoints().length - 1];
+		double arcLength = arcLengthHandler.getBreakpoints()[arcLengthHandler.getBreakpoints().length - 1];
 
 		double estimate = arcLength / 2.5; // target segment length
 

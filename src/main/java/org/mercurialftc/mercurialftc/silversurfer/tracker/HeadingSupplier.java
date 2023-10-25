@@ -1,10 +1,11 @@
 package org.mercurialftc.mercurialftc.silversurfer.tracker;
 
-import org.mercurialftc.mercurialftc.silversurfer.geometry.Angle;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.Angle;
+import org.mercurialftc.mercurialftc.silversurfer.geometry.angle.AngleRadians;
 
 public interface HeadingSupplier {
 	/**
-	 * implementations are recommended to supply a {@link org.mercurialftc.mercurialftc.silversurfer.geometry.AngleRadians} if possible
+	 * implementations are recommended to supply a {@link AngleRadians} if possible
 	 *
 	 * @return the current heading of the robot
 	 */

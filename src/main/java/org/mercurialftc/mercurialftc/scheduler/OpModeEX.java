@@ -114,7 +114,7 @@ public abstract class OpModeEX extends OpMode {
 		telemetry.update();
 
 		initialising.setValue("");
-
+		scheduler.setRunState(OpModeEXRunStates.INIT_LOOP);
 	}
 
 	public abstract void init_loopEX();
@@ -131,7 +131,7 @@ public abstract class OpModeEX extends OpMode {
 		scheduler.pollSubsystemsPeriodic();
 		scheduler.pollTriggers();
 		init_loopEX();
-		scheduler.pollCommands(OpModeEXRunStates.INIT_LOOP);
+		scheduler.pollCommands();
 		scheduler.postLoopUpdateBindings();
 		telemetry.update();
 	}
@@ -145,6 +145,7 @@ public abstract class OpModeEX extends OpMode {
 	public final void start() {
 		telemetry.clear();
 		elapsedTime.reset();
+		scheduler.setRunState(OpModeEXRunStates.LOOP);
 		startEX();
 	}
 
@@ -162,7 +163,7 @@ public abstract class OpModeEX extends OpMode {
 		scheduler.pollSubsystemsPeriodic();
 		scheduler.pollTriggers();
 		loopEX();
-		scheduler.pollCommands(OpModeEXRunStates.LOOP);
+		scheduler.pollCommands();
 		scheduler.postLoopUpdateBindings();
 		telemetry.update();
 	}

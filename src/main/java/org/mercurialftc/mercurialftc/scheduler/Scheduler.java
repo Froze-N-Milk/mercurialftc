@@ -180,8 +180,11 @@ public class Scheduler {
 		command.initialise();
 	}
 
-	public void pollCommands(OpModeEX.OpModeEXRunStates runState) {
+	public void setRunState(OpModeEX.OpModeEXRunStates runState) {
 		this.runState = runState;
+	}
+
+	public void pollCommands() {
 		// checks to see if any commands are finished, if so, cancels them
 		for (Command command : commands) {
 			if (command.finished()) {

@@ -63,6 +63,17 @@ public class LambdaCommand implements Command {
 	}
 
 	/**
+	 * Composes a Command into a LambdaCommand
+	 *
+	 * @param command the command to convert
+	 * @return a new LambdaCommand with the features of the argument
+	 */
+	public LambdaCommand composeFrom(Command command) {
+		if (command instanceof LambdaCommand) return (LambdaCommand) command;
+		return new LambdaCommand(command.getRequiredSubsystems(), command::initialise, command::execute, command::finished, command::end, command.interruptable(), command.getRunStates());
+	}
+
+	/**
 	 * non-mutating, sets the requirements, overriding the previous contents
 	 *
 	 * @param requiredSubsystems subsystem requirements of this command

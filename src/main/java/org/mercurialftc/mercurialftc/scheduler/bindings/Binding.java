@@ -20,7 +20,7 @@ public class Binding<B extends Binding<B>> implements BooleanSupplier {
 	private long trailingEdgeDebounce;
 	private long lastCheck = System.nanoTime() - 100;
 	private boolean toggledOn = false;
-	private boolean previousToggleState = true;
+	private boolean previousToggleState = false;
 	private boolean processedInput = false;
 
 	public Binding(BooleanSupplier internalInput) {
@@ -53,7 +53,7 @@ public class Binding<B extends Binding<B>> implements BooleanSupplier {
 	}
 
 	public B whileTrue(@NotNull Command toRun) {
-		new Trigger(() -> (getAsBoolean() && getAsBoolean() != previousState),
+		return onTrue(
 				new LambdaCommand()
 						.setRequirements(toRun.getRequiredSubsystems())
 						.setInit(toRun::initialise)
@@ -62,33 +62,28 @@ public class Binding<B extends Binding<B>> implements BooleanSupplier {
 						.addFinish(() -> !getAsBoolean())
 						.setInterruptible(toRun.interruptable())
 		);
-		return thisAsB;
 	}
 
 	public B whileFalse(@NotNull Command toRun) {
-		new Trigger(() -> (getAsBoolean() && getAsBoolean() != previousState),
+		return onFalse(
 				new LambdaCommand()
 						.setRequirements(toRun.getRequiredSubsystems())
 						.setRunStates(toRun.getRunStates())
 						.setInit(toRun::initialise)
 						.setExecute(toRun::execute)
 						.setEnd(toRun::end)
-						.addFinish(this::getAsBoolean)
+						.addFinish(this)
 						.setInterruptible(toRun.interruptable())
 		);
-		return thisAsB;
 	}
 
 	public B onTrue(@NotNull Command toRun) {
-		new Trigger(() -> (getAsBoolean() && getAsBoolean() != previousState), toRun);
+		new Trigger(() -> (getAsBoolean() && !previousState), toRun);
 		return thisAsB;
 	}
 
 	public B toggle(@NotNull Command toRun) {
-		new Trigger(() -> {
-			getAsBoolean();
-			return toggledOn && !previousToggleState;
-		},
+		new Trigger(() -> toggledOn && !previousToggleState,
 				new LambdaCommand()
 						.setRequirements(toRun.getRequiredSubsystems())
 						.setRunStates(toRun.getRunStates())
@@ -102,7 +97,7 @@ public class Binding<B extends Binding<B>> implements BooleanSupplier {
 	}
 
 	public B onFalse(@NotNull Command toRun) {
-		new Trigger(() -> (!getAsBoolean() && getAsBoolean() != previousState), toRun);
+		new Trigger(() -> (!getAsBoolean() && previousState), toRun);
 		return thisAsB;
 	}
 

@@ -8,17 +8,21 @@ import org.mercurialftc.mercurialftc.scheduler.commands.LambdaCommand;
 @SuppressWarnings("unused")
 public abstract class Subsystem implements SubsystemInterface {
 	public final OpModeEX opModeEX;
-	private final Command defaultCommand;
+	private Command defaultCommand;
 
 	public Subsystem(@NotNull OpModeEX opModeEX) {
-		this.defaultCommand = new LambdaCommand().setRequirements(this).setInterruptible(true).setExecute(this::defaultCommandExecute).setFinish(() -> false);
 		this.opModeEX = opModeEX;
+		setDefaultCommand(new LambdaCommand().setRequirements(this).setInterruptible(true).setExecute(this::defaultCommandExecute).setFinish(() -> false));
 		opModeEX.getScheduler().registerSubsystem(this);
-		this.defaultCommand.queue();
 	}
 
 	public Command getDefaultCommand() {
 		return defaultCommand;
+	}
+
+	@Override
+	public void setDefaultCommand(Command defaultCommand) {
+		this.defaultCommand = defaultCommand;
 	}
 
 	/**

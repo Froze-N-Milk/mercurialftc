@@ -4,7 +4,10 @@ import org.jetbrains.annotations.NotNull;
 import org.mercurialftc.mercurialftc.scheduler.OpModeEX;
 import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
@@ -60,6 +63,18 @@ public class LambdaCommand implements Command {
 		this.commandEnd = commandEnd;
 		this.interruptible = interruptible;
 		this.runStates = runStates;
+	}
+
+	/**
+	 * Composes a Command into a LambdaCommand
+	 *
+	 * @param command the command to convert
+	 * @return a new LambdaCommand with the features of the argument
+	 */
+	@NotNull
+	public static LambdaCommand from(@NotNull Command command) {
+		if (command instanceof LambdaCommand) return (LambdaCommand) command;
+		return new LambdaCommand(command.getRequiredSubsystems(), command::initialise, command::execute, command::finished, command::end, command.interruptable(), command.getRunStates());
 	}
 
 	/**

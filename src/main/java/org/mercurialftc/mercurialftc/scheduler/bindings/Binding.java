@@ -123,7 +123,7 @@ public class Binding<B extends Binding<B>> implements BooleanSupplier {
 	/**
 	 * ensures that this will be registered if it is used, otherwise, doesn't end up registered
 	 */
-	private void registrationCheck() {
+	protected void registrationCheck() {
 		if (!registered) {
 			Scheduler.getSchedulerInstance().registerBinding(this);
 			registered = true;

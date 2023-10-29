@@ -171,6 +171,18 @@ public class DomainBindingTests {
 				}}
 		);
 
+		// inverse of above
+		testMappings.put(
+				domainSupplier.buildBinding()
+						.greaterThanEqualTo(0.0)
+						.lessThanEqualTo(0.0)
+						.bind(),
+				new HashMap<Double, Boolean>() {{
+					put(Double.NEGATIVE_INFINITY, false);
+					put(Double.POSITIVE_INFINITY, false);
+					put(0.0, true);
+				}}
+		);
 	}
 
 	@Test

@@ -53,28 +53,11 @@ public class Binding<B extends Binding<B>> implements BooleanSupplier {
 	}
 
 	public B whileTrue(@NotNull Command toRun) {
-		return onTrue(
-				new LambdaCommand()
-						.setRequirements(toRun.getRequiredSubsystems())
-						.setInit(toRun::initialise)
-						.setExecute(toRun::execute)
-						.setEnd(toRun::end)
-						.addFinish(() -> !getAsBoolean())
-						.setInterruptible(toRun.interruptable())
-		);
+		return onTrue(LambdaCommand.from(toRun).addFinish(() -> !getAsBoolean()));
 	}
 
 	public B whileFalse(@NotNull Command toRun) {
-		return onFalse(
-				new LambdaCommand()
-						.setRequirements(toRun.getRequiredSubsystems())
-						.setRunStates(toRun.getRunStates())
-						.setInit(toRun::initialise)
-						.setExecute(toRun::execute)
-						.setEnd(toRun::end)
-						.addFinish(this)
-						.setInterruptible(toRun.interruptable())
-		);
+		return onFalse(LambdaCommand.from(toRun).addFinish(this));
 	}
 
 	public B onTrue(@NotNull Command toRun) {

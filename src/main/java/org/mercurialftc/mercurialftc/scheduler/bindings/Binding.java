@@ -10,9 +10,8 @@ import java.util.function.BooleanSupplier;
 /**
  * allows for the powerful binding of commands to boolean conditions, especially those supplied by gamepad inputs and sensors
  */
-@SuppressWarnings("unused")
+@SuppressWarnings("unused, unchecked")
 public class Binding<B extends Binding<B>> implements BooleanSupplier {
-	@SuppressWarnings("unchecked")
 	private final B thisAsB = (B) this;
 	private final BooleanSupplier internalInput;
 	private boolean previousState;
@@ -22,9 +21,10 @@ public class Binding<B extends Binding<B>> implements BooleanSupplier {
 	private boolean toggledOn = false;
 	private boolean previousToggleState = false;
 	private boolean processedInput = false;
+	private boolean registered;
 
 	public Binding(BooleanSupplier internalInput) {
-		Scheduler.getSchedulerInstance().registerBinding(this);
+		registered = false;
 		this.internalInput = internalInput;
 	}
 
@@ -49,54 +49,32 @@ public class Binding<B extends Binding<B>> implements BooleanSupplier {
 
 	@Override
 	public boolean getAsBoolean() {
+		registrationCheck();
 		return processedInput;
 	}
 
 	public B whileTrue(@NotNull Command toRun) {
-		return onTrue(
-				new LambdaCommand()
-						.setRequirements(toRun.getRequiredSubsystems())
-						.setInit(toRun::initialise)
-						.setExecute(toRun::execute)
-						.setEnd(toRun::end)
-						.addFinish(() -> !getAsBoolean())
-						.setInterruptible(toRun.interruptable())
-		);
+		return onTrue(LambdaCommand.from(toRun).addFinish(() -> !getAsBoolean()));
 	}
 
 	public B whileFalse(@NotNull Command toRun) {
-		return onFalse(
-				new LambdaCommand()
-						.setRequirements(toRun.getRequiredSubsystems())
-						.setRunStates(toRun.getRunStates())
-						.setInit(toRun::initialise)
-						.setExecute(toRun::execute)
-						.setEnd(toRun::end)
-						.addFinish(this)
-						.setInterruptible(toRun.interruptable())
-		);
+		return onFalse(LambdaCommand.from(toRun).addFinish(this));
 	}
 
 	public B onTrue(@NotNull Command toRun) {
+		registrationCheck();
 		new Trigger(() -> (getAsBoolean() && !previousState), toRun);
 		return thisAsB;
 	}
 
 	public B toggle(@NotNull Command toRun) {
-		new Trigger(() -> toggledOn && !previousToggleState,
-				new LambdaCommand()
-						.setRequirements(toRun.getRequiredSubsystems())
-						.setRunStates(toRun.getRunStates())
-						.setInit(toRun::initialise)
-						.setExecute(toRun::execute)
-						.setEnd(toRun::end)
-						.addFinish(() -> !toggledOn)
-						.setInterruptible(toRun.interruptable())
-		);
+		registrationCheck();
+		new Trigger(() -> toggledOn && !previousToggleState, LambdaCommand.from(toRun).addFinish(() -> !toggledOn));
 		return thisAsB;
 	}
 
 	public B onFalse(@NotNull Command toRun) {
+		registrationCheck();
 		new Trigger(() -> (!getAsBoolean() && previousState), toRun);
 		return thisAsB;
 	}
@@ -120,6 +98,36 @@ public class Binding<B extends Binding<B>> implements BooleanSupplier {
 				break;
 		}
 		return thisAsB;
+	}
+
+	/**
+	 * non-mutating
+	 *
+	 * @param andSupplier an and condition added to the binding
+	 * @return a new binding that will have internal state of true if its previous internal BooleanSupplier AND its new additional BooleanSupplier return true
+	 */
+	public B and(BooleanSupplier andSupplier) {
+		return (B) new Binding<B>(() -> this.getAsBoolean() && andSupplier.getAsBoolean());
+	}
+
+	/**
+	 * non-mutating
+	 *
+	 * @param orSupplier an or condition added to the binding
+	 * @return a new binding that will have internal state of true if its previous internal BooleanSupplier OR its new additional BooleanSupplier return true
+	 */
+	public B or(BooleanSupplier orSupplier) {
+		return (B) new Binding<>(() -> this.getAsBoolean() || orSupplier.getAsBoolean());
+	}
+
+	/**
+	 * ensures that this will be registered if it is used, otherwise, doesn't end up registered
+	 */
+	protected void registrationCheck() {
+		if (!registered) {
+			Scheduler.getSchedulerInstance().registerBinding(this);
+			registered = true;
+		}
 	}
 
 	public enum DebouncingType {

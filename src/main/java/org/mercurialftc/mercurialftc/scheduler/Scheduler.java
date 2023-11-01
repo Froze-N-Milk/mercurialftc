@@ -104,6 +104,14 @@ public class Scheduler {
 		return loggingEnabled;
 	}
 
+	public OpModeEX.OpModeEXRunStates getRunState() {
+		return runState;
+	}
+
+	public void setRunState(OpModeEX.OpModeEXRunStates runState) {
+		this.runState = runState;
+	}
+
 	public LinkedHashSet<SubsystemInterface> getSubsystems() {
 		return subsystems;
 	}
@@ -142,7 +150,7 @@ public class Scheduler {
 
 	private void initialiseCommand(Command command) {
 		if (command == null) return;
-		if (isScheduled(command)) return;
+		if (composedCommands.contains(command)) return;
 		if (!command.getRunStates().contains(runState)) return;
 
 		Set<SubsystemInterface> commandRequirements = command.getRequiredSubsystems();
@@ -178,10 +186,6 @@ public class Scheduler {
 			requirements.put(requirement, command);
 		}
 		command.initialise();
-	}
-
-	public void setRunState(OpModeEX.OpModeEXRunStates runState) {
-		this.runState = runState;
 	}
 
 	public void pollCommands() {
@@ -294,8 +298,7 @@ public class Scheduler {
 	 * @throws IllegalArgumentException if the given commands have already been composed.
 	 */
 	public void registerComposedCommands(Command... commands) {
-		Set<Command> commandSet = new HashSet<>(Arrays.asList(commands));
-		registerComposedCommands(commandSet);
+		registerComposedCommands(Arrays.asList(commands));
 	}
 
 	/**
@@ -305,7 +308,7 @@ public class Scheduler {
 	 * @param commands the commands to register
 	 * @throws IllegalArgumentException if the given commands have already been composed.
 	 */
-	public void registerComposedCommands(Set<Command> commands) {
+	public void registerComposedCommands(Collection<Command> commands) {
 		requireNotComposed(commands);
 		composedCommands.addAll(commands);
 	}
@@ -317,10 +320,20 @@ public class Scheduler {
 	 * @param commands the commands to register
 	 * @throws IllegalArgumentException if the given commands have already been composed.
 	 */
-	public void registerComposedCommands(List<Command> commands) {
-		Set<Command> commandSet = new HashSet<>(commands);
-		requireNotComposed(commandSet);
-		composedCommands.addAll(commandSet);
+	public void deregisterComposedCommands(Command... commands) {
+		deregisterComposedCommands(Arrays.asList(commands));
+	}
+
+	/**
+	 * Register commands as composed. An exception will be thrown if these commands are scheduled
+	 * directly or added to a composition.
+	 *
+	 * @param commands the commands to register
+	 * @throws IllegalArgumentException if the given commands have already been composed.
+	 */
+	public void deregisterComposedCommands(Collection<Command> commands) {
+		requireComposed(commands);
+		composedCommands.removeAll(commands);
 	}
 
 	/**
@@ -355,6 +368,34 @@ public class Scheduler {
 	 */
 	public void requireNotComposed(Collection<Command> commands) {
 		if (!Collections.disjoint(commands, getComposedCommands())) {
+			throw new IllegalArgumentException(
+					"Commands that have been composed may not be added to another composition or scheduled "
+							+ "individually!");
+		}
+	}
+
+	/**
+	 * Requires that the specified command has been already added to a composition.
+	 *
+	 * @param command The command to check
+	 * @throws IllegalArgumentException if the given commands have already been composed.
+	 */
+	public void requireComposed(Command command) {
+		if (!composedCommands.contains(command)) {
+			throw new IllegalArgumentException(
+					"Commands that have been composed may not be added to another composition or scheduled "
+							+ "individually!");
+		}
+	}
+
+	/**
+	 * Requires that the specified commands have been already added to a composition.
+	 *
+	 * @param commands The commands to check
+	 * @throws IllegalArgumentException if the given commands have already been composed.
+	 */
+	public void requireComposed(Collection<Command> commands) {
+		if (!getComposedCommands().containsAll(commands)) {
 			throw new IllegalArgumentException(
 					"Commands that have been composed may not be added to another composition or scheduled "
 							+ "individually!");

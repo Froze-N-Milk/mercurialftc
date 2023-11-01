@@ -1,5 +1,6 @@
 package org.mercurialftc.mercurialftc.scheduler.commands;
 
+import org.jetbrains.annotations.Nullable;
 import org.mercurialftc.mercurialftc.scheduler.OpModeEX;
 import org.mercurialftc.mercurialftc.scheduler.Scheduler;
 import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
@@ -7,12 +8,13 @@ import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
 import java.util.*;
 
 @SuppressWarnings("unused")
-public class SequentialCommandGroup implements Command {
+public class SequentialCommandGroup implements CommandGroup {
 	private final ArrayList<Command> commands;
 	private final boolean interruptable;
 	private final Set<SubsystemInterface> requiredSubsystems;
 	private final Set<OpModeEX.OpModeEXRunStates> runStates;
 	private int commandIndex;
+	@Nullable
 	private Command currentCommand;
 
 	public SequentialCommandGroup() {
@@ -29,12 +31,6 @@ public class SequentialCommandGroup implements Command {
 		this.commands = commands;
 		this.interruptable = interruptable;
 		commandIndex = -1;
-		Scheduler.getSchedulerInstance().registerComposedCommands(commands);
-	}
-
-	@Override
-	public void queue() {
-		Command.super.queue();
 	}
 
 	/**
@@ -53,7 +49,7 @@ public class SequentialCommandGroup implements Command {
 	 * @param commands new commands to add
 	 * @return a new SequentialCommandGroup, with the added commands
 	 */
-	public SequentialCommandGroup addCommands(List<Command> commands) {
+	public SequentialCommandGroup addCommands(Collection<Command> commands) {
 		if (commandIndex != -1) {
 			throw new IllegalStateException(
 					"Commands cannot be added to a composition while it is running");
@@ -73,6 +69,8 @@ public class SequentialCommandGroup implements Command {
 			newRunStates.addAll(command.getRunStates());
 		}
 
+		Scheduler.getSchedulerInstance().registerComposedCommands(commands);
+
 		return new SequentialCommandGroup(
 				newCommandList,
 				newRequirementSet,
@@ -82,57 +80,65 @@ public class SequentialCommandGroup implements Command {
 	}
 
 	@Override
-	public boolean interruptable() {
+	public final boolean interruptable() {
 		return interruptable;
 	}
 
 	@Override
-	public void initialise() {
+	public final void initialise() {
 		if (commands.isEmpty()) {
-			throw new RuntimeException("Attempted to run empty SequentialCommandGroup, SequentialCommandGroupRequires a minimum of 1 Command to be run");
+			throw new RuntimeException("Attempted to run empty SequentialCommandGroup, SequentialCommandGroupRequires requires a minimum of 1 Command to be run");
 		}
 		commandIndex = 0;
 		currentCommand = commands.get(commandIndex);
-	}
-
-	@Override
-	public void execute() {
-		if (currentCommand.finished()) {
-			currentCommand.end(false);
-			commandIndex++;
-		}
-		if (commandIndex < commands.size()) {
-			currentCommand = commands.get(commandIndex);
+		if (currentCommand.getRunStates().contains(Scheduler.getSchedulerInstance().getRunState())) {
 			currentCommand.initialise();
-		} else {
-			return;
 		}
-		currentCommand.execute();
 	}
 
 	@Override
-	public void end(boolean interrupted) {
-		if (interrupted
-				&& !commands.isEmpty()
-				&& commandIndex > -1
-				&& commandIndex < commands.size()) {
-			commands.get(commandIndex).end(true);
+	public final void execute() {
+		if (currentCommand == null) return;
+		if (currentCommand.finished() || !currentCommand.getRunStates().contains(Scheduler.getSchedulerInstance().getRunState())) {
+			if (currentCommand.getRunStates().contains(Scheduler.getSchedulerInstance().getRunState())) {
+				currentCommand.end(false);
+			}
+			commandIndex++;
+			if (commandIndex < commands.size()) {
+				currentCommand = commands.get(commandIndex);
+				if (currentCommand.getRunStates().contains(Scheduler.getSchedulerInstance().getRunState())) {
+					currentCommand.initialise();
+				}
+			} else {
+				currentCommand = null;
+				return;
+			}
 		}
+		if (currentCommand.getRunStates().contains(Scheduler.getSchedulerInstance().getRunState())) {
+			currentCommand.execute();
+		}
+	}
+
+	@Override
+	public final void end(boolean interrupted) {
 		commandIndex = -1;
+		if (currentCommand == null || !currentCommand.getRunStates().contains(Scheduler.getSchedulerInstance().getRunState()))
+			return;
+		currentCommand.end(interrupted);
 	}
 
 	@Override
-	public boolean finished() {
-		return commandIndex >= commands.size() - 1;
+	public final boolean finished() {
+		return commandIndex >= commands.size() || currentCommand == null;
 	}
 
 	@Override
-	public Set<SubsystemInterface> getRequiredSubsystems() {
+	public final Set<SubsystemInterface> getRequiredSubsystems() {
 		return requiredSubsystems;
 	}
 
 	@Override
-	public Set<OpModeEX.OpModeEXRunStates> getRunStates() {
+	public final Set<OpModeEX.OpModeEXRunStates> getRunStates() {
 		return runStates;
 	}
 }

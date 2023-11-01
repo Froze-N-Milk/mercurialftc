@@ -40,11 +40,17 @@ public interface Command {
 	 */
 	Set<OpModeEX.OpModeEXRunStates> getRunStates();
 
+	/**
+	 * @return if this command is allowed to be interrupted by others
+	 */
 	default boolean interruptable() {
 		return true;
 	}
 
+	/**
+	 * schedule the command with the scheduler
+	 */
 	default void queue() {
-		Scheduler.getSchedulerInstance().scheduleCommand(this);
+		if (!Scheduler.getSchedulerInstance().isScheduled(this)) Scheduler.getSchedulerInstance().scheduleCommand(this);
 	}
 }

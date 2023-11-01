@@ -4,22 +4,24 @@ import org.jetbrains.annotations.NotNull;
 import org.mercurialftc.mercurialftc.scheduler.OpModeEX;
 import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 @SuppressWarnings("unused")
 public class LambdaCommand implements Command {
+	private final static HashSet<SubsystemInterface> DEFAULT_REQUIREMENTS = new HashSet<>();
+	private final static HashSet<OpModeEX.OpModeEXRunStates> DEFAULT_RUN_STATES = new HashSet<>(Collections.singletonList(OpModeEX.OpModeEXRunStates.LOOP));
 	private final Runnable commandInit;
 	private final Runnable commandMethod;
 	private final BooleanSupplier commandFinish;
 	private final Consumer<Boolean> commandEnd;
-	private final boolean interruptible;
-	private final Set<OpModeEX.OpModeEXRunStates> runStates;
-	private final Set<SubsystemInterface> requiredSubsystems;
+	private final BooleanSupplier interruptibleSupplier;
+	private final Supplier<Set<OpModeEX.OpModeEXRunStates>> runStatesSupplier;
+	private final Supplier<Set<SubsystemInterface>> requiredSubsystemsSupplier;
 
 	/**
 	 * constructs a default lambda command with the following default behaviours:
@@ -34,7 +36,7 @@ public class LambdaCommand implements Command {
 	 */
 	public LambdaCommand() {
 		this(
-				new HashSet<>(),
+				() -> DEFAULT_REQUIREMENTS,
 				() -> {
 				},
 				() -> {
@@ -42,27 +44,27 @@ public class LambdaCommand implements Command {
 				() -> true,
 				(interrupted) -> {
 				},
-				true,
-				new HashSet<>(Collections.singletonList(OpModeEX.OpModeEXRunStates.LOOP))
+				() -> true,
+				() -> DEFAULT_RUN_STATES
 		);
 	}
 
 	private LambdaCommand(
-			Set<SubsystemInterface> requiredSubsystems,
+			Supplier<Set<SubsystemInterface>> requiredSubsystemsSupplier,
 			Runnable commandInit,
 			Runnable commandMethod,
 			BooleanSupplier commandFinish,
 			Consumer<Boolean> commandEnd,
-			boolean interruptible,
-			Set<OpModeEX.OpModeEXRunStates> runStates
+			BooleanSupplier interruptibleSupplier,
+			Supplier<Set<OpModeEX.OpModeEXRunStates>> runStatesSupplier
 	) {
-		this.requiredSubsystems = requiredSubsystems;
+		this.requiredSubsystemsSupplier = requiredSubsystemsSupplier;
 		this.commandInit = commandInit;
 		this.commandMethod = commandMethod;
 		this.commandFinish = commandFinish;
 		this.commandEnd = commandEnd;
-		this.interruptible = interruptible;
-		this.runStates = runStates;
+		this.interruptibleSupplier = interruptibleSupplier;
+		this.runStatesSupplier = runStatesSupplier;
 	}
 
 	/**
@@ -74,7 +76,7 @@ public class LambdaCommand implements Command {
 	@NotNull
 	public static LambdaCommand from(@NotNull Command command) {
 		if (command instanceof LambdaCommand) return (LambdaCommand) command;
-		return new LambdaCommand(command.getRequiredSubsystems(), command::initialise, command::execute, command::finished, command::end, command.interruptable(), command.getRunStates());
+		return new LambdaCommand(command::getRequiredSubsystems, command::initialise, command::execute, command::finished, command::end, command::interruptable, command::getRunStates);
 	}
 
 	/**
@@ -88,13 +90,13 @@ public class LambdaCommand implements Command {
 		Collections.addAll(requirements, requiredSubsystems);
 
 		return new LambdaCommand(
-				requirements,
+				() -> requirements,
 				this.commandInit,
 				this.commandMethod,
 				this.commandFinish,
 				this.commandEnd,
-				this.interruptible,
-				this.runStates
+				this.interruptibleSupplier,
+				this.runStatesSupplier
 		);
 	}
 
@@ -106,13 +108,13 @@ public class LambdaCommand implements Command {
 	 */
 	public LambdaCommand setRequirements(@NotNull Set<SubsystemInterface> requiredSubsystems) {
 		return new LambdaCommand(
-				requiredSubsystems,
+				() -> requiredSubsystems,
 				this.commandInit,
 				this.commandMethod,
 				this.commandFinish,
 				this.commandEnd,
-				this.interruptible,
-				this.runStates
+				this.interruptibleSupplier,
+				this.runStatesSupplier
 		);
 	}
 
@@ -124,13 +126,13 @@ public class LambdaCommand implements Command {
 	 */
 	public LambdaCommand setInit(Runnable initialise) {
 		return new LambdaCommand(
-				this.requiredSubsystems,
+				this.requiredSubsystemsSupplier,
 				initialise,
 				this.commandMethod,
 				this.commandFinish,
 				this.commandEnd,
-				this.interruptible,
-				this.runStates
+				this.interruptibleSupplier,
+				this.runStatesSupplier
 		);
 	}
 
@@ -142,13 +144,13 @@ public class LambdaCommand implements Command {
 	 */
 	public LambdaCommand setExecute(Runnable execute) {
 		return new LambdaCommand(
-				this.requiredSubsystems,
+				this.requiredSubsystemsSupplier,
 				this.commandInit,
 				execute,
 				this.commandFinish,
 				this.commandEnd,
-				this.interruptible,
-				this.runStates
+				this.interruptibleSupplier,
+				this.runStatesSupplier
 		);
 	}
 
@@ -160,13 +162,13 @@ public class LambdaCommand implements Command {
 	 */
 	public LambdaCommand setFinish(BooleanSupplier finish) {
 		return new LambdaCommand(
-				this.requiredSubsystems,
+				this.requiredSubsystemsSupplier,
 				this.commandInit,
 				this.commandMethod,
 				finish,
 				this.commandEnd,
-				this.interruptible,
-				this.runStates
+				this.interruptibleSupplier,
+				this.runStatesSupplier
 		);
 	}
 
@@ -178,13 +180,13 @@ public class LambdaCommand implements Command {
 	 */
 	public LambdaCommand setEnd(Consumer<Boolean> end) {
 		return new LambdaCommand(
-				this.requiredSubsystems,
+				this.requiredSubsystemsSupplier,
 				this.commandInit,
 				this.commandMethod,
 				this.commandFinish,
 				end,
-				this.interruptible,
-				this.runStates
+				this.interruptibleSupplier,
+				this.runStatesSupplier
 		);
 	}
 
@@ -196,13 +198,50 @@ public class LambdaCommand implements Command {
 	 */
 	public LambdaCommand setInterruptible(boolean interruptible) {
 		return new LambdaCommand(
-				this.requiredSubsystems,
+				this.requiredSubsystemsSupplier,
 				this.commandInit,
 				this.commandMethod,
 				this.commandFinish,
 				this.commandEnd,
-				interruptible,
-				this.runStates
+				() -> interruptible,
+				this.runStatesSupplier
+		);
+	}
+
+	/**
+	 * non-mutating, sets if interruption is allowed
+	 *
+	 * @param interruptibleSupplier if interruption is allowed
+	 * @return a new LambdaCommand
+	 */
+	public LambdaCommand setInterruptible(BooleanSupplier interruptibleSupplier) {
+		return new LambdaCommand(
+				this.requiredSubsystemsSupplier,
+				this.commandInit,
+				this.commandMethod,
+				this.commandFinish,
+				this.commandEnd,
+				interruptibleSupplier,
+				this.runStatesSupplier
+		);
+	}
+
+
+	/**
+	 * non-mutating, adds additional if interruption is allowed conditions, either the preexisting method OR the new one returning true will allow interruption
+	 *
+	 * @param interruptibleSupplier if interruption is allowed
+	 * @return a new LambdaCommand
+	 */
+	public LambdaCommand addInterruptible(BooleanSupplier interruptibleSupplier) {
+		return new LambdaCommand(
+				this.requiredSubsystemsSupplier,
+				this.commandInit,
+				this.commandMethod,
+				this.commandFinish,
+				this.commandEnd,
+				() -> this.interruptibleSupplier.getAsBoolean() || interruptibleSupplier.getAsBoolean(),
+				this.runStatesSupplier
 		);
 	}
 
@@ -217,13 +256,13 @@ public class LambdaCommand implements Command {
 		Collections.addAll(requirements, requiredSubsystems);
 
 		return new LambdaCommand(
-				requirements,
+				() -> requirements,
 				this.commandInit,
 				this.commandMethod,
 				this.commandFinish,
 				this.commandEnd,
-				this.interruptible,
-				this.runStates
+				this.interruptibleSupplier,
+				this.runStatesSupplier
 		);
 	}
 
@@ -234,15 +273,15 @@ public class LambdaCommand implements Command {
 	 * @return a new LambdaCommand
 	 */
 	public LambdaCommand addRequirements(@NotNull Set<SubsystemInterface> requiredSubsystems) {
-		requiredSubsystems.addAll(this.requiredSubsystems);
+		requiredSubsystems.addAll(this.getRequiredSubsystems());
 		return new LambdaCommand(
-				requiredSubsystems,
+				() -> requiredSubsystems,
 				this.commandInit,
 				this.commandMethod,
 				this.commandFinish,
 				this.commandEnd,
-				this.interruptible,
-				this.runStates
+				this.interruptibleSupplier,
+				this.runStatesSupplier
 		);
 	}
 
@@ -254,7 +293,7 @@ public class LambdaCommand implements Command {
 	 */
 	public LambdaCommand addInit(Runnable initialise) {
 		return new LambdaCommand(
-				this.requiredSubsystems,
+				this.requiredSubsystemsSupplier,
 				() -> {
 					this.commandInit.run();
 					initialise.run();
@@ -262,8 +301,8 @@ public class LambdaCommand implements Command {
 				this.commandMethod,
 				this.commandFinish,
 				this.commandEnd,
-				this.interruptible,
-				this.runStates
+				this.interruptibleSupplier,
+				this.runStatesSupplier
 		);
 	}
 
@@ -275,7 +314,7 @@ public class LambdaCommand implements Command {
 	 */
 	public LambdaCommand addExecute(Runnable execute) {
 		return new LambdaCommand(
-				this.requiredSubsystems,
+				this.requiredSubsystemsSupplier,
 				this.commandInit,
 				() -> {
 					this.commandMethod.run();
@@ -283,8 +322,8 @@ public class LambdaCommand implements Command {
 				},
 				this.commandFinish,
 				this.commandEnd,
-				this.interruptible,
-				this.runStates
+				this.interruptibleSupplier,
+				this.runStatesSupplier
 		);
 	}
 
@@ -296,13 +335,13 @@ public class LambdaCommand implements Command {
 	 */
 	public LambdaCommand addFinish(BooleanSupplier finish) {
 		return new LambdaCommand(
-				this.requiredSubsystems,
+				this.requiredSubsystemsSupplier,
 				this.commandInit,
 				this.commandMethod,
 				() -> this.commandFinish.getAsBoolean() || finish.getAsBoolean(),
 				this.commandEnd,
-				this.interruptible,
-				this.runStates
+				this.interruptibleSupplier,
+				this.runStatesSupplier
 		);
 	}
 
@@ -314,7 +353,7 @@ public class LambdaCommand implements Command {
 	 */
 	public LambdaCommand addEnd(Consumer<Boolean> end) {
 		return new LambdaCommand(
-				this.requiredSubsystems,
+				this.requiredSubsystemsSupplier,
 				this.commandInit,
 				this.commandMethod,
 				this.commandFinish,
@@ -322,8 +361,8 @@ public class LambdaCommand implements Command {
 					this.commandEnd.accept(interrupted);
 					end.accept(interrupted);
 				},
-				this.interruptible,
-				this.runStates
+				this.interruptibleSupplier,
+				this.runStatesSupplier
 		);
 	}
 
@@ -345,7 +384,7 @@ public class LambdaCommand implements Command {
 
 	@Override
 	public Set<SubsystemInterface> getRequiredSubsystems() {
-		return requiredSubsystems;
+		return requiredSubsystemsSupplier.get();
 	}
 
 	@Override
@@ -355,13 +394,12 @@ public class LambdaCommand implements Command {
 
 	@Override
 	public final boolean interruptable() {
-		return interruptible;
+		return interruptibleSupplier.getAsBoolean();
 	}
 
 	@Override
 	public Set<OpModeEX.OpModeEXRunStates> getRunStates() {
-		if (runStates.isEmpty()) runStates.add(OpModeEX.OpModeEXRunStates.LOOP);
-		return runStates;
+		return runStatesSupplier.get();
 	}
 
 	/**
@@ -370,15 +408,17 @@ public class LambdaCommand implements Command {
 	 * @param runStates allowed RunStates of the command
 	 * @return a new LambdaCommand
 	 */
-	public LambdaCommand setRunStates(OpModeEX.OpModeEXRunStates... runStates) {
+	public LambdaCommand setRunStates(@NotNull OpModeEX.OpModeEXRunStates... runStates) {
+		Set<OpModeEX.OpModeEXRunStates> runstatesSet = new HashSet<>(runStates.length);
+		Collections.addAll(runstatesSet, runStates);
 		return new LambdaCommand(
-				this.requiredSubsystems,
+				this.requiredSubsystemsSupplier,
 				this.commandInit,
 				this.commandMethod,
 				this.commandFinish,
 				this.commandEnd,
-				this.interruptible,
-				new HashSet<>(Arrays.asList(runStates))
+				this.interruptibleSupplier,
+				() -> runstatesSet
 		);
 	}
 
@@ -390,13 +430,13 @@ public class LambdaCommand implements Command {
 	 */
 	public LambdaCommand setRunStates(Set<OpModeEX.OpModeEXRunStates> runStates) {
 		return new LambdaCommand(
-				this.requiredSubsystems,
+				this.requiredSubsystemsSupplier,
 				this.commandInit,
 				this.commandMethod,
 				this.commandFinish,
 				this.commandEnd,
-				this.interruptible,
-				runStates
+				this.interruptibleSupplier,
+				() -> runStates
 		);
 	}
 }

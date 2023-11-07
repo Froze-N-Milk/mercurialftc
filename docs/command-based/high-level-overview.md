@@ -1,6 +1,6 @@
 ---
 description: >-
-  A high level overview of the terminology involved in the mercurialftc
+  A high level overview of the terminology involved in the MercurialFTC
   implementation of the command based paradigm
 ---
 
@@ -20,4 +20,4 @@ These concepts combine together to ensure that procedure is only written once in
 
 ## OpModeEX
 
-mercurialftc uses an OpMode wrapper to handle the behaviour of each of these classes.
+Mercurial uses an OpMode wrapper to handle the behaviour of each of these classes. Visit the next page to read more about OpModeEX.

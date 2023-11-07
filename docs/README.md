@@ -6,9 +6,11 @@ description: >-
 
 # What is MercurialFTC?
 
-## Features
+Side note: Throughout this guide, MercurialFTC will be also referred to as "Mercurial" and "mercurial".
 
-* Command-based paradigm with a focus on use in FTC, not a pure port of WPIlib
+### Features:
+
+* Command-based paradigm with a focus on use in FTC, not a pure port of WPILib
 * Built-in path building and following for mecanum drive bases
   * With real and build-time obstacle avoidance capabilities
 * A focus on developer friendly semantics

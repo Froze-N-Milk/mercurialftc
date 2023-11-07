@@ -1,8 +1,7 @@
 ---
 description: >-
-  OpModeEX is the mercurialftc wrapper over the traditional FTCRC OpMode.
-  OpModeEX has some extra features and manages a bunch of behaviour in the
-  background.
+  OpModeEX is a mercurial wrapper over the traditional FTCRC OpMode. OpModeEX
+  contains some extra features and manages various background behavior.
 ---
 
 # OpModeEX
@@ -13,7 +12,11 @@ description: >-
 
 ```java
 /**
- * called before {@link #initEX()}, solely for initialising all subsystems, ensures that they are registered with the correct {@link com.mercurialftc.mercurialftc.scheduler.Scheduler}, and that their init methods will be run
+ * called before {@link #initEX()},
+ * solely for initialising all of the subsystems, 
+ * ensures that they are registered with the correct 
+ * {@link com.mercurialftc.mercurialftc.scheduler.Scheduler}, 
+ * and that their init methods will be run
  */
 @Override
 public void registerSubsystems() {
@@ -21,7 +24,7 @@ public void registerSubsystems() {
 }
 ```
 
-registerSubsystems() allows you to construct each of your subsystems, assigning values to the fields that need to be made in the OpModeEX class. After this method is run, the OpModeEX will automatically call .init() on each subsystem that was constructed, and initialise them in the order they are constructed in.
+registerSubsystems() allows you to construct each of your subsystems and assign values to the fields that need to be made in the OpModeEX class. After this method is run, the OpModeEX will automatically call .init() on each subsystem that was constructed, and initialise them in the order they are constructed in.
 
 ### initEX()
 
@@ -35,14 +38,15 @@ public void initEX() {
 }
 ```
 
-initEX() should contain any additional initialisation code that needs to be run, after the subsystems are all initialised. This might include additional configuration, the generation of paths, or similar.
+initEX() should contain any additional initialisation code that needs to be run, but only after the subsystems are all initialised. This might include additional configurations, the generation of paths, and/or similar.
 
 ### registerBindings()
 
 ```java
 /**
  * registers bindings after the subsystem and regular init code,
- * useful for organisation of your OpModeEX, but functionally no different to initialising them at the end of {@link #initEX()}
+ * useful for organisation of your OpModeEX, but functionally no different 
+ * to initialising them at the end of {@link #initEX()}
  */
 @Override
 public void registerBindings() {

@@ -12,32 +12,72 @@ public class AdvancingStateCommandGroup implements CommandGroup {
 	private final ArrayList<Command> commands;
 	private final Set<SubsystemInterface> requiredSubsystems;
 	private final Set<OpModeEX.OpModeEXRunStates> runStates;
+	private final Command advanceCommand, reverseCommand;
+	private final boolean wraps;
 	private int commandIndex;
 	@Nullable
 	private Command currentCommand;
 	private boolean advanceState;
 
 	/**
-	 * a new empty AdvancingStateCommandGroup, which will interrupt its current command (if running) and move on to the next one when .queue() is called on it again
+	 * a new empty AdvancingStateCommandGroup, which will interrupt its current command (if running) and move on to the next/previous one when {@link #advanceCommand()} or {@link #reverseCommand()} are called
 	 */
-	public AdvancingStateCommandGroup() {
-		this(new ArrayList<>(), new HashSet<>(), new HashSet<>(2));
+	public AdvancingStateCommandGroup(boolean wraps) {
+		this(wraps, new ArrayList<>(), new HashSet<>(), new HashSet<>(2));
 	}
 
-	private AdvancingStateCommandGroup(ArrayList<Command> commands, Set<SubsystemInterface> requirements, Set<OpModeEX.OpModeEXRunStates> runStates) {
+	private AdvancingStateCommandGroup(boolean wraps, ArrayList<Command> commands, Set<SubsystemInterface> requirements, Set<OpModeEX.OpModeEXRunStates> runStates) {
 		this.requiredSubsystems = requirements;
 		this.runStates = runStates;
 		this.commands = commands;
+		this.wraps = wraps;
 		commandIndex = -1;
 		advanceState = false;
+
+		this.advanceCommand = new LambdaCommand().addInit(() -> {
+			queue();
+			if (commandIndex != commands.size() - 1 || wraps) {
+				commandIndex++;
+				commandIndex %= commands.size();
+				advanceState = true;
+			}
+		});
+		this.reverseCommand = new LambdaCommand().addInit(() -> {
+			queue();
+			if (commandIndex != 0 || wraps) {
+				commandIndex--;
+				commandIndex %= commands.size();
+				advanceState = true;
+			}
+		});
 	}
 
-	@Override
-	public void queue() {
-		CommandGroup.super.queue();
-		commandIndex++;
-		commandIndex %= commands.size();
-		advanceState = true;
+	/**
+	 * moves the index back one, if the index was 0 and wrapping is true, moves to the last index
+	 */
+	public void reverse() {
+		this.reverseCommand.initialise();
+	}
+
+	/**
+	 * moves the index forward one, if the index was the last one and wrapping is true, moves to the index 0
+	 */
+	public void advance() {
+		this.advanceCommand.initialise();
+	}
+
+	/**
+	 * moves the index forward one, if the index was the last one and wrapping is true, moves to the index 0
+	 */
+	public Command advanceCommand() {
+		return this.advanceCommand;
+	}
+
+	/**
+	 * moves the index back one, if the index was 0 and wrapping is true, moves to the last index
+	 */
+	public Command reverseCommand() {
+		return this.reverseCommand;
 	}
 
 	/**
@@ -79,6 +119,7 @@ public class AdvancingStateCommandGroup implements CommandGroup {
 		Scheduler.getSchedulerInstance().registerComposedCommands(commands);
 
 		return new AdvancingStateCommandGroup(
+				this.wraps,
 				newCommandList,
 				newRequirementSet,
 				newRunStates

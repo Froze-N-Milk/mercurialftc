@@ -86,8 +86,8 @@ public class AdvancingStateCommandGroup implements CommandGroup {
 	}
 
 	@Override
-	public final boolean interruptable() {
-		return currentCommand == null || currentCommand.interruptable();
+	public final boolean interruptible() {
+		return currentCommand == null || currentCommand.interruptible();
 	}
 
 	@Override

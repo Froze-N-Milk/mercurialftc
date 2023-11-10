@@ -97,8 +97,8 @@ public class SelectionCommandGroup<E extends Enum<E>> implements Command {
 	}
 
 	@Override
-	public boolean interruptable() {
-		return currentCommand == null || currentCommand.interruptable();
+	public boolean interruptible() {
+		return currentCommand == null || currentCommand.interruptible();
 	}
 
 	@Override

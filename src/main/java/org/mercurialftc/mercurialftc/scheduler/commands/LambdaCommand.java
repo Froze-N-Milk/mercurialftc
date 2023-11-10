@@ -76,7 +76,7 @@ public class LambdaCommand implements Command {
 	@NotNull
 	public static LambdaCommand from(@NotNull Command command) {
 		if (command instanceof LambdaCommand) return (LambdaCommand) command;
-		return new LambdaCommand(command::getRequiredSubsystems, command::initialise, command::execute, command::finished, command::end, command::interruptable, command::getRunStates);
+		return new LambdaCommand(command::getRequiredSubsystems, command::initialise, command::execute, command::finished, command::end, command::interruptible, command::getRunStates);
 	}
 
 	/**
@@ -393,7 +393,7 @@ public class LambdaCommand implements Command {
 	}
 
 	@Override
-	public final boolean interruptable() {
+	public final boolean interruptible() {
 		return interruptibleSupplier.getAsBoolean();
 	}
 

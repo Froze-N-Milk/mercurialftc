@@ -4,7 +4,6 @@ import org.mercurialftc.mercurialftc.scheduler.OpModeEX;
 import org.mercurialftc.mercurialftc.scheduler.Scheduler;
 import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
 
-import java.util.HashSet;
 import java.util.Set;
 
 public interface Command {
@@ -43,7 +42,7 @@ public interface Command {
 	/**
 	 * @return if this command is allowed to be interrupted by others
 	 */
-	default boolean interruptable() {
+	default boolean interruptible() {
 		return true;
 	}
 

@@ -14,7 +14,6 @@ import java.util.*;
 @SuppressWarnings("unused")
 public class Scheduler {
 	public static Scheduler scheduler;
-
 	private static boolean schedulerRefreshEnabled, loggingEnabled;
 	private static ConfigOptionsManager configOptionsManager;
 	private final LinkedHashSet<SubsystemInterface> subsystems; // currently registered Subsystems
@@ -163,7 +162,7 @@ public class Scheduler {
 			// for each subsystem required, check the command currently requiring it, and make sure that they can all be overwritten
 			for (SubsystemInterface subsystem : commandRequirements) {
 				Command requirer = requirements.get(subsystem);
-				if (requirer != null && !requirer.interruptable()) {
+				if (requirer != null && !requirer.interruptible()) {
 					return;
 				}
 			}
@@ -430,5 +429,4 @@ public class Scheduler {
 			return option;
 		}
 	}
-
 }

@@ -67,9 +67,15 @@ public class Binding<B extends Binding<B>> implements BooleanSupplier {
 		return thisAsB;
 	}
 
-	public B toggle(@NotNull Command toRun) {
+	public B toggleTrue(@NotNull Command toRun) {
 		registrationCheck();
 		new Trigger(() -> toggledOn && !previousToggleState, LambdaCommand.from(toRun).addFinish(() -> !toggledOn));
+		return thisAsB;
+	}
+
+	public B toggleFalse(@NotNull Command toRun) {
+		registrationCheck();
+		new Trigger(() -> !toggledOn && !previousToggleState, LambdaCommand.from(toRun).addFinish(() -> toggledOn));
 		return thisAsB;
 	}
 

@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
 import org.mercurialftc.mercurialftc.scheduler.bindings.gamepadex.GamepadEX;
+import org.mercurialftc.mercurialftc.util.heavymetal.HeavyMetal;
+import org.mercurialftc.mercurialftc.util.heavymetal.TraceComponentRenderer;
 
 import java.util.List;
 
@@ -20,6 +22,8 @@ public abstract class OpModeEX extends OpMode {
 	private List<LynxModule> allHubs;
 
 	private ElapsedTime elapsedTime;
+
+	private HeavyMetal heavyMetal;
 
 	public OpModeEX() {
 		scheduler = Scheduler.freshInstance();
@@ -39,6 +43,10 @@ public abstract class OpModeEX extends OpMode {
 
 	public final List<LynxModule> getAllHubs() {
 		return allHubs;
+	}
+
+	public HeavyMetal getHeavyMetal() {
+		return heavyMetal;
 	}
 
 	public final ElapsedTime getElapsedTime() {
@@ -115,6 +123,9 @@ public abstract class OpModeEX extends OpMode {
 
 		initialising.setValue("");
 		scheduler.setRunState(OpModeEXRunStates.INIT_LOOP);
+
+		HeavyMetal heavyMetal = new HeavyMetal(telemetry, TraceComponentRenderer.RenderOrder.getDefaultMapping());
+		heavyMetal.findTraces(this, this.getClass());
 	}
 
 	public abstract void init_loopEX();
@@ -133,6 +144,7 @@ public abstract class OpModeEX extends OpMode {
 		init_loopEX();
 		scheduler.pollCommands();
 		scheduler.postLoopUpdateBindings();
+		heavyMetal.update();
 		telemetry.update();
 	}
 
@@ -165,6 +177,7 @@ public abstract class OpModeEX extends OpMode {
 		loopEX();
 		scheduler.pollCommands();
 		scheduler.postLoopUpdateBindings();
+		heavyMetal.update();
 		telemetry.update();
 	}
 

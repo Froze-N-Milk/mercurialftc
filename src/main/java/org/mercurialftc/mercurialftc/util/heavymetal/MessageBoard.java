@@ -14,6 +14,7 @@ public class MessageBoard implements TraceComponent {
 
 	public MessageBoard(MessageBoardQueue<TraceMessage> messageQueue) {
 		this.messageQueue = messageQueue;
+		this.cachedBuild = "";
 	}
 
 	@NotNull
@@ -33,6 +34,7 @@ public class MessageBoard implements TraceComponent {
 
 	public void add(TraceMessage message) {
 		messageQueue.offer(message);
+		this.cachedBuild = rebuild();
 	}
 
 	public static class Builder implements TraceComponentBuilder {
@@ -47,6 +49,7 @@ public class MessageBoard implements TraceComponent {
 		@Override
 		public TraceComponent build() {
 			if (length == 0) return null;
+			length += 2;
 			return new MessageBoard(new MessageBoardQueue<>(length));
 		}
 	}

@@ -36,13 +36,13 @@ public class MessageBoardQueue<T> extends AbstractQueue<T> {
 	@Override
 	public boolean offer(T t) {
 		if (t == null) return false;
+		this.array[getEndIndex()] = t;
 		currentLen++;
 		if (currentLen >= this.array.length) {
 			currentLen = this.array.length;
 			startIndex++;
 			startIndex %= this.array.length;
 		}
-		this.array[getEndIndex()] = t;
 		return true;
 	}
 

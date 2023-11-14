@@ -3,11 +3,14 @@ package org.mercurialftc.mercurialftc.util.heavymetal;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.jetbrains.annotations.NotNull;
 import org.mercurialftc.mercurialftc.util.heavymetal.annotations.DataField;
+import org.mercurialftc.mercurialftc.util.heavymetal.annotations.OnCall;
 import org.mercurialftc.mercurialftc.util.heavymetal.annotations.Traced;
 import org.mercurialftc.mercurialftc.util.heavymetal.collections.ArrayMap;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -18,6 +21,8 @@ public class HeavyMetal {
 
 	private final HashMap<String, TraceComponentRenderer> traceComponents;
 	private final TraceComponentRenderer.RenderOrder renderOrder;
+	private final LinkedHashMap<Object, ArrayMap.Entry<String, Method>> onCalls;
+	private final long startTime;
 
 	public HeavyMetal(@NotNull Telemetry telemetry, TraceComponentRenderer.RenderOrder renderOrder) {
 		telemetry.setAutoClear(false);
@@ -34,6 +39,8 @@ public class HeavyMetal {
 
 		this.traceComponents = new HashMap<>();
 		this.renderOrder = renderOrder;
+		this.startTime = System.nanoTime();
+		this.onCalls = new LinkedHashMap<>();
 	}
 
 	public HeavyMetal(Object outputHolder, Field outputField, TraceComponentRenderer.RenderOrder renderOrder) {
@@ -43,6 +50,8 @@ public class HeavyMetal {
 
 		this.traceComponents = new HashMap<>();
 		this.renderOrder = renderOrder;
+		this.startTime = System.nanoTime();
+		this.onCalls = new LinkedHashMap<>();
 	}
 
 	void set(String output) {
@@ -51,6 +60,62 @@ public class HeavyMetal {
 		} catch (IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	/**
+	 * a standalone publish that requires no annotation on the method calling this
+	 *
+	 * @param group
+	 * @param label
+	 * @param contents
+	 */
+	public void publish(String group, String label, String contents) {
+		traceComponents.putIfAbsent(group, new TraceComponentRenderer.Builder(renderOrder).add(MessageBoard.class).build(group));
+		TraceComponentRenderer renderer = this.traceComponents.get(group);
+		if (renderer == null) return;
+		renderer.add(MessageBoard.class, new TimedTraceMessage(startTime, label, contents));
+	}
+
+	/**
+	 * publishes the contents of the onCall annotation attached to this method, if there is no annotation, does nothing
+	 *
+	 * @param object target object, usually should be 'this'
+	 */
+	public void publish(Object object) {
+		ArrayMap.Entry<String, Method> target = onCalls.get(object);
+		if (target == null) return;
+		OnCall annotation = target.getValue().getDeclaredAnnotation(OnCall.class);
+		if (annotation == null) return;
+		String group = annotation.group();
+		if (Objects.equals("", group)) group = target.getKey();
+		traceComponents.putIfAbsent(group, new TraceComponentRenderer.Builder(renderOrder).add(MessageBoard.class).build(group));
+		TraceComponentRenderer renderer = this.traceComponents.get(group);
+		if (renderer == null) return;
+		String label = annotation.label();
+		if (Objects.equals("", label)) label = target.getValue().getName();
+		String contents = annotation.contents();
+		if (Objects.equals("", contents)) contents = "was invoked";
+		renderer.add(MessageBoard.class, new TimedTraceMessage(startTime, label, contents));
+	}
+
+	/**
+	 * publishes the contents of the onCall annotation attached to this method, if there is no annotation, does nothing
+	 *
+	 * @param object target object, usually should be 'this'
+	 */
+	public void publish(Object object, String contents) {
+		ArrayMap.Entry<String, Method> target = onCalls.get(object);
+		if (target == null) return;
+		OnCall annotation = target.getValue().getDeclaredAnnotation(OnCall.class);
+		if (annotation == null) return;
+		String group = annotation.group();
+		if (Objects.equals("", group)) group = target.getKey();
+		traceComponents.putIfAbsent(group, new TraceComponentRenderer.Builder(renderOrder).add(MessageBoard.class).build(group));
+		TraceComponentRenderer renderer = this.traceComponents.get(group);
+		if (renderer == null) return;
+		String label = annotation.label();
+		if (Objects.equals("", label)) label = target.getValue().getName();
+		renderer.add(MessageBoard.class, new TimedTraceMessage(startTime, label, contents));
 	}
 
 	public void update() {
@@ -96,6 +161,21 @@ public class HeavyMetal {
 				dataFields.add(instance, new ArrayMap.Entry<>(parentGroup, field));
 			}
 		}
+		for (Method method : instance.getClass().getDeclaredMethods()) {
+			if (method.isAnnotationPresent(OnCall.class)) {
+				method.setAccessible(true);
+
+				Traced annotation = instance.getClass().getDeclaredAnnotation(Traced.class);
+				String parentGroup = "";
+				if (annotation != null) {
+					parentGroup = annotation.group();
+				} else {
+					parentGroup = instance.getClass().getSimpleName();
+				}
+
+				onCalls.put(instance, new ArrayMap.Entry<>(parentGroup, method));
+			}
+		}
 		for (ArrayMap.Entry<Object, Field> entry : tracedFields) {
 			try {
 				Object searchTarget = Objects.requireNonNull(entry.getValue().get(entry.getKey()));
@@ -111,6 +191,17 @@ public class HeavyMetal {
 								parentGroup = entry.getValue().getName();
 							}
 							dataFields.add(entry.getValue().get(entry.getKey()), new ArrayMap.Entry<>(parentGroup, field));
+						}
+					}
+					for (Method method : searchTargetClass.getDeclaredMethods()) {
+						if (method.isAnnotationPresent(OnCall.class)) {
+							method.setAccessible(true);
+
+							String parentGroup = Objects.requireNonNull(entry.getValue().getDeclaredAnnotation(Traced.class)).group();
+							if (Objects.equals(parentGroup, "") || parentGroup == null) {
+								parentGroup = entry.getValue().getName();
+							}
+							onCalls.put(entry.getValue().get(entry.getKey()), new ArrayMap.Entry<>(parentGroup, method));
 						}
 					}
 					searchTargetClass = searchTargetClass.getSuperclass();
@@ -145,7 +236,7 @@ public class HeavyMetal {
 			Object object = dataField.getKey();
 			if (field == null || object == null || !field.isAccessible()) continue;
 
-			Object target = null;
+			Object target;
 			try {
 				target = field.get(object);
 			} catch (IllegalAccessException e) {
@@ -154,6 +245,24 @@ public class HeavyMetal {
 			builder.add(DataBlock.class, new TraceMessage(label, target != null ? target::toString : null));
 		}
 
+		for (Map.Entry<Object, ArrayMap.Entry<String, Method>> onCall : onCalls.entrySet()) {
+			OnCall annotation = Objects.requireNonNull(onCall.getValue().getValue().getAnnotation(OnCall.class));
+
+			String group = annotation.group();
+			if (Objects.equals(group, "") || group == null) {
+				String parentGroup = onCall.getValue().getKey();
+				if (Objects.equals(parentGroup, "") || parentGroup == null) {
+					onCall.getKey().getClass().getSimpleName();
+				}
+				group = parentGroup;
+			}
+
+			builderMap.putIfAbsent(group, new TraceComponentRenderer.Builder(renderOrder));
+			TraceComponentRenderer.Builder builder = builderMap.get(group);
+			if (builder == null) continue;
+
+			builder.add(MessageBoard.class);
+		}
 		// builds the renders
 		for (Map.Entry<String, TraceComponentRenderer.Builder> renderBuilderEntry : builderMap.entrySet()) {
 			traceComponents.put(renderBuilderEntry.getKey(), renderBuilderEntry.getValue().build(renderBuilderEntry.getKey()));

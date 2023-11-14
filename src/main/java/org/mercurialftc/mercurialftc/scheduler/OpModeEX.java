@@ -124,7 +124,7 @@ public abstract class OpModeEX extends OpMode {
 		initialising.setValue("");
 		scheduler.setRunState(OpModeEXRunStates.INIT_LOOP);
 
-		HeavyMetal heavyMetal = new HeavyMetal(telemetry, TraceComponentRenderer.RenderOrder.getDefaultMapping());
+		heavyMetal = new HeavyMetal(telemetry, TraceComponentRenderer.RenderOrder.getDefaultMapping());
 		heavyMetal.findTraces(this, this.getClass());
 	}
 

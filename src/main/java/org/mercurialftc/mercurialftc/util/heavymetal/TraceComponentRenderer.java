@@ -53,16 +53,18 @@ public class TraceComponentRenderer {
 			}
 		}
 
-		public void add(Class<? extends TraceComponent> traceClass, TraceMessage message) {
+		public Builder add(Class<? extends TraceComponent> traceClass, TraceMessage message) {
 			Integer index = renderOrder.getIndex(traceClass);
 			if (index == null) throw new RuntimeException("Target trace class was not in the render order map");
 			traceComponentBuilders[index].add(message);
+			return this;
 		}
 
-		public void add(Class<? extends TraceComponent> traceClass) {
+		public Builder add(Class<? extends TraceComponent> traceClass) {
 			Integer index = renderOrder.getIndex(traceClass);
 			if (index == null) throw new RuntimeException("Target trace class was not in the render order map");
 			traceComponentBuilders[index].add();
+			return this;
 		}
 
 		public TraceComponentRenderer build(String title) {

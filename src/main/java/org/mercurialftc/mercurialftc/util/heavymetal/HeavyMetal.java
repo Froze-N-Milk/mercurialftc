@@ -1,18 +1,17 @@
 package org.mercurialftc.mercurialftc.util.heavymetal;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.mercurialftc.mercurialftc.util.heavymetal.annotations.DataField;
-import org.mercurialftc.mercurialftc.util.heavymetal.annotations.OnCall;
-import org.mercurialftc.mercurialftc.util.heavymetal.annotations.Traced;
+import org.mercurialftc.mercurialftc.util.heavymetal.annotations.*;
 import org.mercurialftc.mercurialftc.util.heavymetal.collections.ArrayMap;
+import org.mercurialftc.mercurialftc.util.heavymetal.collections.annotatedtargets.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @SuppressWarnings("unused")
 public class HeavyMetal {
@@ -21,7 +20,7 @@ public class HeavyMetal {
 
 	private final HashMap<String, TraceComponentRenderer> traceComponents;
 	private final TraceComponentRenderer.RenderOrder renderOrder;
-	private final LinkedHashMap<Object, ArrayMap.Entry<String, Method>> onCalls;
+	private final LinkedHashMap<Object, AnnotatedOnCall> onCalls;
 	private final long startTime;
 
 	public HeavyMetal(@NotNull Telemetry telemetry, TraceComponentRenderer.RenderOrder renderOrder) {
@@ -54,6 +53,46 @@ public class HeavyMetal {
 		this.onCalls = new LinkedHashMap<>();
 	}
 
+	@NotNull
+	@Contract(pure = true)
+	public static List<AnnotatedDataField> getDataFields(@NotNull Object bloodstream) {
+		ArrayList<Field> fields = new ArrayList<>();
+		Class<?> searchTargetClass = bloodstream.getClass();
+		Traced traced = bloodstream.getClass().getAnnotation(Traced.class);
+		String group = bloodstream.getClass().getSimpleName();
+		if (traced != null) group = traced.group();
+		String finalGroup = group;
+		while (searchTargetClass != null && searchTargetClass != Object.class) {
+			fields.addAll(Arrays.asList(searchTargetClass.getDeclaredFields()));
+			searchTargetClass = searchTargetClass.getSuperclass();
+		}
+		return fields.stream()
+				.filter(f -> f.isAnnotationPresent(DataField.class))
+				.peek(f -> f.setAccessible(true))
+				.map(f -> new AnnotatedDataField(bloodstream, f, finalGroup))
+				.collect(Collectors.toList());
+	}
+
+	@NotNull
+	@Contract(pure = true)
+	public static Map<Object, AnnotatedOnCall> getOnCalls(@NotNull Object bloodstream) {
+		ArrayList<Method> methods = new ArrayList<>();
+		Class<?> searchTargetClass = bloodstream.getClass();
+		Traced traced = bloodstream.getClass().getAnnotation(Traced.class);
+		String group = bloodstream.getClass().getSimpleName();
+		if (traced != null) group = traced.group();
+		String finalGroup = group;
+		while (searchTargetClass != null && searchTargetClass != Object.class) {
+			methods.addAll(Arrays.asList(searchTargetClass.getDeclaredMethods()));
+			searchTargetClass = searchTargetClass.getSuperclass();
+		}
+		return methods.stream()
+				.filter(m -> m.isAnnotationPresent(DataField.class))
+				.peek(m -> m.setAccessible(true))
+				.map(m -> new AnnotatedOnCall(bloodstream, m, finalGroup))
+				.collect(Collectors.toMap(AnnotatedTarget::getParentInstance, toCall -> toCall));
+	}
+
 	void set(String output) {
 		try {
 			this.output.set(outputHolder, output);
@@ -82,20 +121,12 @@ public class HeavyMetal {
 	 * @param object target object, usually should be 'this'
 	 */
 	public void publish(Object object) {
-		ArrayMap.Entry<String, Method> target = onCalls.get(object);
-		if (target == null) return;
-		OnCall annotation = target.getValue().getDeclaredAnnotation(OnCall.class);
-		if (annotation == null) return;
-		String group = annotation.group();
-		if (Objects.equals("", group)) group = target.getKey();
-		traceComponents.putIfAbsent(group, new TraceComponentRenderer.Builder(renderOrder).add(MessageBoard.class).build(group));
-		TraceComponentRenderer renderer = this.traceComponents.get(group);
+		AnnotatedOnCall onCall = onCalls.get(object);
+		if (onCall == null) return;
+		traceComponents.putIfAbsent(onCall.group(), new TraceComponentRenderer.Builder(renderOrder).add(MessageBoard.class).build(onCall.group()));
+		TraceComponentRenderer renderer = this.traceComponents.get(onCall.group());
 		if (renderer == null) return;
-		String label = annotation.label();
-		if (Objects.equals("", label)) label = target.getValue().getName();
-		String contents = annotation.contents();
-		if (Objects.equals("", contents)) contents = "was invoked";
-		renderer.add(MessageBoard.class, new TimedTraceMessage(startTime, label, contents));
+		renderer.add(MessageBoard.class, new TimedTraceMessage(startTime, onCall.label(), onCall.contents()));
 	}
 
 	/**
@@ -104,18 +135,12 @@ public class HeavyMetal {
 	 * @param object target object, usually should be 'this'
 	 */
 	public void publish(Object object, String contents) {
-		ArrayMap.Entry<String, Method> target = onCalls.get(object);
-		if (target == null) return;
-		OnCall annotation = target.getValue().getDeclaredAnnotation(OnCall.class);
-		if (annotation == null) return;
-		String group = annotation.group();
-		if (Objects.equals("", group)) group = target.getKey();
-		traceComponents.putIfAbsent(group, new TraceComponentRenderer.Builder(renderOrder).add(MessageBoard.class).build(group));
-		TraceComponentRenderer renderer = this.traceComponents.get(group);
+		AnnotatedOnCall onCall = onCalls.get(object);
+		if (onCall == null) return;
+		traceComponents.putIfAbsent(onCall.group(), new TraceComponentRenderer.Builder(renderOrder).add(MessageBoard.class).build(onCall.group()));
+		TraceComponentRenderer renderer = this.traceComponents.get(onCall.group());
 		if (renderer == null) return;
-		String label = annotation.label();
-		if (Objects.equals("", label)) label = target.getValue().getName();
-		renderer.add(MessageBoard.class, new TimedTraceMessage(startTime, label, contents));
+		renderer.add(MessageBoard.class, new TimedTraceMessage(startTime, onCall.label(), contents));
 	}
 
 	public void update() {
@@ -134,135 +159,33 @@ public class HeavyMetal {
 	 *
 	 * @param bloodstream the root class to start searching from
 	 */
-	public void findTraces(Object instance, Class<?> bloodstream) {
+	public void findTraces(GroupedData bloodstream) {
 		Map<String, TraceComponentRenderer.Builder> builderMap = new HashMap<>();
+		ArrayList<TracedField> tracedFields;
+		tracedFields = tracedFields(bloodstream, bloodstream.getClass(), bloodstream.group());
 
-		ArrayMap<Object, Field> tracedFields;
-		try {
-			tracedFields = tracedFields(instance, bloodstream);
-		} catch (IllegalAccessException e) {
-			throw new RuntimeException(e);
+		ArrayList<AnnotatedDataField> dataFields = new ArrayList<>(getDataFields(bloodstream));
+		onCalls.putAll(getOnCalls(bloodstream));
+
+		for (TracedField tracedField : tracedFields) {
+			tracedField.getDataFields().forEach(dataFields::add);
+			tracedField.getOnCalls().forEach(onCall -> onCalls.put(onCall.getParentInstance(), onCall));
 		}
 
-		ArrayMap<Object, ArrayMap.Entry<String, Field>> dataFields = new ArrayMap<>();
+		dataFields.forEach(dataField -> {
+			builderMap.putIfAbsent(dataField.group(), new TraceComponentRenderer.Builder(renderOrder));
+			TraceComponentRenderer.Builder builder = builderMap.get(dataField.group());
+			if (builder == null) return;
+			builder.add(DataBlock.class, new TraceMessage(dataField.label(), dataField.getChildInstance()::toString));
+		});
 
-		for (Field field : instance.getClass().getDeclaredFields()) {
-			if (field.isAnnotationPresent(DataField.class)) {
-				field.setAccessible(true);
-
-				Traced annotation = instance.getClass().getDeclaredAnnotation(Traced.class);
-				String parentGroup = "";
-				if (annotation != null) {
-					parentGroup = annotation.group();
-				} else {
-					parentGroup = instance.getClass().getSimpleName();
-				}
-
-				dataFields.add(instance, new ArrayMap.Entry<>(parentGroup, field));
-			}
-		}
-		for (Method method : instance.getClass().getDeclaredMethods()) {
-			if (method.isAnnotationPresent(OnCall.class)) {
-				method.setAccessible(true);
-
-				Traced annotation = instance.getClass().getDeclaredAnnotation(Traced.class);
-				String parentGroup = "";
-				if (annotation != null) {
-					parentGroup = annotation.group();
-				} else {
-					parentGroup = instance.getClass().getSimpleName();
-				}
-
-				onCalls.put(instance, new ArrayMap.Entry<>(parentGroup, method));
-			}
-		}
-		for (ArrayMap.Entry<Object, Field> entry : tracedFields) {
-			try {
-				Object searchTarget = Objects.requireNonNull(entry.getValue().get(entry.getKey()));
-				Class<?> searchTargetClass = searchTarget.getClass();
-
-				while (searchTargetClass != Object.class && searchTargetClass != null) {
-					for (Field field : searchTargetClass.getDeclaredFields()) {
-						if (field.isAnnotationPresent(DataField.class)) {
-							field.setAccessible(true);
-
-							String parentGroup = Objects.requireNonNull(entry.getValue().getDeclaredAnnotation(Traced.class)).group();
-							if (Objects.equals(parentGroup, "") || parentGroup == null) {
-								parentGroup = entry.getValue().getName();
-							}
-							dataFields.add(entry.getValue().get(entry.getKey()), new ArrayMap.Entry<>(parentGroup, field));
-						}
-					}
-					for (Method method : searchTargetClass.getDeclaredMethods()) {
-						if (method.isAnnotationPresent(OnCall.class)) {
-							method.setAccessible(true);
-
-							String parentGroup = Objects.requireNonNull(entry.getValue().getDeclaredAnnotation(Traced.class)).group();
-							if (Objects.equals(parentGroup, "") || parentGroup == null) {
-								parentGroup = entry.getValue().getName();
-							}
-							onCalls.put(entry.getValue().get(entry.getKey()), new ArrayMap.Entry<>(parentGroup, method));
-						}
-					}
-					searchTargetClass = searchTargetClass.getSuperclass();
-				}
-			} catch (IllegalAccessException e) {
-				throw new RuntimeException(e);
-			}
-		}
-
-		for (ArrayMap.Entry<Object, ArrayMap.Entry<String, Field>> dataField : dataFields) {
-			DataField annotation = Objects.requireNonNull(dataField.getValue().getValue().getAnnotation(DataField.class));
-
-			String group = annotation.group();
-			if (Objects.equals(group, "") || group == null) {
-				String parentGroup = dataField.getValue().getKey();
-				if (Objects.equals(parentGroup, "") || parentGroup == null) {
-					dataField.getKey().getClass().getSimpleName();
-				}
-				group = parentGroup;
-			}
-
-			String label = annotation.label();
-			if (Objects.equals(label, "") || label == null) {
-				label = dataField.getValue().getValue().getName();
-			}
-
-			builderMap.putIfAbsent(group, new TraceComponentRenderer.Builder(renderOrder));
-			TraceComponentRenderer.Builder builder = builderMap.get(group);
-			if (builder == null) continue;
-
-			Field field = dataField.getValue().getValue();
-			Object object = dataField.getKey();
-			if (field == null || object == null || !field.isAccessible()) continue;
-
-			Object target;
-			try {
-				target = field.get(object);
-			} catch (IllegalAccessException e) {
-				throw new RuntimeException(e);
-			}
-			builder.add(DataBlock.class, new TraceMessage(label, target != null ? target::toString : null));
-		}
-
-		for (Map.Entry<Object, ArrayMap.Entry<String, Method>> onCall : onCalls.entrySet()) {
-			OnCall annotation = Objects.requireNonNull(onCall.getValue().getValue().getAnnotation(OnCall.class));
-
-			String group = annotation.group();
-			if (Objects.equals(group, "") || group == null) {
-				String parentGroup = onCall.getValue().getKey();
-				if (Objects.equals(parentGroup, "") || parentGroup == null) {
-					onCall.getKey().getClass().getSimpleName();
-				}
-				group = parentGroup;
-			}
-
-			builderMap.putIfAbsent(group, new TraceComponentRenderer.Builder(renderOrder));
-			TraceComponentRenderer.Builder builder = builderMap.get(group);
-			if (builder == null) continue;
-
+		onCalls.forEach((k, onCall) -> {
+			builderMap.putIfAbsent(onCall.group(), new TraceComponentRenderer.Builder(renderOrder));
+			TraceComponentRenderer.Builder builder = builderMap.get(onCall.group());
+			if (builder == null) return;
 			builder.add(MessageBoard.class);
-		}
+		});
+
 		// builds the renders
 		for (Map.Entry<String, TraceComponentRenderer.Builder> renderBuilderEntry : builderMap.entrySet()) {
 			traceComponents.put(renderBuilderEntry.getKey(), renderBuilderEntry.getValue().build(renderBuilderEntry.getKey()));
@@ -276,26 +199,32 @@ public class HeavyMetal {
 	 * @param target      class of the root object
 	 */
 	@NotNull
-	private ArrayMap<Object, Field> tracedFields(@NotNull Object bloodstream, @NotNull Class<?> target) throws IllegalAccessException {
-		ArrayMap<Object, Field> traceMap = new ArrayMap<>();
+	private ArrayList<TracedField> tracedFields(@NotNull Object bloodstream, @NotNull Class<?> target, String parentGroup) {
+		ArrayList<TracedField> traceMap = new ArrayList<>();
 		for (Field field : target.getDeclaredFields()) {
 			if (field.isAnnotationPresent(Traced.class)) {
 				field.setAccessible(true);
-				traceMap.add(bloodstream, field);
+				if (field.isAnnotationPresent(Flatpack.class)) {
+					traceMap.add(new FlatpackedField(bloodstream, field, parentGroup));
+				} else {
+					traceMap.add(new TracedField(bloodstream, field));
+				}
 			}
 		}
 
-		ArrayMap<Object, Field> rTraceMap = new ArrayMap<>();
+		ArrayList<TracedField> rTraceMap = new ArrayList<>();
 
 		Class<?> parent = target.getSuperclass();
 		if (parent != null && parent != Object.class) {
-			rTraceMap.addAll(tracedFields(bloodstream, parent));
+			rTraceMap.addAll(tracedFields(bloodstream, parent, parentGroup));
 		}
 
-		for (ArrayMap.Entry<Object, Field> entry : traceMap) {
-			Object downstream = entry.getValue().get(entry.getKey());
-			if (downstream == null) continue;
-			rTraceMap.addAll(tracedFields(downstream, downstream.getClass()));
+		for (TracedField tracedField : traceMap) {
+			if (tracedField instanceof FlatpackedField) {
+				rTraceMap.addAll(tracedFields(tracedField.getChildInstance(), tracedField.getChildInstance().getClass(), parentGroup));
+			} else {
+				rTraceMap.addAll(tracedFields(tracedField.getChildInstance(), tracedField.getChildInstance().getClass(), tracedField.group()));
+			}
 		}
 
 		traceMap.addAll(rTraceMap);

@@ -8,11 +8,12 @@ import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
 import org.mercurialftc.mercurialftc.scheduler.bindings.gamepadex.GamepadEX;
 import org.mercurialftc.mercurialftc.util.heavymetal.HeavyMetal;
 import org.mercurialftc.mercurialftc.util.heavymetal.TraceComponentRenderer;
+import org.mercurialftc.mercurialftc.util.heavymetal.collections.annotatedtargets.GroupedData;
 
 import java.util.List;
 
 @SuppressWarnings("unused")
-public abstract class OpModeEX extends OpMode {
+public abstract class OpModeEX extends OpMode implements GroupedData {
 	private GamepadEX
 			gamepadEX1,
 			gamepadEX2;
@@ -125,7 +126,7 @@ public abstract class OpModeEX extends OpMode {
 		scheduler.setRunState(OpModeEXRunStates.INIT_LOOP);
 
 		heavyMetal = new HeavyMetal(telemetry, TraceComponentRenderer.RenderOrder.getDefaultMapping());
-		heavyMetal.findTraces(this, this.getClass());
+		heavyMetal.findTraces(this);
 	}
 
 	public abstract void init_loopEX();

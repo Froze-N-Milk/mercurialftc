@@ -19,6 +19,6 @@ public interface TraceComponent {
 		 * @return null if nothing was added
 		 */
 		@Nullable
-		TraceComponent build();
+		TraceComponent build(Object settings);
 	}
 }

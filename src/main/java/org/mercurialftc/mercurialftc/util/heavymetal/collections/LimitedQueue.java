@@ -7,12 +7,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 @SuppressWarnings("unused")
-public class MessageBoardQueue<T> extends AbstractQueue<T> {
+public class LimitedQueue<T> extends AbstractQueue<T> {
 	private final T[] array;
 	private int currentLen, startIndex;
 
 	@SuppressWarnings("unchecked")
-	public MessageBoardQueue(int capacity) {
+	public LimitedQueue(int capacity) {
 		this.currentLen = startIndex = 0;
 		this.array = (T[]) new Object[capacity];
 	}
@@ -21,7 +21,13 @@ public class MessageBoardQueue<T> extends AbstractQueue<T> {
 	@NotNull
 	@Override
 	public Iterator<T> iterator() {
-		return new TraceMessageBoardIterator<>(this);
+		return new LimitedQueueIterator<>(this);
+	}
+
+	@NonNull
+	@NotNull
+	public Iterator<T> reverseIterator() {
+		return new ReverseLimitedQueueIterator<>(this);
 	}
 
 	private int getEndIndex() {
@@ -38,7 +44,7 @@ public class MessageBoardQueue<T> extends AbstractQueue<T> {
 		if (t == null) return false;
 		this.array[getEndIndex()] = t;
 		currentLen++;
-		if (currentLen >= this.array.length) {
+		if (currentLen > this.array.length) {
 			currentLen = this.array.length;
 			startIndex++;
 			startIndex %= this.array.length;
@@ -66,12 +72,12 @@ public class MessageBoardQueue<T> extends AbstractQueue<T> {
 		return this.array[startIndex];
 	}
 
-	public static class TraceMessageBoardIterator<T> implements Iterator<T> {
-		private final MessageBoardQueue<T> queue;
+	public static class LimitedQueueIterator<T> implements Iterator<T> {
+		private final LimitedQueue<T> queue;
 		private final int startIndex;
 		private int index;
 
-		public TraceMessageBoardIterator(@NotNull MessageBoardQueue<T> queue) {
+		public LimitedQueueIterator(@NotNull LimitedQueue<T> queue) {
 			this.queue = queue;
 			this.startIndex = queue.startIndex;
 			this.index = 0;
@@ -85,6 +91,32 @@ public class MessageBoardQueue<T> extends AbstractQueue<T> {
 		@Override
 		public T next() {
 			return queue.array[(startIndex + index++) % queue.size()];
+		}
+	}
+
+	public static class ReverseLimitedQueueIterator<T> implements Iterator<T> {
+		private final LimitedQueue<T> queue;
+		private final int startIndex;
+		private int index;
+
+		public ReverseLimitedQueueIterator(@NotNull LimitedQueue<T> queue) {
+			this.queue = queue;
+			int startIndex = queue.getEndIndex() - 1;
+			if (startIndex < 0) startIndex += queue.size();
+			this.startIndex = startIndex;
+			this.index = 0;
+		}
+
+		@Override
+		public boolean hasNext() {
+			return Math.abs(index) < queue.size();
+		}
+
+		@Override
+		public T next() {
+			int i = (startIndex + index--) % queue.size();
+			if (i < 0) i += queue.size();
+			return queue.array[i];
 		}
 	}
 }

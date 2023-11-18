@@ -7,7 +7,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.mercurialftc.mercurialftc.scheduler.subsystems.SubsystemInterface;
 import org.mercurialftc.mercurialftc.scheduler.bindings.gamepadex.GamepadEX;
 import org.mercurialftc.mercurialftc.util.heavymetal.HeavyMetal;
-import org.mercurialftc.mercurialftc.util.heavymetal.TraceComponentRenderer;
+import org.mercurialftc.mercurialftc.util.heavymetal.RenderOrder;
 import org.mercurialftc.mercurialftc.util.heavymetal.collections.annotatedtargets.GroupedData;
 
 import java.util.List;
@@ -125,7 +125,7 @@ public abstract class OpModeEX extends OpMode implements GroupedData {
 		initialising.setValue("");
 		scheduler.setRunState(OpModeEXRunStates.INIT_LOOP);
 
-		heavyMetal = new HeavyMetal(telemetry, TraceComponentRenderer.RenderOrder.getDefaultMapping());
+		heavyMetal = new HeavyMetal(telemetry, RenderOrder.DEFAULT_MAPPING);
 		heavyMetal.findTraces(this);
 	}
 

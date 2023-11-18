@@ -2,23 +2,27 @@ package org.mercurialftc.mercurialftc.util.heavymetal;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.mercurialftc.mercurialftc.util.heavymetal.collections.MessageBoardQueue;
+import org.mercurialftc.mercurialftc.util.heavymetal.collections.LimitedQueue;
 
-import java.util.ArrayList;
-import java.util.Queue;
+import java.util.Iterator;
+import java.util.stream.Stream;
 
 @SuppressWarnings("unused")
 public class MessageBoard implements TraceComponent {
-	private final MessageBoardQueue<TraceMessage> messageQueue;
+	private final LimitedQueue<TraceMessage> messageQueue;
 	private String cachedBuild;
 
-	public MessageBoard(MessageBoardQueue<TraceMessage> messageQueue) {
+	public MessageBoard(LimitedQueue<TraceMessage> messageQueue) {
 		this.messageQueue = messageQueue;
 		this.cachedBuild = "";
 	}
 
+	protected LimitedQueue<TraceMessage> getMessageQueue() {
+		return messageQueue;
+	}
+
 	@NotNull
-	private String rebuild() {
+	protected String rebuild() {
 		StringBuilder builder = new StringBuilder();
 		for (TraceMessage line : messageQueue) {
 			builder.append(line).append("\n");
@@ -47,10 +51,54 @@ public class MessageBoard implements TraceComponent {
 
 		@Nullable
 		@Override
-		public TraceComponent build() {
+		public TraceComponent build(Object settings) {
+			Settings castSettings = (Settings) settings;
 			if (length == 0) return null;
-			length += 2;
-			return new MessageBoard(new MessageBoardQueue<>(length));
+			if (castSettings.len != 0) length = castSettings.len;
+			else {
+				length += 2;
+			}
+			if (castSettings.reversed) return new ReversedMessageBoard(new LimitedQueue<>(length));
+			return new MessageBoard(new LimitedQueue<>(length));
+		}
+	}
+
+	public static class Settings {
+		private final boolean reversed;
+		private final int len;
+
+		public Settings(boolean reversed, int len) {
+			this.reversed = reversed;
+			this.len = len;
+		}
+
+		public Settings(boolean reversed) {
+			this(reversed, 0);
+		}
+
+		public Settings(int len) {
+			this(true, len);
+		}
+
+		public Settings() {
+			this(true, 0);
+		}
+	}
+
+	public static class ReversedMessageBoard extends MessageBoard {
+		public ReversedMessageBoard(LimitedQueue<TraceMessage> messageQueue) {
+			super(messageQueue);
+		}
+
+		@Override
+		@NotNull
+		protected String rebuild() {
+			StringBuilder builder = new StringBuilder();
+			for (Iterator<TraceMessage> it = getMessageQueue().reverseIterator(); it.hasNext(); ) {
+				TraceMessage line = it.next();
+				builder.append(line).append("\n");
+			}
+			return builder.toString();
 		}
 	}
 }

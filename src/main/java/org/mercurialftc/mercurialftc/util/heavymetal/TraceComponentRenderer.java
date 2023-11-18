@@ -2,9 +2,10 @@ package org.mercurialftc.mercurialftc.util.heavymetal;
 
 import androidx.annotation.NonNull;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.mercurialftc.mercurialftc.util.heavymetal.collections.ArrayMap;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.Map;
 
 public class TraceComponentRenderer {
 	private final String title;
@@ -30,9 +31,9 @@ public class TraceComponentRenderer {
 	}
 
 	public void add(Class<? extends TraceComponent> traceClass, TraceMessage message) {
-		Integer index = renderOrder.getIndex(traceClass);
-		if (index == null) throw new RuntimeException("Target trace class was not in the render order map");
-		traceComponents[index].add(message);
+		ArrayMap.Entry<Integer, RenderOrder.Render<?>> entry = renderOrder.getEntry(traceClass);
+		if (entry == null) throw new RuntimeException("Target trace class was not in the render order map");
+		traceComponents[entry.getKey()].add(message);
 	}
 
 	public static class Builder {
@@ -42,11 +43,10 @@ public class TraceComponentRenderer {
 		public Builder(@NotNull RenderOrder renderOrder) {
 			this.renderOrder = renderOrder;
 			traceComponentBuilders = new TraceComponent.TraceComponentBuilder[renderOrder.getOrderMapping().size()];
-			for (Map.Entry<Class<? extends TraceComponent>, Integer> component : renderOrder.getOrderMapping().entrySet()) {
+			for (Map.Entry<Class<? extends TraceComponent>, ArrayMap.Entry<Integer, RenderOrder.Render<?>>> component : renderOrder.getOrderMapping().entrySet()) {
 				try {
-					@SuppressWarnings("unchecked")
-					Class<? extends TraceComponent.TraceComponentBuilder> builder = (Class<? extends TraceComponent.TraceComponentBuilder>) component.getKey().getDeclaredClasses()[0];
-					traceComponentBuilders[component.getValue()] = builder.newInstance();
+					Class<? extends TraceComponent.TraceComponentBuilder> builder = component.getValue().getValue().getComponentBuilder();
+					traceComponentBuilders[component.getValue().getKey()] = builder.newInstance();
 				} catch (IllegalAccessException | InstantiationException e) {
 					throw new RuntimeException(e);
 				}
@@ -54,53 +54,29 @@ public class TraceComponentRenderer {
 		}
 
 		public Builder add(Class<? extends TraceComponent> traceClass, TraceMessage message) {
-			Integer index = renderOrder.getIndex(traceClass);
-			if (index == null) throw new RuntimeException("Target trace class was not in the render order map");
-			traceComponentBuilders[index].add(message);
+			ArrayMap.Entry<Integer, RenderOrder.Render<?>> entry = renderOrder.getEntry(traceClass);
+			if (entry == null) throw new RuntimeException("Target trace class was not in the render order map");
+			traceComponentBuilders[entry.getKey()].add(message);
 			return this;
 		}
 
 		public Builder add(Class<? extends TraceComponent> traceClass) {
-			Integer index = renderOrder.getIndex(traceClass);
-			if (index == null) throw new RuntimeException("Target trace class was not in the render order map");
-			traceComponentBuilders[index].add();
+			ArrayMap.Entry<Integer, RenderOrder.Render<?>> entry = renderOrder.getEntry(traceClass);
+			if (entry == null) throw new RuntimeException("Target trace class was not in the render order map");
+			traceComponentBuilders[entry.getKey()].add();
 			return this;
 		}
 
 		public TraceComponentRenderer build(String title) {
 			TraceComponent[] traceComponents = new TraceComponent[traceComponentBuilders.length];
-			for (int i = 0; i < traceComponentBuilders.length; i++) {
-				TraceComponent.TraceComponentBuilder builder = traceComponentBuilders[i];
-				traceComponents[i] = builder.build();
+			int i = 0;
+			for (Iterator<Map.Entry<Class<? extends TraceComponent>, ArrayMap.Entry<Integer, RenderOrder.Render<?>>>> it = renderOrder.getOrderMapping().entrySet().iterator(); it.hasNext(); i++) {
+				Map.Entry<Class<? extends TraceComponent>, ArrayMap.Entry<Integer, RenderOrder.Render<?>>> render_entry = it.next();
+				TraceComponent.TraceComponentBuilder builder = traceComponentBuilders[render_entry.getValue().getKey()];
+				traceComponents[i] = builder.build(render_entry.getValue().getValue().getSettings());
 			}
 			return new TraceComponentRenderer(title, traceComponents, renderOrder);
 		}
 	}
 
-	public static class RenderOrder {
-		private final static RenderOrder defaultMapping = new RenderOrder(DataBlock.class, MessageBoard.class);
-		private final LinkedHashMap<Class<? extends TraceComponent>, Integer> orderMapping;
-
-		@SafeVarargs
-		public RenderOrder(@NotNull Class<? extends TraceComponent>... traceComponents) {
-			LinkedHashMap<Class<? extends TraceComponent>, Integer> map = new LinkedHashMap<>();
-			for (int i = 0; i < traceComponents.length; i++) {
-				map.put(traceComponents[i], i);
-			}
-			this.orderMapping = map;
-		}
-
-		public static RenderOrder getDefaultMapping() {
-			return defaultMapping;
-		}
-
-		public LinkedHashMap<Class<? extends TraceComponent>, Integer> getOrderMapping() {
-			return orderMapping;
-		}
-
-		@Nullable
-		public Integer getIndex(Class<? extends TraceComponent> componentClass) {
-			return orderMapping.get(componentClass);
-		}
-	}
 }

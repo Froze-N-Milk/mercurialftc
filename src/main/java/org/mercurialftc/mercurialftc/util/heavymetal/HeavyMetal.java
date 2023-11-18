@@ -4,14 +4,12 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.mercurialftc.mercurialftc.util.heavymetal.annotations.*;
-import org.mercurialftc.mercurialftc.util.heavymetal.collections.ArrayMap;
 import org.mercurialftc.mercurialftc.util.heavymetal.collections.annotatedtargets.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @SuppressWarnings("unused")
 public class HeavyMetal {
@@ -19,11 +17,11 @@ public class HeavyMetal {
 	private final Object outputHolder;
 
 	private final HashMap<String, TraceComponentRenderer> traceComponents;
-	private final TraceComponentRenderer.RenderOrder renderOrder;
+	private final RenderOrder renderOrder;
 	private final LinkedHashMap<Object, AnnotatedOnCall> onCalls;
 	private final long startTime;
 
-	public HeavyMetal(@NotNull Telemetry telemetry, TraceComponentRenderer.RenderOrder renderOrder) {
+	public HeavyMetal(@NotNull Telemetry telemetry, RenderOrder renderOrder) {
 		telemetry.setAutoClear(false);
 		telemetry.setDisplayFormat(Telemetry.DisplayFormat.MONOSPACE);
 		telemetry.setCaptionValueSeparator("");
@@ -42,7 +40,7 @@ public class HeavyMetal {
 		this.onCalls = new LinkedHashMap<>();
 	}
 
-	public HeavyMetal(Object outputHolder, Field outputField, TraceComponentRenderer.RenderOrder renderOrder) {
+	public HeavyMetal(Object outputHolder, Field outputField, RenderOrder renderOrder) {
 		this.outputHolder = outputHolder;
 		this.output = outputField;
 		output.setAccessible(true);

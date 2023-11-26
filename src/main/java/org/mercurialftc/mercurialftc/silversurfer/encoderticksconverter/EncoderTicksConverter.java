@@ -11,7 +11,7 @@ public class EncoderTicksConverter {
 	 * @param unit         the unit type you used to measure this ratio
 	 */
 	public EncoderTicksConverter(double ticksPerUnit, Units unit) {
-		this.ticksPerMillimeter = unit.toMillimeters(ticksPerUnit);
+		this.ticksPerMillimeter = unit.fromMillimeters(ticksPerUnit);
 	}
 
 	/**

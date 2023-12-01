@@ -33,7 +33,7 @@ public class TurnBuilder extends FollowableBuilder {
 		segmentOutputSizes = new double[segments.size()];
 
 		for (int i = 0; i < segments.size(); i++) {
-			double difference = segments.get(i).getDifference();
+			double difference = Math.abs(segments.get(i).getDifference());
 
 			double estimate = difference / targetOutputFrequency;
 			int accurateResult = (int) Math.round(estimate);
@@ -101,6 +101,8 @@ public class TurnBuilder extends FollowableBuilder {
 
 			double finalVelocityConstraint = Math.min(vAccelerationLimited, vMax);
 
+//			double errorSignum = Math.signum(segment.getDifference());
+
 			int previousBreakPoint = 0;
 			if (segmentIndex > 0) previousBreakPoint = segmentBreakpoints[segmentIndex - 1];
 			int numberOfSubdivisions = i - previousBreakPoint;
@@ -143,7 +145,7 @@ public class TurnBuilder extends FollowableBuilder {
 
 			double finalVelocityConstraint = Math.min(rotationalVelocity, vMaxAccelerationLimited);
 
-			double errorSignum = Math.signum(segment.getPreviousPose().getTheta().findShortestDistance(segment.getDestinationPose().getTheta()));
+			double errorSignum = Math.signum(segment.getDifference());
 
 			outputs[i] = new Followable.Output(
 					outputs[i].getTranslationVector(),

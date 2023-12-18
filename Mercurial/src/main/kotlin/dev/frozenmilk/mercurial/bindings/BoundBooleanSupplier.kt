@@ -2,6 +2,7 @@ package dev.frozenmilk.mercurial.bindings
 
 import dev.frozenmilk.dairy.calcified.gamepad.EnhancedBooleanSupplier
 import dev.frozenmilk.mercurial.commands.Command
+import dev.frozenmilk.mercurial.commands.toLambda
 import java.util.function.Supplier
 
 class BoundBooleanSupplier(private val booleanSupplier: EnhancedBooleanSupplier) : Supplier<Boolean> by booleanSupplier {
@@ -83,7 +84,7 @@ class BoundBooleanSupplier(private val booleanSupplier: EnhancedBooleanSupplier)
 	 * registers [toRun] to be triggered when this condition is true, and ends it early if it becomes false
 	 */
 	fun whileTrue(toRun: Command): BoundBooleanSupplier {
-		TODO()
+		Binding(booleanSupplier::whenTrue, toRun.toLambda().addFinish { !booleanSupplier.get() })
 		return this
 	}
 
@@ -91,7 +92,7 @@ class BoundBooleanSupplier(private val booleanSupplier: EnhancedBooleanSupplier)
 	 * registers [toRun] to be triggered when this condition is false, and ends it early if it becomes true
 	 */
 	fun whileFalse(toRun: Command): BoundBooleanSupplier {
-		TODO()
+		Binding(booleanSupplier::whenFalse, toRun.toLambda().addFinish(booleanSupplier::get))
 		return this
 	}
 

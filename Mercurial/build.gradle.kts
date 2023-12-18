@@ -50,7 +50,7 @@ dependencies {
 publishing {
 	publications {
 		register<MavenPublication>("release") {
-			groupId = "dev.frozenmilk"
+			groupId = "dev.frozenmilk.mercurial"
 			artifactId = "Mercurial"
 			version = "v0.0.0"
 

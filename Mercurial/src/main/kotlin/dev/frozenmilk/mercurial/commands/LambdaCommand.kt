@@ -39,7 +39,7 @@ class LambdaCommand private constructor(
 			Runnable {},
 			Runnable {},
 			Supplier { true },
-			Consumer<Boolean> { interrupted: Boolean? -> },
+			Consumer<Boolean> { },
 			Supplier { true },
 			Supplier<Set<RunStates>> { DEFAULT_RUN_STATES }
 	)

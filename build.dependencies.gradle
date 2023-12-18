@@ -21,5 +21,7 @@ dependencies {
 
     implementation 'com.github.Dairy-Foundation.Dairy:Core:beta-0'
     implementation 'com.github.Dairy-Foundation.Dairy:Calcified:beta-0'
+
+    implementation project(':Mercurial')
 }
 

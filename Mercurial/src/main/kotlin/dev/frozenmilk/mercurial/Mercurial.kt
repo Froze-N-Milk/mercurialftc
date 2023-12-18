@@ -23,9 +23,22 @@ object Mercurial : Feature {
 	//
 
 	private val calcifiedCell = LateInitCell<Feature>()
+	var crossPollinate = true
+		private set
 
 	override val dependencies: Set<Dependency<*, *>> = DependencySet(this)
-			.includesAtLeastOneOf(Mercurify::class.java)
+			.includesExactlyOneOf(Mercurify::class.java)
+			.bindOutputTo {
+				crossPollinate = when (it) {
+					is Mercurify -> {
+						it.crossPollinate
+					}
+
+					else -> {
+						true
+					}
+				}
+			}
 			.dependsOnOneOf(Calcified::class.java)
 			.bindOutputTo(calcifiedCell)
 
@@ -62,10 +75,14 @@ object Mercurial : Feature {
 	// External Functions
 	//
 
+	/**
+	 * registers the subsystem, inits it if it wasn't already in the list
+	 */
 	@JvmStatic
 	fun registerSubsystem(subsystem: Subsystem) {
-		subsystems.add(subsystem)
-		subsystem.init()
+		if(subsystems.add(subsystem)) {
+			subsystem.init()
+		}
 	}
 
 	@JvmStatic
@@ -201,6 +218,13 @@ object Mercurial : Feature {
 	}
 
 	override fun postUserInitHook(opMode: OpModeWrapper) {
+		if(crossPollinate && when(opMode.opModeType) {
+					OpModeWrapper.OpModeType.TELEOP -> false
+					OpModeWrapper.OpModeType.AUTONOMOUS -> true
+					OpModeWrapper.OpModeType.NONE -> false
+				}) {
+			subsystems.forEach { it.reset() }
+		}
 	}
 
 	override fun preUserInitLoopHook(opMode: OpModeWrapper) {
@@ -232,6 +256,9 @@ object Mercurial : Feature {
 	}
 
 	override fun postUserStopHook(opMode: OpModeWrapper) {
+		if (crossPollinate && opMode.opModeType == OpModeWrapper.OpModeType.TELEOP) {
+			subsystems.forEach { it.reset() }
+		}
 		bindings.clear()
 	}
 }

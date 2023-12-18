@@ -1,3 +1,3 @@
 package dev.frozenmilk.mercurial
 
-annotation class Mercurify
+annotation class Mercurify(val crossPollinate: Boolean = true)

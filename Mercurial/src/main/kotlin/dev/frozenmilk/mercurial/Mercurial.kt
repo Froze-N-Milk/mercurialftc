@@ -15,14 +15,21 @@ import dev.frozenmilk.util.cell.LazyCell
 import java.util.Collections
 import java.util.WeakHashMap
 
-
-// the scheduler
+/**
+ * Mercurial's scheduler feature
+ */
 object Mercurial : Feature {
 	//
 	// Dependencies
 	//
 
 	private val calcifiedCell = LateInitCell<Feature>()
+
+	/**
+	 * the current cross-pollination behaviour of this system
+	 *
+	 * @see Mercurify.crossPollinate
+	 */
 	var crossPollinate = true
 		private set
 

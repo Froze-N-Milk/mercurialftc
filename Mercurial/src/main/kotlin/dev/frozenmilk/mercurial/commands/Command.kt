@@ -49,4 +49,6 @@ interface Command {
 	fun schedule() {
 		if (!Mercurial.isScheduled(this)) Mercurial.scheduleCommand(this)
 	}
+
+	fun toLambda(): LambdaCommand = LambdaCommand.from(this)
 }

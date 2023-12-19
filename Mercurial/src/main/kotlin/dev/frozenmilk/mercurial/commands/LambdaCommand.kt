@@ -407,5 +407,3 @@ class LambdaCommand private constructor(
 		}
 	}
 }
-
-fun Command.toLambda(): LambdaCommand = LambdaCommand.from(this)

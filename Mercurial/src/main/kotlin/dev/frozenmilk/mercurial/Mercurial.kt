@@ -66,7 +66,11 @@ object Mercurial : Feature {
 	private val composedCommands = emptyMutableWeakRefSet<Command>()
 	private val toSchedule = mutableListOf<Command>()
 	private val toCancel = mutableListOf<Pair<Boolean, Command>>()
-	private val subsystems = emptyMutableWeakRefSet<Subsystem>()
+	private val subsystems = WeakHashMap<Subsystem, Boolean>()
+	private val enabledSubsytems: Collection<Subsystem>
+		get() {
+			return subsystems.filter { it.value }.map { it.key }
+		}
 	private val requirementMap = WeakHashMap<Subsystem, Command>()
 	private val defaultCommandMap = HashMap<Subsystem, Command?>()
 	private val bindings = emptyMutableWeakRefSet<Binding>()
@@ -81,9 +85,10 @@ object Mercurial : Feature {
 	 */
 	@JvmStatic
 	fun registerSubsystem(subsystem: Subsystem) {
-		if(subsystems.add(subsystem)) {
+		if(!subsystems.contains(subsystem)) {
 			subsystem.init()
 		}
+		subsystems[subsystem] = true
 	}
 
 	@JvmStatic
@@ -190,7 +195,7 @@ object Mercurial : Feature {
 		clearToCancel()
 
 		// schedule any default commands that can be scheduled
-		subsystems.forEach {
+		enabledSubsytems.forEach {
 			if (requirementMap[it] == null) {
 				defaultCommandMap[it]?.schedule()
 			}
@@ -204,7 +209,7 @@ object Mercurial : Feature {
 	}
 
 	private fun pollPeriodics() {
-		subsystems.forEach { it.periodic() }
+		subsystems.filter { it.value }.forEach { it.key.periodic() }
 	}
 
 	private fun pollBindings() {
@@ -220,7 +225,7 @@ object Mercurial : Feature {
 
 	override fun postUserInitHook(opMode: OpModeWrapper) {
 		if(crossPollinate && previousOpMode != OpModeWrapper.OpModeType.AUTONOMOUS) {
-			subsystems.forEach { it.reset() }
+			enabledSubsytems.forEach { it.reset() }
 		}
 	}
 
@@ -255,6 +260,8 @@ object Mercurial : Feature {
 	override fun postUserStopHook(opMode: OpModeWrapper) {
 		bindings.clear()
 		previousOpMode = opMode.opModeType
+		// de-init all subsystems
+		subsystems.replaceAll { _, _ -> false }
 	}
 }
 

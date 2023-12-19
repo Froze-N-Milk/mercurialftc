@@ -29,11 +29,11 @@ class MutableWeakRefSet<T>(collection: Collection<T>) : MutableSet<T> {
 	}
 
 	override fun containsAll(elements: Collection<T>): Boolean {
-		TODO("Not yet implemented")
+		return set.filter { it.safeGet() != null }.map { it.get() }.containsAll(elements)
 	}
 
 	override fun contains(element: T): Boolean {
-		TODO("Not yet implemented")
+		return set.filter { it.safeGet() != null }.map { it.get() }.contains(element)
 	}
 
 	override fun iterator(): MutableIterator<T> {

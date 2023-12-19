@@ -232,7 +232,7 @@ object Mercurial : Feature {
 
 	override fun postUserInitHook(opMode: OpModeWrapper) {
 		if(crossPollinate && previousOpMode != OpModeWrapper.OpModeType.AUTONOMOUS) {
-			enabledSubsytems.forEach { it.reset() }
+			enabledSubsytems.forEach { it.refresh() }
 		}
 	}
 
@@ -271,4 +271,3 @@ object Mercurial : Feature {
 		subsystems.replaceAll { _, _ -> false }
 	}
 }
-

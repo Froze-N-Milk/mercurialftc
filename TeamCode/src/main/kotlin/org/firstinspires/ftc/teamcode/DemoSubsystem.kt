@@ -26,7 +26,7 @@ object DemoSubsystem : Subsystem {
 				.setFinish { false }
 	}
 
-	override fun reset() {
+	override fun refresh() {
 		encoder.reset()
 	}
 

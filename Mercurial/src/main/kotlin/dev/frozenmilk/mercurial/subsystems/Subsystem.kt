@@ -16,17 +16,21 @@ interface Subsystem {
 		}
 
 	/**
-	 * The code to be run when the OpMode is initialised.
-	 * should include hardware initialisation
+	 * gets called when this subsystem is registered for the very first time
+	 *
+	 * should contain one-off initialisation code
 	 */
 	fun init()
 
 	/**
-	 * gets called to reset hardware devices if its the appropriate time to do so
+	 * is called to refresh the subsystem at the start of an auto or at the start of a teleop, following another teleop
 	 *
-	 * gets called at the start of an auto, and at the end of a teleop, allowing sensors to not be reset from an auto to a teleop
+	 * is used to facilitate 
+	 *
+	 * @see dev.frozenmilk.mercurial.Mercurify.crossPollinate
+	 * @see Mercurial.crossPollinate
 	 */
-	fun reset()
+	fun refresh()
 
 	/**
 	 * The method that is run at the start of every loop to facilitate encoder reads

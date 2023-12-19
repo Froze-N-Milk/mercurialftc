@@ -71,6 +71,7 @@ object Mercurial : Feature {
 	private val defaultCommandMap = HashMap<Subsystem, Command?>()
 	private val bindings = emptyMutableWeakRefSet<Binding>()
 
+	private var previousOpMode = OpModeWrapper.OpModeType.NONE
 	//
 	// External Functions
 	//
@@ -218,11 +219,7 @@ object Mercurial : Feature {
 	}
 
 	override fun postUserInitHook(opMode: OpModeWrapper) {
-		if(crossPollinate && when(opMode.opModeType) {
-					OpModeWrapper.OpModeType.TELEOP -> false
-					OpModeWrapper.OpModeType.AUTONOMOUS -> true
-					OpModeWrapper.OpModeType.NONE -> false
-				}) {
+		if(crossPollinate && previousOpMode != OpModeWrapper.OpModeType.AUTONOMOUS) {
 			subsystems.forEach { it.reset() }
 		}
 	}
@@ -256,10 +253,8 @@ object Mercurial : Feature {
 	}
 
 	override fun postUserStopHook(opMode: OpModeWrapper) {
-		if (crossPollinate && opMode.opModeType == OpModeWrapper.OpModeType.TELEOP) {
-			subsystems.forEach { it.reset() }
-		}
 		bindings.clear()
+		previousOpMode = opMode.opModeType
 	}
 }
 

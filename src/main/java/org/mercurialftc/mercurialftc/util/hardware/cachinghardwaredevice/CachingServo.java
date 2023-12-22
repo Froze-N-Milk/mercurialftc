@@ -26,7 +26,7 @@ public class CachingServo extends CachingHardwareDevice implements Servo {
 	public CachingServo(Servo servo, double changeThreshold) {
 		super(servo);
 		this.servo = servo;
-		this.cachedPosition = 0.0;
+		this.cachedPosition = Double.NaN;
 		this.changeThreshold = changeThreshold;
 	}
 	
@@ -105,7 +105,7 @@ public class CachingServo extends CachingHardwareDevice implements Servo {
 	@Override
 	public void setPosition(double position) {
 		//will accept inputs of both 0.0 and 1.0 so that the controller can always hit the extremes.
-		if(Math.abs(cachedPosition - position) >= changeThreshold || (position <= 0.0 && !(cachedPosition <= 0.0)) || (position >= 1.0 && !(cachedPosition >= 1.0))) {
+		if(Double.isNaN(cachedPosition) || Math.abs(cachedPosition - position) >= changeThreshold || (position <= 0.0 && !(cachedPosition <= 0.0)) || (position >= 1.0 && !(cachedPosition >= 1.0))) {
 			servo.setPosition(position);
 			cachedPosition = position;
 		}

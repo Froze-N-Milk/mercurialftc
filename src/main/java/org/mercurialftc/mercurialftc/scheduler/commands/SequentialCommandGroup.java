@@ -59,13 +59,13 @@ public class SequentialCommandGroup implements CommandGroup {
 		newCommandList.addAll(commands);
 
 		Set<SubsystemInterface> newRequirementSet = new HashSet<>(this.getRequiredSubsystems());
-		boolean newInterruptable = this.interruptable();
+		boolean newInterruptable = this.interruptible();
 
 		HashSet<OpModeEX.OpModeEXRunStates> newRunStates = new HashSet<>(2);
 
 		for (Command command : commands) {
 			newRequirementSet.addAll(command.getRequiredSubsystems());
-			newInterruptable &= command.interruptable();
+			newInterruptable &= command.interruptible();
 			newRunStates.addAll(command.getRunStates());
 		}
 
@@ -80,7 +80,7 @@ public class SequentialCommandGroup implements CommandGroup {
 	}
 
 	@Override
-	public final boolean interruptable() {
+	public final boolean interruptible() {
 		return interruptable;
 	}
 

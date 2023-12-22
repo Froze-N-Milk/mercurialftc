@@ -58,7 +58,7 @@ public class ParallelCommandGroup implements CommandGroup {
 		HashMap<Command, Boolean> newCommandMap = new HashMap<>(this.commands);
 
 		Set<SubsystemInterface> newRequirementSet = new HashSet<>(this.getRequiredSubsystems());
-		boolean newInterruptable = interruptable();
+		boolean newInterruptable = interruptible();
 		HashSet<OpModeEX.OpModeEXRunStates> newRunStates = new HashSet<>(2);
 
 
@@ -69,7 +69,7 @@ public class ParallelCommandGroup implements CommandGroup {
 			}
 			newCommandMap.put(command, false);
 			newRequirementSet.addAll(command.getRequiredSubsystems());
-			newInterruptable &= command.interruptable();
+			newInterruptable &= command.interruptible();
 			newRunStates.addAll(command.getRunStates());
 		}
 
@@ -84,7 +84,7 @@ public class ParallelCommandGroup implements CommandGroup {
 	}
 
 	@Override
-	public final boolean interruptable() {
+	public final boolean interruptible() {
 		return interruptable;
 	}
 
@@ -98,7 +98,7 @@ public class ParallelCommandGroup implements CommandGroup {
 			if (commandRunning.getKey().getRunStates().contains(Scheduler.getSchedulerInstance().getRunState())) {
 				commandRunning.getKey().initialise();
 				commandRunning.setValue(true);
-				interruptable &= commandRunning.getKey().interruptable();
+				interruptable &= commandRunning.getKey().interruptible();
 			} else {
 				commandRunning.setValue(false);
 			}
@@ -118,7 +118,7 @@ public class ParallelCommandGroup implements CommandGroup {
 				command.end(false);
 				commandRunning.setValue(false);
 			} else {
-				interruptable &= command.interruptable();
+				interruptable &= command.interruptible();
 				command.execute();
 			}
 		}

@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
 public class CachingDcMotor extends CachingDcMotorSimple implements DcMotor {
-	private final DcMotor dcMotor;
+	public final DcMotor dcMotor;
 	private double cachedTargetPosition;
 	
 	/**

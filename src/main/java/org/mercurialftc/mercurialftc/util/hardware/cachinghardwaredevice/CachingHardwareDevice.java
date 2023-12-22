@@ -3,7 +3,7 @@ package org.mercurialftc.mercurialftc.util.hardware.cachinghardwaredevice;
 import com.qualcomm.robotcore.hardware.HardwareDevice;
 
 public abstract class CachingHardwareDevice implements HardwareDevice {
-	private final HardwareDevice hardwareDevice;
+	public final HardwareDevice hardwareDevice;
 	protected CachingHardwareDevice(HardwareDevice hardwareDevice) {
 		this.hardwareDevice = hardwareDevice;
 	}

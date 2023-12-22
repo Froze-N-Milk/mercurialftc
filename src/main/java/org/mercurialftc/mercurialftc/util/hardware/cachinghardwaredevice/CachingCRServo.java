@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ServoController;
 
 public class CachingCRServo extends CachingDcMotorSimple implements CRServo {
-	private final CRServo crServo;
+	public final CRServo crServo;
 	
 	/**
 	 * Default constructor for the cached continuous rotation servo, sets the threshold to 0.02

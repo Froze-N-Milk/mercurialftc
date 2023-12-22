@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.ServoController;
 public class CachingServo extends CachingHardwareDevice implements Servo {
 	private double cachedPosition;
 	private double changeThreshold;
-	private final Servo servo;
+	public final Servo servo;
 	
 	/**
 	 * Default constructor for the cached servo, sets the threshold to 0.01

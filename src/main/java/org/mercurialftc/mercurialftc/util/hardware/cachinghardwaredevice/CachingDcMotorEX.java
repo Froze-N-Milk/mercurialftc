@@ -9,7 +9,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 public class CachingDcMotorEX extends CachingDcMotor implements DcMotorEx{
-	private final DcMotorEx motorEx;
+	public final DcMotorEx motorEx;
 	/**
 	 * Default constructor for the cached motorEx, sets the threshold to 0.02
 	 *

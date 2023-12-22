@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 public class CachingDcMotorSimple extends CachingHardwareDevice implements DcMotorSimple {
 	double cachedPower;
 	double changeThreshold;
-	private final DcMotorSimple dcMotorSimple;
+	public final DcMotorSimple dcMotorSimple;
 	
 	/**
 	 * Default constructor for the cached simple motor, sets the threshold to 0.02

@@ -14,7 +14,6 @@ import java.util.*;
 @SuppressWarnings("unused")
 public class Scheduler {
 	public static Scheduler scheduler;
-
 	private static boolean schedulerRefreshEnabled, loggingEnabled;
 	private static ConfigOptionsManager configOptionsManager;
 	private final LinkedHashSet<SubsystemInterface> subsystems; // currently registered Subsystems
@@ -138,6 +137,16 @@ public class Scheduler {
 		commandsToSchedule.add(command);
 	}
 
+	private void cancelCommandIterator(Command command, Iterator<Command> iterator, boolean interrupted) {
+		if (command == null) return;
+		if (!isScheduled(command)) return;
+		command.end(interrupted);
+		for (SubsystemInterface requirement : command.getRequiredSubsystems()) {
+			requirements.remove(requirement, command);
+		}
+		iterator.remove();
+	}
+
 	private void cancelCommand(Command command, boolean interrupted) {
 		if (command == null) return;
 		if (!isScheduled(command)) return;
@@ -163,7 +172,7 @@ public class Scheduler {
 			// for each subsystem required, check the command currently requiring it, and make sure that they can all be overwritten
 			for (SubsystemInterface subsystem : commandRequirements) {
 				Command requirer = requirements.get(subsystem);
-				if (requirer != null && !requirer.interruptable()) {
+				if (requirer != null && !requirer.interruptible()) {
 					return;
 				}
 			}
@@ -190,13 +199,14 @@ public class Scheduler {
 
 	public void pollCommands() {
 		// checks to see if any commands are finished, if so, cancels them
-		for (Command command : commands) {
+		for (Iterator<Command> commandIterator = commands.iterator(); commandIterator.hasNext(); ) {
+			Command command = commandIterator.next();
 			if (command.finished()) {
-				cancelCommand(command, false);
+				cancelCommandIterator(command, commandIterator, false);
 			}
 			// checks to see if we have exited the valid run states for this command, if so, cancels and interrupts the command.
 			else if (!command.getRunStates().contains(runState)) {
-				cancelCommand(command, true);
+				cancelCommandIterator(command, commandIterator, true);
 			}
 		}
 
@@ -430,5 +440,4 @@ public class Scheduler {
 			return option;
 		}
 	}
-
 }

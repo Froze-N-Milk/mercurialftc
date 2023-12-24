@@ -19,8 +19,9 @@ dependencies {
     runtimeOnly 'org.tensorflow:tensorflow-lite:2.12.0'
     implementation 'androidx.appcompat:appcompat:1.2.0'
 
-    implementation 'com.github.Dairy-Foundation.Dairy:Core:beta-0'
-    implementation 'com.github.Dairy-Foundation.Dairy:Calcified:beta-0'
+    implementation 'com.github.Dairy-Foundation.Dairy:Core:beta-0-1'
+    implementation 'com.github.Dairy-Foundation.Dairy:Calcified:beta-0-1'
+    implementation 'com.github.Dairy-Foundation.Dairy:DataCarton:beta-0-1'
 
     implementation project(':Mercurial')
 }

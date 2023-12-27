@@ -2,7 +2,6 @@ package dev.frozenmilk.mercurial.bindings
 
 import dev.frozenmilk.dairy.calcified.gamepad.EnhancedBooleanSupplier
 import dev.frozenmilk.mercurial.commands.Command
-import dev.frozenmilk.mercurial.commands.toLambda
 import java.util.function.Supplier
 
 class BoundBooleanSupplier(private val booleanSupplier: EnhancedBooleanSupplier) : Supplier<Boolean> by booleanSupplier {

@@ -3,14 +3,12 @@ package org.firstinspires.ftc.teamcode
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import dev.frozenmilk.dairy.calcified.Calcified
-import dev.frozenmilk.dairy.calcified.Calcify
 import dev.frozenmilk.dairy.core.FeatureRegistrar
 import dev.frozenmilk.dairy.core.OpModeLazyCell
 import dev.frozenmilk.mercurial.Mercurial
-import dev.frozenmilk.mercurial.Mercurify
 
-@Mercurify
-@Calcify
+@Mercurial.Attach
+@Calcified.Attach
 @TeleOp
 class UsingMercurial : OpMode() {
 	init {

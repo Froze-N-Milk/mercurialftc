@@ -34,10 +34,10 @@ object Mercurial : Feature {
 		private set
 
 	override val dependencies: Set<Dependency<*, *>> = DependencySet(this)
-			.includesExactlyOneOf(Mercurify::class.java)
+			.includesExactlyOneOf(Attach::class.java)
 			.bindOutputTo {
 				crossPollinate = when (it) {
-					is Mercurify -> {
+					is Attach -> {
 						it.crossPollinate
 					}
 
@@ -270,4 +270,18 @@ object Mercurial : Feature {
 		// de-init all subsystems
 		subsystems.replaceAll { _, _ -> false }
 	}
+
+
+	annotation class Attach(
+			/**
+			 * Controls when [Mercurial] runs reset on subsystems
+			 *
+			 * Set to false if you want to reset the subsystems by hand
+			 *
+			 * By default, resets subsystems at the start of an auto, and at the end of a teleop, allowing values to be carried over from an auto to a teleop
+			 *
+			 * @see dev.frozenmilk.dairy.calcified.Calcified.Attach.crossPollinate
+			 */
+			val crossPollinate: Boolean = true
+	)
 }

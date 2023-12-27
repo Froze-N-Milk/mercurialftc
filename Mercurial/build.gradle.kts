@@ -39,8 +39,9 @@ dependencies {
 	implementation("androidx.appcompat:appcompat:1.2.0")
 	testImplementation("org.testng:testng:6.9.6")
 
-	compileOnly("com.github.Dairy-Foundation.Dairy:Core:beta-0")
-	compileOnly("com.github.Dairy-Foundation.Dairy:Calcified:beta-0")
+	compileOnly("com.github.Dairy-Foundation.Dairy:Core:beta-0-2")
+	compileOnly("com.github.Dairy-Foundation.Dairy:Calcified:beta-0-2")
+	compileOnly("com.github.Dairy-Foundation.Dairy:DataCarton:beta-0-2")
 
 	compileOnly("org.firstinspires.ftc:RobotCore:9.0.1")
 	compileOnly("org.firstinspires.ftc:Hardware:9.0.1")

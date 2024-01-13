@@ -12,6 +12,7 @@ import dev.frozenmilk.mercurial.commands.Command
 import dev.frozenmilk.mercurial.subsystems.Subsystem
 import dev.frozenmilk.util.cell.LateInitCell
 import dev.frozenmilk.util.cell.LazyCell
+import org.firstinspires.ftc.robotcore.internal.opmode.OpModeMeta
 import java.util.Collections
 import java.util.WeakHashMap
 
@@ -82,7 +83,7 @@ object Mercurial : Feature {
 	private val defaultCommandMap = HashMap<Subsystem, Command?>()
 	private val bindings = emptyMutableWeakRefSet<Binding>()
 
-	private var previousOpMode = OpModeWrapper.OpModeType.NONE
+	private var previousOpMode = OpModeMeta.Flavor.SYSTEM
 	//
 	// External Functions
 	//
@@ -231,7 +232,7 @@ object Mercurial : Feature {
 	}
 
 	override fun postUserInitHook(opMode: OpModeWrapper) {
-		if(crossPollinate && previousOpMode != OpModeWrapper.OpModeType.AUTONOMOUS) {
+		if(crossPollinate && previousOpMode != OpModeMeta.Flavor.AUTONOMOUS) {
 			enabledSubsytems.forEach { it.refresh() }
 		}
 	}

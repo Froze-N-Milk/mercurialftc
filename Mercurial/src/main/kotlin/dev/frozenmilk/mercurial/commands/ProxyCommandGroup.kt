@@ -112,3 +112,7 @@ class ProxyCommandGroup : CommandGroup {
         return !commands.containsValue(true)
     }
 }
+
+fun Command.asProxy(): ProxyCommandGroup {
+    return ProxyCommandGroup().addCommands(this)
+}

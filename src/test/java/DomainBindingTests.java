@@ -11,7 +11,7 @@ public class DomainBindingTests {
 	double internalValue;
 	DomainSupplier domainSupplier = new DomainSupplier(() -> internalValue);
 
-	HashMap<DomainBinding<DomainSupplier>, HashMap<Double, Boolean>> testMappings = new HashMap<>();
+	HashMap<DomainBinding, HashMap<Double, Boolean>> testMappings = new HashMap<>();
 
 	@Test
 	void simpleDomains() {
@@ -220,7 +220,7 @@ public class DomainBindingTests {
 
 	@AfterEach
 	void testBindings() {
-		for (Map.Entry<DomainBinding<DomainSupplier>, HashMap<Double, Boolean>> testMap : testMappings.entrySet()) {
+		for (Map.Entry<DomainBinding, HashMap<Double, Boolean>> testMap : testMappings.entrySet()) {
 			for (Map.Entry<Double, Boolean> test : testMap.getValue().entrySet()) {
 				testMap.getKey().postLoopUpdate();
 				internalValue = test.getKey();
@@ -231,4 +231,6 @@ public class DomainBindingTests {
 
 		testMappings.clear();
 	}
+
+
 }

@@ -77,8 +77,8 @@ public class DomainSupplier implements DoubleSupplier {
 	 *
 	 * @return a domain binding builder to start building a complex domain binding
 	 */
-	public DomainBindingBuilder<DomainSupplier> buildBinding() {
-		return new DomainBindingBuilder<>(this);
+	public DomainBindingBuilder buildBinding() {
+		return new DomainBindingBuilder(this);
 	}
 
 	/**

@@ -2,19 +2,19 @@ package org.mercurialftc.mercurialftc.scheduler.bindings.gamepadex.domainbinding
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.mercurialftc.mercurialftc.scheduler.bindings.gamepadex.DomainSupplier;
 
 import java.util.ArrayList;
-import java.util.function.DoubleSupplier;
 
 @SuppressWarnings("unused")
-public class DomainBindingBuilder<S extends DoubleSupplier> {
-	private final S s;
+public class DomainBindingBuilder {
+	private final DomainSupplier domainSupplier;
 	private final ArrayList<DomainChecker> domainCheckers;
 	private DomainClosureBuilder domainClosureBuilder;
 	private OperationType previousOperationType;
 
-	public DomainBindingBuilder(S s) {
-		this.s = s;
+	public DomainBindingBuilder(DomainSupplier domainSupplier) {
+		this.domainSupplier = domainSupplier;
 		this.domainCheckers = new ArrayList<>(1);
 		this.domainClosureBuilder = new DomainClosureBuilder();
 	}
@@ -22,7 +22,7 @@ public class DomainBindingBuilder<S extends DoubleSupplier> {
 	/**
 	 * @return self, for chaining
 	 */
-	public DomainBindingBuilder<S> lessThan(double value) {
+	public DomainBindingBuilder lessThan(double value) {
 		handleBuildState(OperationType.LESS, Inclusivity.NOT_INCLUSIVE, value);
 		domainClosureBuilder = domainClosureBuilder.lessThan(value);
 		return this;
@@ -31,7 +31,7 @@ public class DomainBindingBuilder<S extends DoubleSupplier> {
 	/**
 	 * @return self, for chaining
 	 */
-	public DomainBindingBuilder<S> lessThanEqualTo(double value) {
+	public DomainBindingBuilder lessThanEqualTo(double value) {
 		handleBuildState(OperationType.LESS, Inclusivity.INCLUSIVE, value);
 		domainClosureBuilder = domainClosureBuilder.lessThanEqualTo(value);
 		return this;
@@ -40,7 +40,7 @@ public class DomainBindingBuilder<S extends DoubleSupplier> {
 	/**
 	 * @return self, for chaining
 	 */
-	public DomainBindingBuilder<S> greaterThan(double value) {
+	public DomainBindingBuilder greaterThan(double value) {
 		handleBuildState(OperationType.GREATER, Inclusivity.NOT_INCLUSIVE, value);
 		domainClosureBuilder = domainClosureBuilder.greaterThan(value);
 		return this;
@@ -53,13 +53,13 @@ public class DomainBindingBuilder<S extends DoubleSupplier> {
 	/**
 	 * @return self, for chaining
 	 */
-	public DomainBindingBuilder<S> greaterThanEqualTo(double value) {
+	public DomainBindingBuilder greaterThanEqualTo(double value) {
 		handleBuildState(OperationType.GREATER, Inclusivity.INCLUSIVE, value);
 		domainClosureBuilder = domainClosureBuilder.greaterThanEqualTo(value);
 		return this;
 	}
 
-	public DomainBinding<S> bind() {
+	public DomainBinding bind() {
 		if (domainClosureBuilder.lower != Double.NEGATIVE_INFINITY || domainClosureBuilder.upper != Double.POSITIVE_INFINITY) {
 			domainCheckers.add(this.domainClosureBuilder.build());
 		}
@@ -67,10 +67,10 @@ public class DomainBindingBuilder<S extends DoubleSupplier> {
 		// todo simplify domain checkers by checking their extremes and seeing if one entirely contains another or if two could be merged?
 		// doesn't matter for the moment, but very plausible for later
 
-		return new DomainBinding<>(s, () -> {
+		return new DomainBinding(domainSupplier, () -> {
 			boolean result = false;
 			for (DomainChecker domainChecker : domainCheckers) {
-				result |= domainChecker.getResult(s.getAsDouble());
+				result |= domainChecker.getResult(domainSupplier.getAsDouble());
 			}
 			return result;
 		});

@@ -11,8 +11,7 @@ import java.util.function.BooleanSupplier;
  * allows for the powerful binding of commands to boolean conditions, especially those supplied by gamepad inputs and sensors
  */
 @SuppressWarnings("unused, unchecked")
-public class Binding<B extends Binding<B>> implements BooleanSupplier {
-	private final B thisAsB = (B) this;
+public class Binding implements BooleanSupplier {
 	private final BooleanSupplier internalInput;
 	private boolean previousState;
 	private long leadingEdgeDebounce;
@@ -53,36 +52,36 @@ public class Binding<B extends Binding<B>> implements BooleanSupplier {
 		return processedInput;
 	}
 
-	public B whileTrue(@NotNull Command toRun) {
+	public Binding whileTrue(@NotNull Command toRun) {
 		return onTrue(LambdaCommand.from(toRun).addFinish(() -> !getAsBoolean()));
 	}
 
-	public B whileFalse(@NotNull Command toRun) {
+	public Binding whileFalse(@NotNull Command toRun) {
 		return onFalse(LambdaCommand.from(toRun).addFinish(this));
 	}
 
-	public B onTrue(@NotNull Command toRun) {
+	public Binding onTrue(@NotNull Command toRun) {
 		registrationCheck();
 		new Trigger(() -> (getAsBoolean() && !previousState), toRun);
-		return thisAsB;
+		return this;
 	}
 
-	public B toggleTrue(@NotNull Command toRun) {
+	public Binding toggleTrue(@NotNull Command toRun) {
 		registrationCheck();
 		new Trigger(() -> toggledOn && !previousToggleState, LambdaCommand.from(toRun).addFinish(() -> !toggledOn));
-		return thisAsB;
+		return this;
 	}
 
-	public B toggleFalse(@NotNull Command toRun) {
+	public Binding toggleFalse(@NotNull Command toRun) {
 		registrationCheck();
 		new Trigger(() -> !toggledOn && !previousToggleState, LambdaCommand.from(toRun).addFinish(() -> toggledOn));
-		return thisAsB;
+		return this;
 	}
 
-	public B onFalse(@NotNull Command toRun) {
+	public Binding onFalse(@NotNull Command toRun) {
 		registrationCheck();
 		new Trigger(() -> (!getAsBoolean() && previousState), toRun);
-		return thisAsB;
+		return this;
 	}
 
 	/**
@@ -90,7 +89,7 @@ public class Binding<B extends Binding<B>> implements BooleanSupplier {
 	 * @param duration number of seconds
 	 * @return mutated self
 	 */
-	public B debounce(@NotNull DebouncingType type, double duration) {
+	public Binding debounce(@NotNull DebouncingType type, double duration) {
 		switch (type) {
 			case LEADING_EDGE:
 				leadingEdgeDebounce = (long) (duration * 1e9);
@@ -103,7 +102,7 @@ public class Binding<B extends Binding<B>> implements BooleanSupplier {
 				trailingEdgeDebounce = (long) (duration * 1e9);
 				break;
 		}
-		return thisAsB;
+		return this;
 	}
 
 	/**
@@ -112,8 +111,8 @@ public class Binding<B extends Binding<B>> implements BooleanSupplier {
 	 * @param andSupplier an and condition added to the binding
 	 * @return a new binding that will have internal state of true if its previous internal BooleanSupplier AND its new additional BooleanSupplier return true
 	 */
-	public B and(BooleanSupplier andSupplier) {
-		return (B) new Binding<B>(() -> this.getAsBoolean() && andSupplier.getAsBoolean());
+	public Binding and(BooleanSupplier andSupplier) {
+		return new Binding(() -> this.getAsBoolean() && andSupplier.getAsBoolean());
 	}
 
 	/**
@@ -122,8 +121,8 @@ public class Binding<B extends Binding<B>> implements BooleanSupplier {
 	 * @param orSupplier an or condition added to the binding
 	 * @return a new binding that will have internal state of true if its previous internal BooleanSupplier OR its new additional BooleanSupplier return true
 	 */
-	public B or(BooleanSupplier orSupplier) {
-		return (B) new Binding<>(() -> this.getAsBoolean() || orSupplier.getAsBoolean());
+	public Binding or(BooleanSupplier orSupplier) {
+		return new Binding(() -> this.getAsBoolean() || orSupplier.getAsBoolean());
 	}
 
 	/**

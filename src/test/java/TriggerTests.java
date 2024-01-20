@@ -8,7 +8,7 @@ import org.mercurialftc.mercurialftc.scheduler.commands.LambdaCommand;
 
 public class TriggerTests {
 	private Scheduler scheduler;
-	private Binding<?> testBinding;
+	private Binding testBinding;
 	private boolean inputState, output;
 	private LambdaCommand testCommand;
 
@@ -18,7 +18,7 @@ public class TriggerTests {
 		scheduler.setRunState(OpModeEXRunStates.LOOP);
 		this.inputState = false;
 		this.output = false;
-		this.testBinding = new Binding<>(() -> inputState);
+		this.testBinding = new Binding(() -> inputState);
 
 		testCommand = new LambdaCommand()
 				.setInit(() -> {
@@ -31,6 +31,7 @@ public class TriggerTests {
 					System.out.println("end: " + false);
 				});
 	}
+
 
 	@Test
 	void onTrue() {

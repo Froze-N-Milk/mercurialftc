@@ -18,7 +18,7 @@ public class Scheduler {
 	private static ConfigOptionsManager configOptionsManager;
 	private final LinkedHashSet<SubsystemInterface> subsystems; // currently registered Subsystems
 	private final LinkedHashSet<Trigger> triggers;
-	private final LinkedHashSet<Binding<?>> bindings;
+	private final LinkedHashSet<Binding> bindings;
 	private final Set<Command> composedCommands = Collections.newSetFromMap(new WeakHashMap<>());
 	private final LinkedHashSet<Command> commands; // currently scheduled Commands
 	private final ArrayList<Command> commandsToCancel; // commands to be cancelled this loop
@@ -246,11 +246,11 @@ public class Scheduler {
 		}
 	}
 
-	public void registerBinding(Binding<?> binding) {
+	public void registerBinding(Binding binding) {
 		bindings.add(binding);
 	}
 
-	public void deregisterBinding(Binding<?> binding) {
+	public void deregisterBinding(Binding binding) {
 		bindings.remove(binding);
 	}
 
@@ -269,13 +269,13 @@ public class Scheduler {
 	}
 
 	public void preLoopUpdateBindings() {
-		for (Binding<?> binding : bindings) {
+		for (Binding binding : bindings) {
 			binding.preLoopUpdate();
 		}
 	}
 
 	public void postLoopUpdateBindings() {
-		for (Binding<?> binding : bindings) {
+		for (Binding binding : bindings) {
 			binding.postLoopUpdate();
 		}
 	}
